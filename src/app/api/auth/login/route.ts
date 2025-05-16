@@ -14,7 +14,6 @@ export async function POST(request: NextRequest) {
     
     const { user, token } = await authController.loginHandler(email, password);
     
-    // Remove password from response
     const userResponse = {
       _id: user._id,
       email: user.email,
