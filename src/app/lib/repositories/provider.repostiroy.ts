@@ -20,6 +20,14 @@ export class ProviderRepository {
         return await Provider.findByIdAndUpdate(id, providerData, { new: true });
     }
 
+    async softDelete(id: string): Promise<IProvider | null> {
+        return await Provider.findByIdAndUpdate(
+            id, 
+            { isActive: false }, 
+            { new: true }
+        );
+    }
+
     async delete(id: string): Promise<boolean> {
         const result = await Provider.findByIdAndDelete(id);
         return !!result;
