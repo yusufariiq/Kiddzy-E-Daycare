@@ -2,9 +2,9 @@ import mongoose, { Document, Schema } from 'mongoose';
 
 export interface IChild extends Document {
     userId: mongoose.Types.ObjectId;
-    firstName: string;
-    lastName: string;
-    dateOfBirth: Date;
+    fullname: string;
+    nickname: string;
+    age: number;
     gender: 'male' | 'female' | 'other';
     specialNeeds?: string;
     allergies?: string[];
@@ -17,18 +17,18 @@ const childSchema = new Schema<IChild>(
             ref: 'User',
             required: true,
         },
-        firstName: {
+        fullname: {
             type: String,
             required: true,
             trim: true,
         },
-        lastName: {
+        nickname: {
             type: String,
             required: true,
             trim: true,
         },
-        dateOfBirth: {
-            type: Date,
+        age: {
+            type: Number,
             required: true,
         },
         gender: {
