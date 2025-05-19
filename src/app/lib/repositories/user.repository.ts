@@ -20,4 +20,8 @@ export class UserRepository {
     async findAll(): Promise<IUser[]> {
         return await User.find().select('-password');
     }
+    
+    async findByRole(role: string): Promise<IUser[]> {
+        return await User.find({ role }).select('-password');
+    }
 }

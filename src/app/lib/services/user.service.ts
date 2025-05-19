@@ -8,8 +8,20 @@ export class UserService {
         this.userRepository = new UserRepository();
     }
 
+    async getAllUsers(): Promise<IUser[] | null > {
+        return await this.userRepository.findAll();
+    }
+
     async getUserProfile(userId: string): Promise<IUser | null> {
         return await this.userRepository.findById(userId);
+    }
+    
+    async getUserByEmail(email: string): Promise<IUser | null> {
+        return await this.userRepository.findByEmail(email);
+    }
+
+    async getUsersByRole(role: string): Promise<IUser[]> {
+        return await this.userRepository.findByRole(role);
     }
 
     async updateUserProfile(userId: string, userData: Partial<IUser>): Promise<IUser | null> {
