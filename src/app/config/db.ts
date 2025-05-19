@@ -1,6 +1,11 @@
 import mongoose from 'mongoose';
 import dotenv from 'dotenv';
 
+import '../lib/models/user.model';
+import '../lib/models/provider.model';
+import '../lib/models/booking.model';
+import '../lib/models/child.model'
+
 dotenv.config();
 
 const MONGODB_URL = process.env.MONGODB_URL;
