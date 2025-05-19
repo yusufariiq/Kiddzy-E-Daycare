@@ -23,7 +23,7 @@ export async function GET(req: NextRequest) {
         } else if (latitude && longitude) {
             providers = await providerService.findProvidersByLocation(longitude, latitude, maxDistance);
         } else {
-            providers = await providerService.getAllProviders(limit, page);
+            providers = await providerService.getActiveProviders();
         }
 
         return NextResponse.json({ success: true, data: providers });

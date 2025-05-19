@@ -15,6 +15,12 @@ export class ProviderRepository {
     async findById(id: string): Promise<IProvider | null> {
         return await Provider.findById(id);
     }
+    
+    async findActiveProviders(): Promise<IProvider[]> {
+        return await Provider.find({
+            isActive: true
+        });
+    }
 
     async update(id: string, providerData: Partial<IProvider>): Promise<IProvider | null> {
         return await Provider.findByIdAndUpdate(id, providerData, { new: true });
