@@ -6,41 +6,87 @@ export class BookingRepository {
     }
 
     async findById(id: string): Promise<IBooking | null> {
-        return await Booking.findById(id).populate('provider').populate('user');
+        return await Booking.findById(id)
+            .populate('providerId').populate('userId').populate('childId');
+    }
+      
+    async findByUser(userId: string): Promise<IBooking[]> {
+        return await Booking.find({ userId })
+            .populate('providerId')
+            .populate('userId')
+            .populate('childId')
+            .sort({ createdAt: -1 });
     }
 
-    async findByUser(userId: string): Promise<IBooking[]> {
-        return await Booking.find({ user: userId })
-        .populate('provider')
-        .sort({ createdAt: -1 });
+    async findByProvider(providerId: string): Promise<IBooking[]> {
+        return await Booking.find({ providerId })
+            .populate('userId')
+            .populate('childId')
+            .sort({ startDate: 1 });
     }
 
     async findActiveByUser(userId: string): Promise<IBooking[]> {
         return await Booking.find({ 
-        user: userId,
-        status: { $in: ['pending', 'active'] }
+            userId,
+            status: { $in: ['pending', 'confirmed', 'active'] }
         })
-        .populate('provider')
+        .populate('providerId')
+        .populate('childId')
+        .sort({ startDate: 1 });
+    }
+
+    async findActiveByProvider(providerId: string): Promise<IBooking[]> {
+        return await Booking.find({ 
+            providerId,
+            status: { $in: ['pending', 'confirmed', 'active'] }
+        })
+        .populate('userId')
+        .populate('childId')
         .sort({ startDate: 1 });
     }
 
     async findCompletedByUser(userId: string): Promise<IBooking[]> {
         return await Booking.find({ 
-        user: userId,
-        status: { $in: ['completed', 'canceled'] }
+            user: userId,
+            status: { $in: ['completed', 'canceled'] }
         })
         .populate('provider')
         .sort({ createdAt: -1 });
     }
 
-    async updateStatus(id: string, status: 'pending' | 'active' | 'completed' | 'canceled'): Promise<IBooking | null> {
-        return await Booking.findByIdAndUpdate(id, { status }, { new: true });
+    async findCompletedByProvider(providerId: string): Promise<IBooking[]> {
+        return await Booking.find({ 
+            providerId,
+            status: { $in: ['completed', 'cancelled'] }
+        })
+        .populate('userId')
+        .populate('childId')
+        .sort({ startDate: -1 });
     }
 
-    async updatePayment(id: string, paymentId: string): Promise<IBooking | null> {
+    async updateStatus(id: string, status: 'pending' | 'confirmed' | 'active' | 'completed' | 'cancelled'): Promise<IBooking | null> {
+        return await Booking.findByIdAndUpdate(id, { status }, { new: true })
+            .populate('providerId')
+            .populate('userId')
+            .populate('childId');
+    }
+
+    async updatePayment(id: string, paymentId: string, paymentMethod: string): Promise<IBooking | null> {
         return await Booking.findByIdAndUpdate(id, { 
-        paymentId, 
-        paymentStatus: 'completed' 
-        }, { new: true });
+            paymentId, 
+            paymentMethod,
+            paymentStatus: 'paid' 
+        }, { new: true })
+            .populate('providerId')
+            .populate('userId')
+            .populate('childId');
+    }
+
+    async findAll(): Promise<IBooking[]> {
+        return await Booking.find({})
+            .populate('providerId')
+            .populate('userId')
+            .populate('childId')
+            .sort({ createdAt: -1 });
     }
 }

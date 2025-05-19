@@ -36,7 +36,9 @@ export class BookingService {
     
     const booking = await this.bookingRepository.create({
       ...bookingData,
-      totalAmount
+      totalAmount,
+      status: 'pending',
+      paymentStatus: 'pending'
     });
     
     return booking;
@@ -44,6 +46,10 @@ export class BookingService {
 
   async getUserBookings(userId: string): Promise<IBooking[]> {
     return await this.bookingRepository.findByUser(userId);
+  }
+
+  async getProviderBookings(providerId: string): Promise<IBooking[]> {
+    return await this.bookingRepository.findByProvider(providerId);
   }
 
   async getUserActiveBookings(userId: string): Promise<IBooking[]> {
@@ -54,15 +60,35 @@ export class BookingService {
     return await this.bookingRepository.findCompletedByUser(userId);
   }
 
+  async getProviderActiveBookings(providerId: string): Promise<IBooking[]> {
+    return await this.bookingRepository.findActiveByProvider(providerId);
+  }
+
+  async getProviderCompletedBookings(providerId: string): Promise<IBooking[]> {
+    return await this.bookingRepository.findCompletedByProvider(providerId);
+  }
+
   async getBookingDetails(bookingId: string): Promise<IBooking | null> {
     return await this.bookingRepository.findById(bookingId);
   }
 
-  async updateBookingStatus(bookingId: string, status: 'pending' | 'active' | 'completed' | 'canceled'): Promise<IBooking | null> {
+  async updateBookingStatus(bookingId: string, status: 'pending' | 'confirmed' | 'active' | 'completed' | 'cancelled'): Promise<IBooking | null> {
     return await this.bookingRepository.updateStatus(bookingId, status);
   }
 
-  async processPayment(bookingId: string, paymentId: string): Promise<IBooking | null> {
-    return await this.bookingRepository.updatePayment(bookingId, paymentId);
+  async processPayment(bookingId: string, paymentId: string, paymentMethod: string): Promise<IBooking | null> {
+    // First update the payment info
+    const updatedBooking = await this.bookingRepository.updatePayment(bookingId, paymentId, paymentMethod);
+    
+    // If payment is processed successfully, update the booking status to active
+    if (updatedBooking && updatedBooking.paymentStatus === 'paid') {
+      return await this.bookingRepository.updateStatus(bookingId, 'active');
+    }
+    
+    return updatedBooking;
+  }
+
+  async getAllBookings(): Promise<IBooking[]> {
+    return await this.bookingRepository.findAll();
   }
 }

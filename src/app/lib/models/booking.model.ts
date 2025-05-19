@@ -66,4 +66,25 @@ const bookingSchema = new Schema<IBooking>(
     { timestamps: true }
 );
 
+bookingSchema.virtual('user', {
+    ref: 'User',
+    localField: 'userId',
+    foreignField: '_id',
+    justOne: true
+});
+
+bookingSchema.virtual('provider', {
+    ref: 'Provider',
+    localField: 'providerId',
+    foreignField: '_id',
+    justOne: true
+});
+
+bookingSchema.virtual('child', {
+    ref: 'Child',
+    localField: 'childId',
+    foreignField: '_id',
+    justOne: true
+});
+
 export const Booking = mongoose.models.Booking || mongoose.model<IBooking>('Booking', bookingSchema);
