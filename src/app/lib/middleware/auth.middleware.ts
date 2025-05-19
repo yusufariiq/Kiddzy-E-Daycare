@@ -39,7 +39,16 @@ export const verifyAuth = async (request: NextRequest): Promise<AuthResult> => {
       email: decoded.email,
       role: decoded.role
     };
-  } catch (error) {
+  } catch (error: any) {
+    
+    if (error.name === 'TokenExpiredError') {
+      return {
+        isAuthenticated: false,
+        error: 'Token expired',
+        status: 401
+      };
+    }
+    
     return {
       isAuthenticated: false,
       error: 'Invalid token.',
