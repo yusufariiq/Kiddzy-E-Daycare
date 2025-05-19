@@ -17,10 +17,9 @@ export async function POST(request: NextRequest) {
         { status: authResult.status || 401 }
       );
     }
-    
+
     const data = await request.json();
     
-    // Validate required fields
     if (!data.bookingId || !data.paymentId || !data.paymentMethod) {
       return NextResponse.json(
         { error: 'Missing required fields: bookingId, paymentId, and paymentMethod' },
@@ -37,7 +36,7 @@ export async function POST(request: NextRequest) {
       );
     }
     
-    if (currentBooking.userId.toString() !== authResult.userId) {
+    if (currentBooking.userId.id.toString() !== authResult.userId) {
       return NextResponse.json(
         { error: 'Access denied. You do not have permission to process payment for this booking.' },
         { status: 403 }
