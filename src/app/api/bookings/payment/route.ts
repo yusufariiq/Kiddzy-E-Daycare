@@ -3,7 +3,6 @@ import connectDB from '@/app/config/db';
 import { BookingService } from '@/app/lib/services/booking.service';
 import { verifyAuth } from '@/app/lib/middleware/auth.middleware';
 
-
 const bookingService = new BookingService();
 
 connectDB();
@@ -22,9 +21,9 @@ export async function POST(request: NextRequest) {
     const data = await request.json();
     
     // Validate required fields
-    if (!data.bookingId || !data.paymentId) {
+    if (!data.bookingId || !data.paymentId || !data.paymentMethod) {
       return NextResponse.json(
-        { error: 'Missing required fields: bookingId and paymentId' },
+        { error: 'Missing required fields: bookingId, paymentId, and paymentMethod' },
         { status: 400 }
       );
     }
@@ -45,7 +44,18 @@ export async function POST(request: NextRequest) {
       );
     }
     
-    const updatedBooking = await bookingService.processPayment(data.bookingId, data.paymentId);
+    if (currentBooking.paymentStatus === 'paid') {
+      return NextResponse.json(
+        { error: 'Payment has already been processed for this booking' },
+        { status: 400 }
+      );
+    }
+    
+    const updatedBooking = await bookingService.processPayment(
+      data.bookingId, 
+      data.paymentId, 
+      data.paymentMethod
+    );
     
     if (!updatedBooking) {
       return NextResponse.json(
@@ -59,6 +69,7 @@ export async function POST(request: NextRequest) {
       booking: updatedBooking
     }, { status: 200 });
   } catch (error: any) {
+    console.error('Error processing payment:', error);
     return NextResponse.json(
       { error: error.message || 'Failed to process payment' },
       { status: 500 }
