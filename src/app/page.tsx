@@ -1,19 +1,22 @@
+import Features from "@/components/common/features";
+import Hero from "@/components/common/hero";
 import Navbar from "@/components/common/navbar";
+import SearchBar from "@/components/common/searchbar";
 
 export default function Home() {
   return (
-    <main className="min-h-screen bg-[#EFEEEA]">
+    <main className="min-h-screen bg-white">
       <Navbar />
-      <div className="mt-20 space-y-32">
-          {Array.from({ length: 5 }).map((_, i) => (
-            <div key={i} className="p-8 bg-white rounded-lg shadow-md">
-              <h2 className="text-2xl font-bold text-[#273F4F]">Section {i + 1}</h2>
-              <p className="mt-4 text-[#273F4F]">
-                Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam euismod, nisl eget aliquam ultricies,
-                nunc nisl aliquet nunc, quis aliquam nisl nunc quis nisl.
-              </p>
-            </div>
-          ))}
+      <div className="space-y-10 bg-[#EFEEEA]">
+        <Hero />
+
+        <div className="relative z-10 mx-auto max-w-7xl px-4 sm:px-6 lg:px-8" style={{ marginTop: "-6rem" }}>
+          <div className="rounded-xl bg-white shadow-xl">
+            <SearchBar />
+          </div>
+        </div>
+
+        <Features />
         </div>
     </main>
   );
