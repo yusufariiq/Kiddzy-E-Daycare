@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-import { ContactService } from "@/app/lib/services/contact.service";
-import connectDB from "@/app/config/db";
+import connectDB from "@/config/db";
+import { ContactService } from "@/lib/services/contact.service";
 
 const contactService = new ContactService();
 

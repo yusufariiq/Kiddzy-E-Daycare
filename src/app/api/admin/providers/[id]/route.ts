@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
-import { verifyAdmin } from "@/app/lib/middleware/auth.middleware";
-import { ProviderRepository } from "@/app/lib/repositories/provider.repostiroy";
-import connectDB from "@/app/config/db";
+import { verifyAdmin } from "@/lib/middleware/auth.middleware";
+import { ProviderRepository } from "@/lib/repositories/provider.repostiroy";
+import connectDB from "@/config/db";
 
 export async function PUT(
   req: NextRequest,

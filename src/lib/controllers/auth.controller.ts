@@ -1,4 +1,3 @@
-// controllers/auth.controller.ts
 import { IUser } from '../models/user.model';
 import { AuthService } from '../services/auth.service';
 

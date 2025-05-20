@@ -1,6 +1,6 @@
-import connectDB from "@/app/config/db";
-import { verifyAuth } from "@/app/lib/middleware/auth.middleware";
-import { UserService } from "@/app/lib/services/user.service";
+import connectDB from "@/config/db";
+import { verifyAuth } from "@/lib/middleware/auth.middleware";
+import { UserService } from "@/lib/services/user.service";
 import { NextRequest, NextResponse } from "next/server";
 
 const userService = new UserService();

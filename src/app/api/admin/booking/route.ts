@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { verifyAdmin } from '@/app/lib/middleware/auth.middleware';
-import { BookingService } from '@/app/lib/services/booking.service';
-import connectDB from '@/app/config/db';
+import { verifyAdmin } from '@/lib/middleware/auth.middleware';
+import { BookingService } from '@/lib/services/booking.service';
+import connectDB from '@/config/db';
 
 const bookingService = new BookingService();
 

@@ -1,5 +1,5 @@
-import { verifyAdmin } from '@/app/lib/middleware/auth.middleware';
-import { UserService } from '@/app/lib/services/user.service';
+import { verifyAdmin } from '@/lib/middleware/auth.middleware';
+import { UserService } from '@/lib/services/user.service';
 import { NextRequest, NextResponse } from 'next/server';
 
 const userService = new UserService();
