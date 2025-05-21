@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
+import Navbar from "@/components/common/navbar";
+import Footer from "@/components/common/footer";
 
 const inter = Inter({
   weight: ['400', '900'],
@@ -22,7 +24,9 @@ export default function RootLayout({
       <body
         className={`${inter} ${inter} antialiased`}
       >
+        <Navbar/>
         {children}
+        <Footer/>
       </body>
     </html>
   );

@@ -7,11 +7,6 @@ const features = [
     description: "All childcare providers undergo thorough background checks and verification processes.",
   },
   {
-    icon: <Star className="h-10 w-10 text-[#FE7743]" />,
-    title: "Quality Ratings",
-    description: "Read reviews and ratings from other parents to find the best care for your children.",
-  },
-  {
     icon: <Clock className="h-10 w-10 text-[#FE7743]" />,
     title: "Flexible Scheduling",
     description: "Find childcare that fits your schedule, whether you need full-time, part-time, or occasional care.",
@@ -25,7 +20,7 @@ const features = [
 
 export default function Features() {
   return (
-    <div className="bg-[#EFEEEA] py-16 md:py-24">
+    <div className="bg-white py-16">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="text-center">
           <h2 className="text-3xl font-bold text-[#273F4F] md:text-5xl">Why Choose Kiddzy</h2>
@@ -34,9 +29,9 @@ export default function Features() {
           </p>
         </div>
 
-        <div className="mt-16 grid gap-8 md:grid-cols-2 lg:grid-cols-4">
+        <div className="mt-16 grid gap-8 md:grid-cols-2 lg:grid-cols-3">
           {features.map((feature, index) => (
-            <div key={index} className="rounded-lg p-6 text-center shadow-sm hover:shadow-md bg-white">
+            <div key={index} className="rounded-lg p-6 text-center bg-white">
               <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full">
                 {feature.icon}
               </div>

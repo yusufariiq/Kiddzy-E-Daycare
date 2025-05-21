@@ -108,8 +108,8 @@ export default function Navbar() {
 
             {/* Mobile menu, show/hide based on menu state */}
             {isMenuOpen && (
-                <div className="md:hidden" id="mobile-menu">
-                    <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3 bg-white">
+                <div className="backdrop-blur-lg py-5 md:hidden" id="mobile-menu">
+                    <div className="px-2 pt-2 pb-3 space-y-5 sm:px-3 bg-white">
                         {navLinks.map((link) => (
                         <Link
                             key={link.name}
@@ -120,7 +120,7 @@ export default function Navbar() {
                             {link.name}
                         </Link>
                         ))}
-                            <div className="flex flex-col space-y-2 pt-2">
+                            <div className="flex flex-col space-y-4 pt-2">
                             <Link href="/login" onClick={() => setIsMenuOpen(false)}>
                                 <Button variant="outline" size="default" className="w-full justify-center">
                                 Log in

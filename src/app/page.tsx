@@ -1,23 +1,27 @@
+import AppBanner from "@/components/common/app-banner";
 import Features from "@/components/common/features";
 import Hero from "@/components/common/hero";
-import Navbar from "@/components/common/navbar";
+import Provider from "@/components/common/provider";
 import SearchBar from "@/components/common/searchbar";
+import Testimonials from "@/components/common/testimonials";
 
 export default function Home() {
   return (
     <main className="min-h-screen bg-white">
-      <Navbar />
-      <div className="space-y-10 bg-[#EFEEEA]">
+      <div className="bg-[#FE7743]">
         <Hero />
 
-        <div className="relative z-10 mx-auto max-w-7xl px-4 sm:px-6 lg:px-8" style={{ marginTop: "-6rem" }}>
+        <div className="relative z-10 mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 pb-10" style={{ marginTop: "-5rem" }}>
           <div className="rounded-xl bg-white shadow-xl">
             <SearchBar />
           </div>
         </div>
-
+        
+        <Provider/>
         <Features />
-        </div>
+        <Testimonials/>
+        <AppBanner/>
+      </div>
     </main>
   );
 }
