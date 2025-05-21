@@ -7,7 +7,7 @@ export default function Footer() {
       <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
         <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-4">
           {/* Company Info */}
-          <div className="col-span-2 flex flex-col justify-center md:justify-start items-center">
+          <div className="col-span-2 flex flex-col justify-center items-center md:items-start">
             <div className="flex items-center">
               <div className="h-10 w-10 rounded-full bg-[#FE7743] flex items-center justify-center text-white">
                 <svg
@@ -58,26 +58,26 @@ export default function Footer() {
           </div>
 
           {/* Quick Links */}
-          <div className="flex flex-col justify-center md:justify-start items-center">
+          <div className="flex flex-col justify-center items-center md:items-start ">
             <h3 className="text-lg font-semibold">Quick Links</h3>
             <ul className="mt-4 space-y-2">
               <li>
-                <Link href="#" className="text-gray-300 hover:text-white">
+                <Link href="/childcare" className="text-gray-300 hover:text-white">
                   Find Childcare
                 </Link>
               </li>
               <li>
-                <Link href="#" className="text-gray-300 hover:text-white">
-                  How it Works
-                </Link>
-              </li>
-              <li>
-                <Link href="#" className="text-gray-300 hover:text-white">
+                <Link href="/about-us" className="text-gray-300 hover:text-white">
                   About Us
                 </Link>
               </li>
               <li>
-                <Link href="#" className="text-gray-300 hover:text-white">
+                <Link href="/contact" className="text-gray-300 hover:text-white">
+                  Contact
+                </Link>
+              </li>
+              <li>
+                <Link href="/faq" className="text-gray-300 hover:text-white">
                   FAQ
                 </Link>
               </li>

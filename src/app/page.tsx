@@ -13,6 +13,9 @@ export default function Home() {
 
         <div className="relative z-10 mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 pb-10" style={{ marginTop: "-5rem" }}>
           <div className="rounded-xl bg-white shadow-xl">
+            <h2 className="py-8 text-center text-2xl font-bold text-[#273F4F] md:text-3xl">
+              Find the perfect childcare solution
+            </h2>
             <SearchBar />
           </div>
         </div>

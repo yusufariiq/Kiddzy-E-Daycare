@@ -32,7 +32,7 @@ export default function Features() {
         <div className="mt-16 grid gap-8 md:grid-cols-2 lg:grid-cols-3">
           {features.map((feature, index) => (
             <div key={index} className="rounded-lg p-6 text-center bg-white">
-              <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full">
+              <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-[#FEEAD3]">
                 {feature.icon}
               </div>
               <h3 className="mt-4 text-xl font-semibold text-[#273F4F]">{feature.title}</h3>

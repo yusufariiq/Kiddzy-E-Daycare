@@ -75,10 +75,6 @@ export default function SearchBar({ onSearch, className }: SearchBarProps) {
 
   return (
     <div className={cn("w-full px-4 py-6 md:px-6", className)}>
-      <h2 className="mb-10 text-center text-2xl font-bold text-[#273F4F] md:text-3xl">
-        Find the perfect childcare solution
-      </h2>
-
       <form onSubmit={handleSearch} className="mx-auto max-w-6xl">
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
           <div className="space-y-2">

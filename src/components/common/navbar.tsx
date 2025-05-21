@@ -6,9 +6,9 @@ import { Menu, X } from "lucide-react"
 import { Button } from "../ui/button"
 
 const navLinks = [
-    { name: "Find Childcare", href: "/find-childcare" },
-    { name: "About us", href: "/for-providers" },
-    { name: "How it Works", href: "/how-it-works" },
+    { name: "Find Childcare", href: "/childcare" },
+    { name: "About Us", href: "/about-us" },
+    { name: "Contact Us", href: "/contact" },
 ]
 
 export default function Navbar() {
@@ -73,12 +73,12 @@ export default function Navbar() {
                         ))}
                         </div>
                         <div className="flex items-center space-x-4">
-                            <Link href="/login">
+                            <Link href="/auth/login">
                                 <Button variant="ghost" size="default">
                                 Log in
                                 </Button>
                             </Link>
-                            <Link href="/signup">
+                            <Link href="/auth/register">
                                 <Button variant="default" size="default">
                                 Sign Up
                                 </Button>
@@ -121,12 +121,12 @@ export default function Navbar() {
                         </Link>
                         ))}
                             <div className="flex flex-col space-y-4 pt-2">
-                            <Link href="/login" onClick={() => setIsMenuOpen(false)}>
+                            <Link href="/auth/login" onClick={() => setIsMenuOpen(false)}>
                                 <Button variant="outline" size="default" className="w-full justify-center">
                                 Log in
                                 </Button>
                             </Link>
-                            <Link href="/signup" onClick={() => setIsMenuOpen(false)}>
+                            <Link href="/auth/register" onClick={() => setIsMenuOpen(false)}>
                                 <Button variant="default" size="default" className="w-full justify-center">
                                 Sign Up
                                 </Button>

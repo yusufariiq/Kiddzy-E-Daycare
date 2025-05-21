@@ -57,7 +57,7 @@ export default function AppBanner() {
               alt="Kiddzy mobile app"
               width={1000}
               height={1100}
-              className="object-cover w-full h-80 md:h-full"
+              className="object-cover h-80 md:h-full"
             />
           </div>
         </div>
