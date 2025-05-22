@@ -189,12 +189,12 @@ export default function Navbar() {
                 </div>
               ) : (
                 <>
-                  <Link href="/login">
+                  <Link href="/auth/login">
                     <Button variant="ghost" size="default">
                       Log in
                     </Button>
                   </Link>
-                  <Link href="/register">
+                  <Link href="/auth/register">
                     <Button variant="default" size="default">
                       Sign Up
                     </Button>
@@ -342,12 +342,12 @@ export default function Navbar() {
               </div>
             ) : (
               <div className="flex flex-col space-y-4 pt-2">
-                <Link href="/login" onClick={() => setIsMenuOpen(false)}>
+                <Link href="/auth/login" onClick={() => setIsMenuOpen(false)}>
                   <Button variant="outline" size="default" className="w-full justify-center">
                     Log in
                   </Button>
                 </Link>
-                <Link href="/register" onClick={() => setIsMenuOpen(false)}>
+                <Link href="/auth/register" onClick={() => setIsMenuOpen(false)}>
                   <Button variant="default" size="default" className="w-full justify-center">
                     Sign Up
                   </Button>

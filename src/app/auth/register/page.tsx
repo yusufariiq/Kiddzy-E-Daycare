@@ -168,7 +168,7 @@ export default function RegisterPage() {
                             placeholder="you@example.com"
                             />
                         </div>
-                        errors.email && <p className="mt-1 text-sm text-red-500">{errors.email?.message}</p>
+                        {errors.email && <p className="mt-1 text-sm text-red-500">{errors.email?.message}</p>}
                     </div>
 
                     <div>
@@ -189,7 +189,7 @@ export default function RegisterPage() {
                                 placeholder="(123) 456-7890"
                             />
                         </div>
-                        errors.phone && <p className="mt-1 text-sm text-red-500">{errors.phone?.message}</p>
+                        {errors.phone && <p className="mt-1 text-sm text-red-500">{errors.phone?.message}</p>}
                     </div>
 
                     <div>
@@ -312,7 +312,7 @@ export default function RegisterPage() {
 
                 <div className="mt-6 text-center text-sm text-gray-600">
                 Already have an account?{" "}
-                <Link href="/login" className="font-medium text-[#FE7743] hover:text-[#e66a3a] hover:underline">
+                <Link href="/auth/login" className="font-medium text-[#FE7743] hover:text-[#e66a3a] hover:underline">
                     Sign in
                 </Link>
                 </div>
