@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { useForm } from "react-hook-form"
@@ -8,6 +8,8 @@ import { yupResolver } from "@hookform/resolvers/yup"
 import * as yup from "yup"
 import { Eye, EyeOff, Mail, Lock, User, Phone, AlertCircle, CheckCircle } from "lucide-react"
 import { Button } from "@/components/ui/button"
+import { useAuth } from "@/context/auth.context"
+import LoadingSpinner from "@/components/ui/loading-spinner"
 
 const registerSchema = yup.object({
   firstName: yup.string().required("First name is required"),
@@ -35,11 +37,18 @@ type RegisterFormData = yup.InferType<typeof registerSchema>
 
 export default function RegisterPage() {
   const router = useRouter()
+  const { register: registerUser, isAuthenticated, isLoading: authLoading } = useAuth()
   const [isLoading, setIsLoading] = useState(false)
   const [showPassword, setShowPassword] = useState(false)
   const [showConfirmPassword, setShowConfirmPassword] = useState(false)
   const [registerError, setRegisterError] = useState<string | null>(null)
   const [registrationComplete, setRegistrationComplete] = useState(false)
+
+  useEffect(() => {
+    if (!authLoading && isAuthenticated) {
+      router.replace("/")
+    }
+  }, [isAuthenticated, authLoading, router])
 
   const {
     register,
@@ -54,25 +63,39 @@ export default function RegisterPage() {
     setRegisterError(null)
 
     try {
-      // Simulate API call with timeout
-      await new Promise((resolve) => setTimeout(resolve, 1500))
+      await registerUser({
+        firstName: data.firstName,
+        lastName: data.lastName,
+        email: data.email,
+        phone: data.phone,
+        password: data.password,
+      })
 
-      // For demo purposes, let's simulate a successful registration
-      // In a real app, you would call your registration API here
-      console.log("Registration data:", data)
-
-      // Show success message
       setRegistrationComplete(true)
 
-      // Redirect to login page after a delay
+      // Redirect to home page after a delay
       setTimeout(() => {
-        router.push("/login")
-      }, 3000)
-    } catch (error) {
-      setRegisterError("Registration failed. Please try again.")
+        router.push("/auth/login")
+      }, 2000)
+    } catch (error: any) {
+      setRegisterError(error.message || "Registration failed. Please try again.")
     } finally {
       setIsLoading(false)
     }
+  }
+
+  // Show loading spinner while checking auth status
+  if (authLoading) {
+    return (
+      <div className="min-h-[90vh] flex flex-1 items-center justify-center bg-[#EFEEEA]">
+        <LoadingSpinner size="lg" />
+      </div>
+    )
+  }
+
+  // Don't render if already authenticated (will redirect)
+  if (isAuthenticated) {
+    return null
   }
 
   return (
@@ -100,8 +123,8 @@ export default function RegisterPage() {
                     <p className="mt-2 text-center text-gray-600">
                         Your account has been created successfully. You will be redirected to the login page shortly.
                     </p>
-                    <Link href="/login" className="mt-6">
-                        <Button>Go to Login</Button>
+                    <Link href="/auth/login" className="mt-6">
+                        <Button>Go to Login Page</Button>
                     </Link>
                 </div>
                 ) : (
@@ -280,26 +303,7 @@ export default function RegisterPage() {
                         <Button type="submit" className="w-full py-3" disabled={isLoading}>
                         {isLoading ? (
                         <>
-                            <svg
-                            className="mr-2 h-4 w-4 animate-spin"
-                            xmlns="http://www.w3.org/2000/svg"
-                            fill="none"
-                            viewBox="0 0 24 24"
-                            >
-                            <circle
-                                className="opacity-25"
-                                cx="12"
-                                cy="12"
-                                r="10"
-                                stroke="currentColor"
-                                strokeWidth="4"
-                            ></circle>
-                            <path
-                                className="opacity-75"
-                                fill="currentColor"
-                                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                            ></path>
-                            </svg>
+                            <LoadingSpinner size="sm" className="mr-2" />
                             Creating Account...
                         </>
                         ) : (
