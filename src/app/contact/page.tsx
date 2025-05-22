@@ -90,7 +90,7 @@ export default function ContactPage() {
     <div className="min-h-screen">
         <main>
             {/* Hero Section */}
-            <div className="text-white mt-10 mb-5 mx-auto max-w-7xl px-4 text-center sm:px-6 lg:px-8 py-16 bg-[#FE7743] rounded-2xl">
+            <div className="text-white mt-10 mb-5 mx-auto max-w-lg sm:max-w-2xl md:max-w-4xl lg:max-w-7xl px-4 text-center sm:px-6 lg:px-8 py-16 bg-[#FE7743] rounded-2xl">
                 <h1 className="text-4xl md:text-5xl">Ask Anything About <span className="font-bold">Kiddzy</span></h1>
             </div>
 

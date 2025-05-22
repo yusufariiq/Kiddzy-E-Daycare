@@ -25,7 +25,7 @@ export default function AboutPage() {
     <div className="min-h-screen">
         <main>
             {/* Hero Section */}
-            <div className="text-white my-10 mx-auto max-w-7xl px-4 text-center sm:px-6 lg:px-8 py-16 bg-[#FE7743] rounded-2xl">
+            <div className="text-white my-10 mx-auto max-w-lg sm:max-w-2xl md:max-w-4xl lg:max-w-7xl px-4 text-center sm:px-6 lg:px-8 py-16 bg-[#FE7743] rounded-2xl">
                 <h1 className="text-4xl md:text-5xl">The Story Behind <span className="font-bold">Kiddzy</span></h1>
             </div>
 
@@ -66,7 +66,7 @@ export default function AboutPage() {
                         <div className="order-1 flex justify-center md:order-2">
                             <div className="relative h-[300px] w-[300px] overflow-hidden rounded-full bg-[#FE7743]/10">
                             <Image
-                                src="/placeholder.svg?height=300&width=300&text=Comprehensive+Info"
+                                src="/image3.webp"
                                 alt="Comprehensive Childcare Information"
                                 fill
                                 className="object-cover"
@@ -80,7 +80,7 @@ export default function AboutPage() {
                         <div className="flex justify-center">
                             <div className="relative h-[300px] w-[300px] overflow-hidden rounded-full bg-[#FE7743]/10">
                             <Image
-                                src="/placeholder.svg?height=300&width=300&text=Connecting+Families"
+                                src="/image4.webp"
                                 alt="Connecting Parents and Providers"
                                 fill
                                 className="object-cover"
