@@ -92,7 +92,9 @@ export default function Navbar() {
                 user ? (
                   <div className="relative" ref={dropdownRef}>
                     <button
-                      onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+                      onClick={() => {
+                        setIsDropdownOpen(!isDropdownOpen);
+                      }}
                       className="flex items-center space-x-2 text-[#273F4F] hover:text-[#FE7743] px-3 py-2 text-base font-medium transition-colors rounded-md hover:bg-gray-100"
                     >
                       <div className="h-8 w-8 rounded-full bg-[#FE7743]/10 flex items-center justify-center text-[#FE7743]">
@@ -126,9 +128,11 @@ export default function Navbar() {
                           <p className="text-xs text-gray-500 truncate">{user.email}</p>
                         </div>
                         <Link
-                          href="/profile"
+                          href={`/profile/${user._id}`}
                           className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 gap-2"
-                          onClick={() => setIsDropdownOpen(false)}
+                          onClick={() => {
+                            setIsDropdownOpen(false);
+                          }}
                         >
                           <UserCircle className="size-5 text-[#FE7743]" />
                           Profile Settings
@@ -215,7 +219,7 @@ export default function Navbar() {
                   </div>
                   <div className="mt-3 space-y-1">
                     <Link
-                      href="/profile"
+                      href={`/profile/${user._id}`}
                       className="flex items-center px-3 py-2 text-base font-medium text-[#273F4F] hover:text-[#FE7743] hover:bg-gray-50 rounded-md"
                       onClick={() => setIsMenuOpen(false)}
                     >
