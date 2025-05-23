@@ -3,87 +3,88 @@
 import type React from "react"
 
 import { useState } from "react"
-import Image from "next/image"
 import { Mail, Phone, MapPin, Send } from "lucide-react"
+import LoadingSpinner from "@/components/ui/loading-spinner"
+import { useForm } from "react-hook-form"
+import { yupResolver } from "@hookform/resolvers/yup"
+import * as yup from "yup"
+import { ContactData } from "@/lib/types/contact"
+import toast from "react-hot-toast"
+
+const contactSchema = yup.object({
+  name: yup.string().required("Name is required"),
+  email: yup.string().email("Please enter a valid email").required("Email is required"),
+  subject: yup.string().required("Subject is required"),
+  message: yup.string().required("Message is required"),
+})
+
+type ContactFormData = yup.InferType<typeof contactSchema>
 
 export default function ContactPage() {
-  const [formData, setFormData] = useState({
-    name: "",
-    email: "",
-    subject: "",
-    message: "",
-  })
-
-  const [errors, setErrors] = useState<Record<string, string>>({})
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [submitStatus, setSubmitStatus] = useState<"idle" | "success" | "error">("idle")
 
-  const validateForm = () => {
-    const newErrors: Record<string, string> = {}
+  const {
+    register,
+    handleSubmit,
+    reset,
+    formState: { errors },
+  } = useForm<ContactFormData>({
+      resolver: yupResolver(contactSchema),
+  })
 
-    if (!formData.name.trim()) {
-      newErrors.name = "Name is required"
+  const sendMessage = async (contactData: ContactData) => {
+    try {
+      const response = await fetch('/api/contact', {
+        method: 'POST',
+        body: JSON.stringify({
+          name: contactData.name,
+          email: contactData.email,
+          subject: contactData.subject,
+          message: contactData.message,
+        })
+      })
+
+      const data = await response.json()
+
+      if (!response.ok) {
+        throw new Error(data.message || 'Failed sending message')
+      }
+      
+      toast.success("Message has been sent!")
+    } catch (error: any) {
+      toast.error(error.message || 'Sending message failed. Please try again.')
+      throw error
     }
-
-    if (!formData.email.trim()) {
-      newErrors.email = "Email is required"
-    } else if (!/^\S+@\S+\.\S+$/.test(formData.email)) {
-      newErrors.email = "Please enter a valid email address"
-    }
-
-    if (!formData.subject.trim()) {
-      newErrors.subject = "Subject is required"
-    }
-
-    if (!formData.message.trim()) {
-      newErrors.message = "Message is required"
-    }
-
-    setErrors(newErrors)
-    return Object.keys(newErrors).length === 0
   }
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    const { name, value } = e.target
-    setFormData((prev) => ({ ...prev, [name]: value }))
-
-    // Clear error when user starts typing
-    if (errors[name]) {
-      setErrors((prev) => ({ ...prev, [name]: "" }))
-    }
-  }
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-
-    if (!validateForm()) {
-      return
-    }
-
+  const onSubmit = async (data: ContactFormData) => {
     setIsSubmitting(true)
 
     try {
-      // Simulate API call with timeout
-      await new Promise((resolve) => setTimeout(resolve, 1000))
+      await sendMessage({
+        name: data.name,
+        email: data.email,
+        subject: data.subject,
+        message: data.message,
+      })
 
-      // Reset form on success
-      setFormData({
+      setSubmitStatus("success")
+    } catch (error) {
+      setSubmitStatus("error")
+    } finally{
+      setIsSubmitting(false)
+      reset({
         name: "",
         email: "",
         subject: "",
         message: "",
       })
-      setSubmitStatus("success")
-    } catch (error) {
-      setSubmitStatus("error")
-    } finally {
-      setIsSubmitting(false)
-
-      // Reset status after 5 seconds
-      setTimeout(() => {
-        setSubmitStatus("idle")
-      }, 5000)
     }
+
+    setTimeout(() => {
+      setSubmitStatus("idle")
+    }, 5000)
   }
 
   return (
@@ -161,7 +162,7 @@ export default function ContactPage() {
                                 </div>
                                 )}
 
-                                <form onSubmit={handleSubmit} className="mt-6 space-y-6">
+                                <form onSubmit={handleSubmit(onSubmit)} className="mt-6 space-y-6">
                                     <div>
                                         <label htmlFor="name" className="block text-sm font-medium text-[#273F4F]">
                                         Full Name <span className="text-red-500">*</span>
@@ -169,15 +170,13 @@ export default function ContactPage() {
                                         <input
                                         type="text"
                                         id="name"
-                                        name="name"
-                                        value={formData.name}
-                                        onChange={handleChange}
+                                        {...register("name")}
                                         className={`mt-1 block w-full rounded-md border ${
                                             errors.name ? "border-red-500" : "border-gray-300"
                                         } px-4 py-3 shadow-sm focus:border-[#FE7743] focus:outline-none focus:ring-1 focus:ring-[#FE7743]`}
                                         placeholder="John Doe"
                                         />
-                                        {errors.name && <p className="mt-1 text-sm text-red-500">{errors.name}</p>}
+                                        {errors.name && <p className="mt-1 text-sm text-red-500">{errors.name.message}</p>}
                                     </div>
 
                                     <div>
@@ -187,15 +186,13 @@ export default function ContactPage() {
                                         <input
                                         type="email"
                                         id="email"
-                                        name="email"
-                                        value={formData.email}
-                                        onChange={handleChange}
+                                        {...register("email")}
                                         className={`mt-1 block w-full rounded-md border ${
                                             errors.email ? "border-red-500" : "border-gray-300"
                                         } px-4 py-3 shadow-sm focus:border-[#FE7743] focus:outline-none focus:ring-1 focus:ring-[#FE7743]`}
                                         placeholder="john.doe@example.com"
                                         />
-                                        {errors.email && <p className="mt-1 text-sm text-red-500">{errors.email}</p>}
+                                        {errors.email && <p className="mt-1 text-sm text-red-500">{errors.email.message}</p>}
                                     </div>
 
                                     <div>
@@ -205,15 +202,13 @@ export default function ContactPage() {
                                         <input
                                         type="text"
                                         id="subject"
-                                        name="subject"
-                                        value={formData.subject}
-                                        onChange={handleChange}
+                                        {...register("subject")}
                                         className={`mt-1 block w-full rounded-md border ${
                                             errors.subject ? "border-red-500" : "border-gray-300"
                                         } px-4 py-3 shadow-sm focus:border-[#FE7743] focus:outline-none focus:ring-1 focus:ring-[#FE7743]`}
                                         placeholder="Inquiry about childcare services"
                                         />
-                                        {errors.subject && <p className="mt-1 text-sm text-red-500">{errors.subject}</p>}
+                                        {errors.subject && <p className="mt-1 text-sm text-red-500">{errors.subject.message}</p>}
                                     </div>
 
                                     <div>
@@ -222,16 +217,14 @@ export default function ContactPage() {
                                         </label>
                                         <textarea
                                         id="message"
-                                        name="message"
-                                        value={formData.message}
-                                        onChange={handleChange}
+                                        {...register("message")}
                                         rows={5}
                                         className={`mt-1 block w-full rounded-md border ${
                                             errors.message ? "border-red-500" : "border-gray-300"
                                         } px-4 py-3 shadow-sm focus:border-[#FE7743] focus:outline-none focus:ring-1 focus:ring-[#FE7743]`}
                                         placeholder="Your message here..."
                                         />
-                                        {errors.message && <p className="mt-1 text-sm text-red-500">{errors.message}</p>}
+                                        {errors.message && <p className="mt-1 text-sm text-red-500">{errors.message.message}</p>}
                                     </div>
 
                                     <div>
@@ -242,32 +235,13 @@ export default function ContactPage() {
                                         >
                                         {isSubmitting ? (
                                             <>
-                                            <svg
-                                                className="mr-2 h-4 w-4 animate-spin"
-                                                xmlns="http://www.w3.org/2000/svg"
-                                                fill="none"
-                                                viewBox="0 0 24 24"
-                                            >
-                                                <circle
-                                                className="opacity-25"
-                                                cx="12"
-                                                cy="12"
-                                                r="10"
-                                                stroke="currentColor"
-                                                strokeWidth="4"
-                                                ></circle>
-                                                <path
-                                                className="opacity-75"
-                                                fill="currentColor"
-                                                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                                                ></path>
-                                            </svg>
-                                            Sending...
+                                              <LoadingSpinner className="text-white"/>
+                                              Sending...
                                             </>
                                         ) : (
                                             <>
-                                            <Send className="mr-2 h-5 w-5" />
-                                            Send Message
+                                              <Send className="mr-2 h-5 w-5" />
+                                              Send Message
                                             </>
                                         )}
                                         </button>
