@@ -77,16 +77,6 @@ export async function PUT(
         const body = await req.json();
         const { firstName, lastName, phoneNumber, email } = body;
 
-        if (!firstName || !lastName || !phoneNumber) {
-            return NextResponse.json(
-                { 
-                  success: false, 
-                  message: 'First name, last name, and phone number are required' 
-                },
-                { status: 400 }
-            );
-        }
-
         const updatedUser = await userService.updateUserProfile(id, {
             firstName,
             lastName,

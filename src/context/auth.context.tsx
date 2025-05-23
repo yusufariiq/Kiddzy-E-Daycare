@@ -2,17 +2,7 @@
 
 import { createContext, useContext, useEffect, useState, ReactNode } from 'react'
 import toast from 'react-hot-toast'
-
-interface User {
-  _id: string
-  email: string
-  firstName: string
-  lastName: string
-  phoneNumber: string
-  role: string
-  createdAt: string
-  updatedAt: string
-}
+import { User } from '@/lib/types/user' 
 
 interface AuthContextType {
   user: User | null
@@ -21,6 +11,7 @@ interface AuthContextType {
   login: (email: string, password: string) => Promise<void>
   register: (userData: RegisterData) => Promise<void>
   logout: () => void
+  updateUser: (userData: Partial<User>) => Promise<void>
   isAuthenticated: boolean
 }
 
@@ -93,7 +84,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       
       // Store in localStorage
       localStorage.setItem('kiddzy_token', data.token)
-      localStorage.setItem('kiddzy_user', JSON.stringify(data.user))
       
       // Notify navbar of user update
       dispatchUserUpdate()
@@ -133,7 +123,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       
       // Store in localStorage
       localStorage.setItem('kiddzy_token', data.token)
-      localStorage.setItem('kiddzy_user', JSON.stringify(data.user))
       
       // Notify navbar of user update
       dispatchUserUpdate()
@@ -142,6 +131,60 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       toast.success(`Welcome to Kiddzy, ${data.user.firstName}!`)
     } catch (error: any) {
       toast.error(error.message || 'Registration failed. Please try again.')
+      throw error
+    }
+  }
+
+  const updateUser = async (userData: Partial<User>) => {
+    if (!user || !token) {
+      throw new Error('User not authenticated')
+    }
+  
+    try {
+      // Use the correct endpoint that matches your API structure
+      const response = await fetch(`/api/user/${user._id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          firstName: userData.firstName,
+          lastName: userData.lastName,
+          phoneNumber: userData.phoneNumber,
+          email: userData.email,
+          address: userData.address,
+        }),
+      })
+  
+      const data = await response.json()
+  
+      if (!response.ok) {
+        throw new Error(data.message || 'Failed to update profile')
+      }
+  
+      // Map API response back to User type
+      const updatedUser = {
+        ...user,
+        ...data.data,
+        phone: data.data.phoneNumber,
+        address: data.data.address,
+      }
+      
+      setUser(updatedUser)
+      
+      // Update localStorage
+      localStorage.setItem('kiddzy_user', JSON.stringify(updatedUser))
+      
+      // Notify components of user update
+      dispatchUserUpdate()
+      
+      // Show success toast
+      toast.success('Profile updated successfully!')
+      
+      return updatedUser
+    } catch (error: any) {
+      toast.error(error.message || 'Failed to update profile. Please try again.')
       throw error
     }
   }
@@ -166,6 +209,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     login,
     register,
     logout,
+    updateUser,
     isAuthenticated: !!user && !!token,
   }
 
