@@ -6,6 +6,7 @@ import { Button } from "../ui/button"
 import { useRouter } from "next/navigation"
 import { Calendar, LogOut, Menu, User, UserCircle, X } from "lucide-react"
 import { useAuth } from "@/context/auth.context"
+import { usePathname } from "next/navigation"
 
 const navLinks = [
   { name: "Find Childcare", href: "/childcare" },
@@ -18,8 +19,9 @@ export default function Navbar() {
   const [scrolled, setScrolled] = useState(false)
   const [isDropdownOpen, setIsDropdownOpen] = useState(false)
   const dropdownRef = useRef<HTMLDivElement>(null)
-  const router = useRouter()
   const { user, logout, isLoading } = useAuth()
+  const router = useRouter()
+  const pathname = usePathname()
 
   // Handle scroll effect
   useEffect(() => {
@@ -77,15 +79,21 @@ export default function Navbar() {
           {/* Desktop navigation */}
           <div className="hidden md:flex md:items-center md:space-x-8">
             <div className="flex space-x-8">
-              {navLinks.map((link) => (
+            {navLinks.map((link) => {
+              const isActive = pathname === link.href
+              return (
                 <Link
                   key={link.name}
                   href={link.href}
-                  className="text-[#273F4F] hover:text-[#FE7743] px-3 py-2 text-base font-medium transition-colors"
+                  className={`px-3 py-2 text-base font-medium transition-colors ${
+                    isActive ? "text-[#FE7743] underline" : "text-[#273F4F] hover:text-[#FE7743]"
+                  }`}
                 >
                   {link.name}
                 </Link>
-              ))}
+              )
+            })}
+
             </div>
             <div className="flex items-center space-x-4">
               {!isLoading && (
@@ -97,8 +105,8 @@ export default function Navbar() {
                       }}
                       className="flex items-center space-x-2 text-[#273F4F] hover:text-[#FE7743] px-3 py-2 text-base font-medium transition-colors rounded-md hover:bg-gray-100"
                     >
-                      <div className="h-8 w-8 rounded-full bg-[#FE7743]/10 flex items-center justify-center text-[#FE7743]">
-                        <UserCircle className="h-5 w-5" />
+                      <div className="rounded-full flex items-center justify-center text-[#FE7743]">
+                        <UserCircle className="size-6" />
                       </div>
                       <span>
                         {user.firstName} {user.lastName}
@@ -193,16 +201,21 @@ export default function Navbar() {
       {isMenuOpen && (
         <div className="backdrop-blur-lg py-5 md:hidden" id="mobile-menu">
           <div className="px-2 pt-2 pb-3 space-y-5 sm:px-3 bg-white">
-            {navLinks.map((link) => (
-              <Link
-                key={link.name}
-                href={link.href}
-                className="text-[#273F4F] hover:text-[#FE7743] block px-3 py-2 rounded-md text-base font-medium"
-                onClick={() => setIsMenuOpen(false)}
-              >
-                {link.name}
-              </Link>
-            ))}
+            {navLinks.map((link) => {
+              const isActive = pathname === link.href
+              return (
+                <Link
+                  key={link.name}
+                  href={link.href}
+                  className={`block px-3 py-2 rounded-md text-base font-medium ${
+                    isActive ? "text-[#FE7743] underline" : "text-[#273F4F] hover:text-[#FE7743]"
+                  }`}
+                  onClick={() => setIsMenuOpen(false)}
+                >
+                  {link.name}
+                </Link>
+              )
+            })}
             {!isLoading && (
               user ? (
                 <div className="border-t border-gray-200 pt-4 mt-4">
