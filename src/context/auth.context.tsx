@@ -3,6 +3,14 @@
 import { createContext, useContext, useEffect, useState, ReactNode } from 'react'
 import toast from 'react-hot-toast'
 import { User } from '@/lib/types/user' 
+import { jwtDecode } from "jwt-decode"
+
+interface DecodedToken {
+  exp: number
+  userId: string
+  email: string
+  role: string
+}
 
 interface AuthContextType {
   user: User | null
@@ -44,22 +52,35 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [isLoading, setIsLoading] = useState(true)
 
   useEffect(() => {
-    // Check for existing session on mount
     const storedToken = localStorage.getItem('kiddzy_token')
     const storedUser = localStorage.getItem('kiddzy_user')
-
+  
     if (storedToken && storedUser) {
       try {
-        setToken(storedToken)
-        setUser(JSON.parse(storedUser))
+        const decoded = jwtDecode<DecodedToken>(storedToken)
+        const now = Date.now() / 1000
+  
+        if (decoded.exp < now) {
+          logout()
+          toast.error("Session expired. Please log in again.")
+        } else {
+          setToken(storedToken)
+          setUser(JSON.parse(storedUser))
+  
+          const timeout = (decoded.exp - now) * 1000
+          const timer = setTimeout(() => {
+            logout()
+            toast.error("Session expired. Please log in again.")
+          }, timeout)
+  
+          return () => clearTimeout(timer)
+        }
       } catch (error) {
-        console.error('Failed to parse stored user data:', error)
-        localStorage.removeItem('kiddzy_token')
-        localStorage.removeItem('kiddzy_user')
-        toast.error('Session expired. Please log in again.')
+        logout()
+        toast.error("Invalid session. Please log in again.")
       }
     }
-    
+  
     setIsLoading(false)
   }, [])
 
