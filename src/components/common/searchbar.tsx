@@ -1,90 +1,63 @@
 "use client"
 
-import { cn } from "@/utils/utils"
-
-import type React from "react"
-
 import { useState } from "react"
-import { MapPin, Search, Calendar, Users } from "lucide-react"
+import { MapPin, Search, Users} from "lucide-react"
 import { Input } from "@/components/ui/input"
-import { Select, type SelectOption } from "@/components/ui/select"
+import { Select } from "@/components/ui/select"
 import { Button } from "@/components/ui/button"
-
-// Sample data for dropdowns
-const ageRangeOptions: SelectOption[] = [
-  { value: "0-1", label: "0-1 years" },
-  { value: "1-2", label: "1-2 years" },
-  { value: "2-3", label: "2-3 years" },
-  { value: "3-5", label: "3-5 years" },
-  { value: "5-12", label: "5-12 years" },
-]
-
-const serviceTypeOptions: SelectOption[] = [
-  { value: "daycare", label: "Daycare" },
-  { value: "nanny", label: "Nanny" },
-  { value: "babysitter", label: "Babysitter" },
-  { value: "preschool", label: "Preschool" },
-  { value: "afterschool", label: "After School Care" },
-]
-
-const availabilityOptions: SelectOption[] = [
-  { value: "fulltime", label: "Full-time" },
-  { value: "parttime", label: "Part-time" },
-  { value: "weekdays", label: "Weekdays" },
-  { value: "weekends", label: "Weekends" },
-  { value: "evenings", label: "Evenings" },
-]
+import { cn } from "@/utils/utils"
 
 export interface SearchBarProps {
   onSearch?: (searchParams: {
     location: string
-    childAge?: string
-    serviceType?: string
-    availability?: string
+    keyword?: string
+    ageGroup?: string
+    maxPrice?: number
   }) => void
+  onReset?: () => void
   className?: string
 }
 
+const ageGroupOptions = [
+  { value: "0-1", label: "0–1 years" },
+  { value: "1-2", label: "1–2 years" },
+  { value: "2-3", label: "2–3 years" },
+  { value: "3-5", label: "3–5 years" },
+  { value: "5-12", label: "5–12 years" },
+]
+
 export default function SearchBar({ onSearch, className }: SearchBarProps) {
   const [location, setLocation] = useState("")
-  const [childAge, setChildAge] = useState("")
-  const [serviceType, setServiceType] = useState("")
-  const [availability, setAvailability] = useState("")
+  const [keyword, setKeyword] = useState("")
+  const [ageGroup, setAgeGroup] = useState("")
+  const [maxPrice, setMaxPrice] = useState("")
+
   const [errors, setErrors] = useState<{ location?: string }>({})
 
-  const handleSearch = (e: React.FormEvent) => {
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
-
-    // Validate location (required field)
     if (!location.trim()) {
       setErrors({ location: "Location is required" })
       return
     }
-
     setErrors({})
-
-    if (onSearch) {
-      onSearch({
-        location,
-        childAge,
-        serviceType,
-        availability,
-      })
-    }
+    onSearch?.({
+      location,
+      keyword,
+      ageGroup,
+      maxPrice: maxPrice ? parseInt(maxPrice) : undefined,
+    })
   }
 
   return (
     <div className={cn("w-full px-4 py-6 md:px-6", className)}>
-      <form onSubmit={handleSearch} className="mx-auto max-w-6xl">
+      <form onSubmit={handleSubmit} className="mx-auto max-w-6xl space-y-4">
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-          <div className="space-y-2">
-            <label htmlFor="location" className="block text-sm font-medium text-[#273F4F]">
-              Location
-            </label>
+          <div className="space-y-1">
+            <label htmlFor="location" className="text-sm font-medium text-[#273F4F]">Location</label>
             <Input
               id="location"
-              type="text"
-              placeholder="Enter your zip code"
+              placeholder="Enter city or ZIP"
               icon={<MapPin className="h-5 w-5" />}
               value={location}
               onChange={(e) => setLocation(e.target.value)}
@@ -93,52 +66,45 @@ export default function SearchBar({ onSearch, className }: SearchBarProps) {
             />
           </div>
 
-          <div className="space-y-2">
-            <label htmlFor="childAge" className="block text-sm font-medium text-[#273F4F]">
-              Child's Age
-            </label>
+          <div className="space-y-1">
+            <label htmlFor="keyword" className="text-sm font-medium text-[#273F4F]">Keyword</label>
+            <Input
+              id="keyword"
+              placeholder="e.g. Montessori, bilingual"
+              value={keyword}
+              onChange={(e) => setKeyword(e.target.value)}
+            />
+          </div>
+
+          <div className="space-y-1">
+            <label htmlFor="ageGroup" className="text-sm font-medium text-[#273F4F]">Age Group</label>
             <Select
-              id="childAge"
-              options={ageRangeOptions}
-              placeholder="Select age range"
+              id="ageGroup"
+              options={ageGroupOptions}
+              placeholder="Select age group"
+              value={ageGroup}
+              onChange={(e) => setAgeGroup(e.target.value)}
               icon={<Users className="h-5 w-5" />}
-              value={childAge}
-              onChange={(e) => setChildAge(e.target.value)}
             />
           </div>
 
-          <div className="space-y-2">
-            <label htmlFor="serviceType" className="block text-sm font-medium text-[#273F4F]">
-              Service Type
-            </label>
-            <Select
-              id="serviceType"
-              options={serviceTypeOptions}
-              placeholder="Select service"
-              value={serviceType}
-              onChange={(e) => setServiceType(e.target.value)}
-            />
-          </div>
-
-          <div className="space-y-2">
-            <label htmlFor="availability" className="block text-sm font-medium text-[#273F4F]">
-              Availability
-            </label>
-            <Select
-              id="availability"
-              options={availabilityOptions}
-              placeholder="Select when"
-              icon={<Calendar className="h-5 w-5" />}
-              value={availability}
-              onChange={(e) => setAvailability(e.target.value)}
+          <div className="space-y-1">
+            <label htmlFor="price" className="text-sm font-medium text-[#273F4F]">Max Price (Rp)</label>
+            <Input
+              id="price"
+              type="number"
+              min="0"
+              placeholder="e.g. 500000"
+              value={maxPrice}
+              onChange={(e) => setMaxPrice(e.target.value)}
             />
           </div>
         </div>
 
-        <div className="mt-6 flex justify-center">
-          <Button type="submit" className="px-8 py-3 text-base">
-            <Search className="mr-2 h-5 w-5" />
-            Search Providers
+        <div className="flex flex-wrap gap-4 justify-center pt-4">
+          <Button type="submit" className="px-6">
+            <Search className="mr-2 h-4 w-4" />
+            Search
           </Button>
         </div>
       </form>
