@@ -196,19 +196,25 @@ export default function ContactPage() {
                                     </div>
 
                                     <div>
-                                        <label htmlFor="subject" className="block text-sm font-medium text-[#273F4F]">
+                                      <label htmlFor="subject" className="block text-sm font-medium text-[#273F4F]">
                                         Subject <span className="text-red-500">*</span>
-                                        </label>
-                                        <input
-                                        type="text"
+                                      </label>
+                                      <select
                                         id="subject"
                                         {...register("subject")}
                                         className={`mt-1 block w-full rounded-md border ${
-                                            errors.subject ? "border-red-500" : "border-gray-300"
+                                          errors.subject ? "border-red-500" : "border-gray-300"
                                         } px-4 py-3 shadow-sm focus:border-[#FE7743] focus:outline-none focus:ring-1 focus:ring-[#FE7743]`}
-                                        placeholder="Inquiry about childcare services"
-                                        />
-                                        {errors.subject && <p className="mt-1 text-sm text-red-500">{errors.subject.message}</p>}
+                                      >
+                                        <option value="">Select a subject</option>
+                                        <option value="General Inquiry">General Inquiry</option>
+                                        <option value="Payment Issue">Payment Issue</option>
+                                        <option value="Booking Assistance">Booking Assistance</option>
+                                        <option value="Feedback">Feedback</option>
+                                        <option value="Technical Support">Technical Support</option>
+                                        <option value="Other">Other</option>
+                                      </select>
+                                      {errors.subject && <p className="mt-1 text-sm text-red-500">{errors.subject.message}</p>}
                                     </div>
 
                                     <div>
@@ -235,7 +241,7 @@ export default function ContactPage() {
                                         >
                                         {isSubmitting ? (
                                             <>
-                                              <LoadingSpinner className="text-white"/>
+                                              <LoadingSpinner className="mr-2 text-white"/>
                                               Sending...
                                             </>
                                         ) : (
