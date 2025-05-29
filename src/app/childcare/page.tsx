@@ -1,28 +1,108 @@
+'use client'
+
+import { useEffect, useState } from "react"
 import ChildcareCard from "@/components/common/childcare-card"
 import SearchBar from "@/components/common/searchbar"
-import { childcareListings } from "@/data/chidlcare"
+import { Button } from "@/components/ui/button"
+import { RefreshCcw } from "lucide-react"
+import LoadingSpinner from "@/components/ui/loading-spinner"
+
+interface OperatingHours {
+  _id: string
+  day: string
+  open: string
+  close: string
+}
+
+interface Provider {
+  _id: string
+  name: string
+  address: string
+  images: string[]
+  price: number
+  availability: boolean
+  operatingHours: OperatingHours[]
+}
 
 export default function ChildcarePage() {
+  const [providers, setProviders] = useState<Provider[]>([])
+  const [loading, setLoading] = useState(false)
+
+  const fetchProviders = async (params?: any) => {
+    setLoading(true)
+    try {
+      const query = params ? new URLSearchParams(params).toString() : ""
+      const res = await fetch(`/api/providers?${query}`)
+      const json = await res.json()
+      setProviders(json.data || [])
+    } catch (e) {
+      console.error(e)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const handleSearch = (params: any) => {
+    fetchProviders({ keyword: params.location })
+  }
+
+  const handleReset = () => fetchProviders()
+
+  useEffect(() => {
+    fetchProviders()
+  }, [])
+
   return (
     <div className="min-h-screen pb-10">
       <main>
-        {/* Hero Section */}
         <div className="text-white mt-10 mb-5 max-w-lg sm:max-w-2xl md:max-w-4xl lg:max-w-7xl mx-auto px-4 text-center sm:px-6 lg:px-8 py-16 bg-[#FE7743] rounded-2xl">
-            <h1 className="text-3xl text-balance md:text-5xl">Discover Trusted Childcare <span className="font-bold">In Your Area!</span></h1>
+          <h1 className="text-3xl text-balance md:text-5xl">
+            Discover Trusted Childcare <span className="font-bold">In Your Area!</span>
+          </h1>
         </div>
 
         <div className="py-8">
-            <SearchBar/>    
+          <SearchBar onSearch={handleSearch} />
+        </div>
+        
+        <div className="mx-auto max-w-7xl flex justify-end">
+          <Button variant="default" onClick={handleReset} className="rounded-full p-3">
+            <RefreshCcw className="size-6"/>
+          </Button>
         </div>
 
-        {/* Grid View */}
+        {providers.length === 0 && !loading && (
+          <div className="py-8 text-center text-gray-500 mt-8">
+            No childcare providers match your search. Try adjusting filters or resetting.
+          </div>
+        )}
+
         <div className="py-8">
           <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-            <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-              {childcareListings.map((listing) => (
-                <ChildcareCard key={listing.id} {...listing} />
-              ))}
-            </div>
+            {loading ? (
+              <div className="flex justify-center items-center text-center">
+                <LoadingSpinner size="lg" className="text-[#FE7743]"/>
+              </div>
+            ) : (
+              <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+                {providers.map((provider) => {
+                  const hours = provider.operatingHours[0]
+                  const hoursDisplay = hours ? `${hours.open} - ${hours.close}` : undefined
+
+                  return (
+                    <ChildcareCard
+                      key={provider._id}
+                      id={provider._id}
+                      image={provider.images[0] || "/placeholder.svg"}
+                      name={provider.name}
+                      location={provider.address}
+                      price={provider.price.toString()}
+                      availability={hoursDisplay}
+                    />
+                  )
+                })}
+              </div>
+            )}
           </div>
         </div>
       </main>

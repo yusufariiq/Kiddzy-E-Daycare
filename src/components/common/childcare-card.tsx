@@ -23,7 +23,7 @@ export default function ChildcareCard({
 }: ChildcareCardProps) {
   return (
     <Link
-      href={`/children/${id}`}
+      href={`/childcare/${id}`}
       className={`group overflow-hidden rounded-lg bg-white transition-all hover:shadow-lg border border-gray-200 ${className}`}
     >
       {/* Card Image */}
