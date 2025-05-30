@@ -9,9 +9,12 @@ export interface IBooking extends Document {
     status: 'pending' | 'confirmed' | 'active' | 'completed' | 'cancelled';
     totalAmount: number;
     childrenCount: number;
-    paymentStatus: 'pending' | 'paid' ;
-    paymentMethod?: string;
-    paymentId?: string;
+    paymentMethod: 'debit_card' | 'bank_transfer' | 'e_wallet';
+    emergencyContact?: {
+        name: string;
+        phone: string;
+        relationship: string;
+    };
     notes?: string;
 }
 
@@ -54,13 +57,25 @@ const bookingSchema = new Schema<IBooking>(
             required: true,
             min: 1
         },
-        paymentStatus: {
+        paymentMethod: {
             type: String,
-            enum: ['pending', 'paid'],
-            default: 'pending',
+            enum: ['debit_card', 'bank_transfer', 'e_wallet'],
+            required: true,
         },
-        paymentMethod: String,
-        paymentId: String,
+        emergencyContact: {
+            name: {
+                type: String,
+                required: false
+            },
+            phone: {
+                type: String,
+                required: false
+            },
+            relationship: {
+                type: String,
+                required: false
+            }
+        },
         notes: String,
     },
     { timestamps: true }
@@ -86,5 +101,9 @@ bookingSchema.virtual('child', {
     foreignField: '_id',
     justOne: true
 });
+
+bookingSchema.index({ userId: 1, status: 1 });
+bookingSchema.index({ providerId: 1, status: 1 });
+bookingSchema.index({ startDate: 1, endDate: 1 });
 
 export const Booking = mongoose.models.Booking || mongoose.model<IBooking>('Booking', bookingSchema);

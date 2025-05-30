@@ -2,6 +2,21 @@ import { BookingRepository } from '../repositories/booking.repository';
 import { ProviderRepository } from '../repositories/provider.repostiroy';
 import { IBooking } from '../models/booking.model';
 
+export interface CreateBookingData {
+  providerId: string;
+  childId: string;
+  startDate: Date;
+  endDate: Date;
+  childrenCount: number;
+  paymentMethod: 'debit_card' | 'bank_transfer' | 'e_wallet';
+  emergencyContact?: {
+    name: string;
+    phone: string;
+    relationship: string;
+  };
+  notes?: string;
+}
+
 export class BookingService {
   private bookingRepository: BookingRepository;
   private providerRepository: ProviderRepository;
@@ -11,7 +26,7 @@ export class BookingService {
     this.providerRepository = new ProviderRepository();
   }
 
-  async createBooking(bookingData: Partial<IBooking>): Promise<IBooking> {
+  async createBooking(userId: string, bookingData: CreateBookingData): Promise<IBooking> {
     // Check if provider exists
     const provider = await this.providerRepository.findById(bookingData.providerId?.toString() || '');
     
@@ -23,72 +38,140 @@ export class BookingService {
       throw new Error('Provider is not available for booking');
     }
     
-    // Calculate total amount based on provider's price and booking duration
     const startDate = new Date(bookingData.startDate as Date);
     const endDate = new Date(bookingData.endDate as Date);
     
-    if (startDate >= endDate) {
+    if (startDate > endDate) {
       throw new Error('End date must be after start date');
     }
     
+    const conflictingBookings = await this.bookingRepository.findConflictingBookings(
+      bookingData.providerId,
+      startDate,
+      endDate
+    );
+
+    if (conflictingBookings.length > 0) {
+      throw new Error('Provider is not available for the selected dates');
+    }
+
     const days = Math.ceil((endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24));
     const totalAmount = provider.price * days * (bookingData.childrenCount || 1);
     
     const booking = await this.bookingRepository.create({
-      ...bookingData,
+      userId,
+      providerId: bookingData.providerId,
+      childId: bookingData.childId,
+      startDate,
+      endDate,
+      childrenCount: bookingData.childrenCount,
       totalAmount,
-      status: 'pending',
-      paymentStatus: 'pending'
+      paymentMethod: bookingData.paymentMethod,
+      emergencyContact: bookingData.emergencyContact,
+      notes: bookingData.notes,
+      status: 'pending'
     });
+
+    return booking;
+  }
+
+  async getUserBookings(userId: string, filter?: 'active' | 'completed' | 'cancelled'): Promise<IBooking[]> {
+    switch (filter) {
+      case 'active':
+        return await this.bookingRepository.findActiveByUser(userId);
+      case 'completed':
+        return await this.bookingRepository.findCompletedByUser(userId);
+      case 'cancelled':
+        return await this.bookingRepository.findCancelledByUser(userId);
+      default:
+        return await this.bookingRepository.findByUser(userId);
+    }
+  }
+
+  async getProviderBookings(providerId: string, filter?: 'active' | 'completed' | 'cancelled'): Promise<IBooking[]> {
+    switch (filter) {
+      case 'active':
+        return await this.bookingRepository.findActiveByProvider(providerId);
+      case 'completed':
+        return await this.bookingRepository.findCompletedByProvider(providerId);
+      case 'cancelled':
+        return await this.bookingRepository.findCancelledByProvider(providerId);
+      default:
+        return await this.bookingRepository.findByProvider(providerId);
+    }
+  }
+
+  async getBookingDetails(bookingId: string, requesterId: string): Promise<IBooking | null> {
+    const booking = await this.bookingRepository.findById(bookingId);
+    
+    if (!booking) {
+      return null;
+    }
+    
+    // Check if requester has permission to view this booking
+    if (booking.userId.id.toString() !== requesterId) {
+      throw new Error('Unauthorized to view this booking');
+    }
     
     return booking;
   }
 
-  async getUserBookings(userId: string): Promise<IBooking[]> {
-    return await this.bookingRepository.findByUser(userId);
-  }
-
-  async getProviderBookings(providerId: string): Promise<IBooking[]> {
-    return await this.bookingRepository.findByProvider(providerId);
-  }
-
-  async getUserActiveBookings(userId: string): Promise<IBooking[]> {
-    return await this.bookingRepository.findActiveByUser(userId);
-  }
-
-  async getUserCompletedBookings(userId: string): Promise<IBooking[]> {
-    return await this.bookingRepository.findCompletedByUser(userId);
-  }
-
-  async getProviderActiveBookings(providerId: string): Promise<IBooking[]> {
-    return await this.bookingRepository.findActiveByProvider(providerId);
-  }
-
-  async getProviderCompletedBookings(providerId: string): Promise<IBooking[]> {
-    return await this.bookingRepository.findCompletedByProvider(providerId);
-  }
-
-  async getBookingDetails(bookingId: string): Promise<IBooking | null> {
-    return await this.bookingRepository.findById(bookingId);
-  }
-
-  async updateBookingStatus(bookingId: string, status: 'pending' | 'confirmed' | 'active' | 'completed' | 'cancelled'): Promise<IBooking | null> {
+  async updateBookingStatus(
+    bookingId: string, 
+    status: 'pending' | 'confirmed' | 'active' | 'completed' | 'cancelled',
+  ): Promise<IBooking | null> {
+    const booking = await this.bookingRepository.findById(bookingId);
+    
+    if (!booking) {
+      throw new Error('Booking not found');
+    }
+    
+    // Validate status transitions
+    const validTransitions = {
+      'pending': ['confirmed', 'cancelled'],
+      'confirmed': ['active', 'cancelled'],
+      'active': ['completed', 'cancelled'],
+      'completed': [],
+      'cancelled': []
+    };
+    
+    if (!validTransitions[booking.status].includes(status)) {
+      throw new Error(`Cannot change status from ${booking.status} to ${status}`);
+    }
+    
     return await this.bookingRepository.updateStatus(bookingId, status);
   }
 
-  async processPayment(bookingId: string, paymentId: string, paymentMethod: string): Promise<IBooking | null> {
-    // First update the payment info
-    const updatedBooking = await this.bookingRepository.updatePayment(bookingId, paymentId, paymentMethod);
+  async cancelBooking(bookingId: string, userId: string, reason?: string): Promise<IBooking | null> {
+    const booking = await this.bookingRepository.findById(bookingId);
     
-    // If payment is processed successfully, update the booking status to active
-    if (updatedBooking && updatedBooking.paymentStatus === 'paid') {
-      return await this.bookingRepository.updateStatus(bookingId, 'active');
+    if (!booking) {
+      throw new Error('Booking not found');
     }
     
-    return updatedBooking;
+    if (booking.userId.id.toString() !== userId) {
+      throw new Error('Unauthorized to cancel this booking');
+    }
+    
+    if (booking.status === 'completed' || booking.status === 'cancelled') {
+      throw new Error('Cannot cancel a completed or already cancelled booking');
+    }
+    
+    // Add cancellation reason to notes if provided
+    const updatedNotes = reason 
+      ? `${booking.notes || ''}\nCancellation reason: ${reason}`.trim()
+      : booking.notes;
+    
+    await this.bookingRepository.updateNotes(bookingId, updatedNotes);
+    
+    return await this.bookingRepository.updateStatus(bookingId, 'cancelled');
   }
 
-  async getAllBookings(): Promise<IBooking[]> {
+  async getAllBookings(adminId: string): Promise<IBooking[]> {
     return await this.bookingRepository.findAll();
+  }
+
+  async getBookingStatistics(providerId?: string) {
+    return await this.bookingRepository.getBookingStatistics(providerId);
   }
 }
