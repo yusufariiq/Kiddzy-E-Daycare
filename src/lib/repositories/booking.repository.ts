@@ -8,21 +8,21 @@ export class BookingRepository {
 
     async findById(id: string): Promise<IBooking | null> {
         return await Booking.findById(id)
-            .populate('providerId', 'name email phone address pricePerDay services')
-            .populate('userId', 'name email phone')
+            .populate('providerId', 'name email whatsapp address pricePerDay services')
+            .populate('userId', 'name email whatsapp')
             .populate('childId', 'fullname nickname age gender specialNeeds allergies');
     }
       
     async findByUser(userId: string): Promise<IBooking[]> {
         return await Booking.find({ userId })
-            .populate('providerId', 'name email phone address pricePerDay services')
+            .populate('providerId', 'name email whatsapp address pricePerDay services')
             .populate('childId', 'fullname nickname age gender')
             .sort({ createdAt: -1 });
     }
 
     async findByProvider(providerId: string): Promise<IBooking[]> {
         return await Booking.find({ providerId })
-            .populate('userId', 'name email phone')
+            .populate('userId', 'name email whatsapp')
             .populate('childId', 'fullname nickname age gender specialNeeds allergies')
             .sort({ startDate: 1 });
     }
@@ -32,7 +32,7 @@ export class BookingRepository {
             userId,
             status: { $in: ['pending', 'confirmed', 'active'] }
         })
-        .populate('providerId', 'name email phone address')
+        .populate('providerId', 'name email whatsapp address')
         .populate('childId', 'fullname nickname age gender')
         .sort({ startDate: 1 });
     }
@@ -42,7 +42,7 @@ export class BookingRepository {
             providerId,
             status: { $in: ['pending', 'confirmed', 'active'] }
         })
-        .populate('userId', 'name email phone')
+        .populate('userId', 'name email whatsapp')
         .populate('childId', 'fullname nickname age gender specialNeeds allergies')
         .sort({ startDate: 1 });
     }
@@ -52,7 +52,7 @@ export class BookingRepository {
             userId,
             status: 'completed'
         })
-        .populate('providerId', 'name email phone address')
+        .populate('providerId', 'name email whatsapp address')
         .populate('childId', 'fullname nickname age gender')
         .sort({ endDate: -1 });
     }
@@ -62,7 +62,7 @@ export class BookingRepository {
             providerId,
             status: 'completed'
         })
-        .populate('userId', 'name email phone')
+        .populate('userId', 'name email whatsapp')
         .populate('childId', 'fullname nickname age gender')
         .sort({ endDate: -1 });
     }
@@ -72,7 +72,7 @@ export class BookingRepository {
             userId,
             status: 'cancelled'
         })
-        .populate('providerId', 'name email phone address')
+        .populate('providerId', 'name email whatsapp address')
         .populate('childId', 'fullname nickname age gender')
         .sort({ updatedAt: -1 });
     }
@@ -82,7 +82,7 @@ export class BookingRepository {
             providerId,
             status: 'cancelled'
         })
-        .populate('userId', 'name email phone')
+        .populate('userId', 'name email whatsapp')
         .populate('childId', 'fullname nickname age gender')
         .sort({ updatedAt: -1 });
     }
@@ -106,8 +106,8 @@ export class BookingRepository {
             { status, updatedAt: new Date() }, 
             { new: true }
         )
-        .populate('providerId', 'name email phone address')
-        .populate('userId', 'name email phone')
+        .populate('providerId', 'name email whatsapp address')
+        .populate('userId', 'name email whatsapp')
         .populate('childId', 'fullname nickname age gender');
     }
 
@@ -121,8 +121,8 @@ export class BookingRepository {
 
     async findAll(): Promise<IBooking[]> {
         return await Booking.find({})
-            .populate('providerId', 'name email phone address')
-            .populate('userId', 'name email phone')
+            .populate('providerId', 'name email whatsapp address')
+            .populate('userId', 'name email whatsapp')
             .populate('childId', 'fullname nickname age gender')
             .sort({ createdAt: -1 });
     }
@@ -185,7 +185,7 @@ export class BookingRepository {
             startDate: { $gte: now, $lte: futureDate },
             status: { $in: ['confirmed', 'active'] }
         })
-        .populate('providerId', 'name phone address')
+        .populate('providerId', 'name whatsapp address')
         .populate('childId', 'fullname nickname age')
         .sort({ startDate: 1 });
     }
@@ -211,8 +211,8 @@ export class BookingRepository {
         }
 
         return await Booking.find(query)
-            .populate('providerId', 'name email phone')
-            .populate('userId', 'name email phone')
+            .populate('providerId', 'name email whatsapp')
+            .populate('userId', 'name email whatsapp')
             .populate('childId', 'fullname nickname age gender')
             .sort({ startDate: 1 });
     }
