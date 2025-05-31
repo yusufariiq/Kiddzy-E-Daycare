@@ -1,0 +1,394 @@
+"use client"
+
+import { useState, useEffect } from "react"
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Calendar, Search, Filter, Plus, Clock, AlertTriangle } from "lucide-react"
+import LoadingSpinner from "@/components/ui/loading-spinner"
+import { useRouter } from "next/navigation"
+import BookingCard from "@/components/booking/booking-card"
+import toast from "react-hot-toast"
+import { useAuth } from "@/context/auth.context"
+
+interface Provider {
+  _id?: string
+  name: string
+  address: string
+  image?: string[]
+}
+
+interface Child {
+  _id?: string
+  fullname: string
+  nickname: string
+}
+
+interface Booking {
+  _id: string
+  bookingId: string
+  provider: Provider
+  child: Child
+  startDate: string
+  endDate: string
+  status: "pending" | "confirmed" | "active" | "completed" | "cancelled"
+  totalAmount: number
+  createdAt: string
+}
+
+interface ApiResponse {
+  bookings: Booking[]
+  count: number
+  filter: string
+}
+
+export default function BookingsPage() {
+  const [activeTab, setActiveTab] = useState<"active" | "history">("active")
+  const [bookings, setBookings] = useState<Booking[]>([])
+  const [loading, setLoading] = useState(true)
+  const [actionLoading, setActionLoading] = useState<string | null>(null)
+  const [searchTerm, setSearchTerm] = useState("")
+  const [filterStatus, setFilterStatus] = useState<string>("all")
+  const [error, setError] = useState<string | null>(null)
+  const [mounted, setMounted] = useState(false)
+  const router = useRouter()
+  const { token, isAuthenticated } = useAuth()
+
+  useEffect(() => {
+    setMounted(true)
+  }, [])
+
+  const fetchBookings = async (filter?: string) => {
+    try {
+      setLoading(true)
+      setError(null)
+
+      if (!isAuthenticated || !token) {
+        router.push("/auth/login")
+        return
+      }
+      
+      const params = new URLSearchParams()
+      if (filter && filter !== 'all') {
+        params.append('filter', filter)
+      }
+      
+      const response = await fetch(`/api/bookings?${params.toString()}`, {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        },
+      })
+
+      if (!response.ok) {
+        throw new Error(`Failed to fetch bookings: ${response.statusText}`)
+      }
+
+      const data: ApiResponse = await response.json()
+      
+      const normalizedBookings = data.bookings.map(booking => ({
+        ...booking,
+        provider: {
+          name: booking.provider?.name || 'Unknown Provider',
+          address: booking.provider?.address || 'No address provided',
+          image: booking.provider?.image || []
+        },
+        child: {
+          fullname: booking.child?.fullname || 'Unknown Child',
+          nickname: booking.child?.nickname || 'Unknown'
+        }
+      }))
+      
+      setBookings(normalizedBookings)
+    } catch (error) {
+      console.error("Failed to fetch bookings:", error)
+      setError(error instanceof Error ? error.message : "Failed to fetch bookings")
+      toast.error("Failed to load bookings. Please try again.")
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const handleCancelBooking = async (bookingId: string, reason?: string) => {
+    try {
+      setActionLoading(bookingId)
+      
+      const params = new URLSearchParams()
+      if (reason) {
+        params.append('reason', reason)
+      }
+
+      const response = await fetch(`/api/bookings/${bookingId}?${params.toString()}`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        },
+      })
+
+      if (!response.ok) {
+        const errorData = await response.json()
+        throw new Error(errorData.error || 'Failed to cancel booking')
+      }
+
+      const data = await response.json()
+      toast.success(data.message || "Booking cancelled successfully")
+      
+      // Refresh bookings
+      await fetchBookings()
+    } catch (error) {
+      console.error("Failed to cancel booking:", error)
+      toast.error(error instanceof Error ? error.message : "Failed to cancel booking")
+    } finally {
+      setActionLoading(null)
+    }
+  }
+
+  // Handle rebook - redirect to provider page or booking flow
+  const handleRebook = (bookingId: string) => {
+    const booking = bookings.find(b => b._id === bookingId)
+    if (booking) {
+      // Store booking data for rebooking and redirect
+      if (typeof window !== 'undefined') {
+        sessionStorage.setItem('rebookData', JSON.stringify({
+          providerId: booking.provider,
+          childName: booking.child.fullname
+        }))
+      }
+      router.push('/childcare')
+    }
+  }
+
+  // Initial fetch
+  useEffect(() => {
+    if (mounted && isAuthenticated && token) {
+      fetchBookings()
+    }
+  }, [mounted, isAuthenticated, token])
+
+  // Refetch when tab changes
+  useEffect(() => {
+    if (mounted && isAuthenticated && token) {
+      const filterParam = activeTab === 'active' ? 'active' : undefined
+      fetchBookings(filterParam)
+    }
+  }, [activeTab, mounted, isAuthenticated, token])
+
+  const getFilteredBookings = () => {
+    let filtered = bookings
+
+    // Filter by tab (active vs history)
+    if (activeTab === "active") {
+      filtered = filtered.filter((booking) => ["pending", "confirmed", "active"].includes(booking.status))
+    } else {
+      filtered = filtered.filter((booking) => ["completed", "cancelled"].includes(booking.status))
+    }
+
+    // Filter by search term
+    if (searchTerm) {
+      filtered = filtered.filter(
+        (booking) =>
+          booking.provider.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          booking.child.fullname.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          booking.bookingId.toLowerCase().includes(searchTerm.toLowerCase()),
+      )
+    }
+
+    // Filter by status
+    if (filterStatus !== "all") {
+      filtered = filtered.filter((booking) => booking.status === filterStatus)
+    }
+
+    return filtered
+  }
+
+  const getStatusCount = (status: string) => {
+    if (status === "active") {
+      return bookings.filter((b) => ["pending", "confirmed", "active"].includes(b.status)).length
+    } else {
+      return bookings.filter((b) => ["completed", "cancelled"].includes(b.status)).length
+    }
+  }
+
+  if (!mounted) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <LoadingSpinner size="lg" className="text-[#FE7743]" />
+      </div>
+    )
+  }
+
+  const filteredBookings = getFilteredBookings()
+
+  if (error && bookings.length === 0) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="bg-white rounded-xl p-8 border border-gray-200 shadow-sm text-center max-w-md">
+          <AlertTriangle className="h-16 w-16 text-red-500 mx-auto mb-4" />
+          <h3 className="text-xl font-semibold text-[#273F4F] mb-2">Unable to Load Bookings</h3>
+          <p className="text-gray-600 mb-6">{error}</p>
+          <Button 
+            onClick={() => fetchBookings()}
+            className="bg-[#FE7743] hover:bg-[#e56a3a] text-white"
+          >
+            Try Again
+          </Button>
+        </div>
+      </div>
+    )
+  }
+
+  return (
+    <div className="min-h-screen bg-gray-50">
+      {/* Header */}
+      <div className="bg-white border-b border-gray-200">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+            <div>
+              <h1 className="text-3xl font-bold text-[#273F4F]">My Bookings</h1>
+              <p className="text-gray-600 mt-1">Manage your childcare bookings and view booking history</p>
+            </div>
+            <Button
+              onClick={() => router.push("/childcare")}
+              className="bg-[#FE7743] hover:bg-[#e56a3a] text-white px-6 py-3 rounded-xl flex items-center gap-2"
+            >
+              <Plus className="h-4 w-4" />
+              New Booking
+            </Button>
+          </div>
+        </div>
+      </div>
+
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* Tabs */}
+        <div className="flex space-x-1 bg-gray-100 p-1 rounded-xl mb-6">
+          <button
+            onClick={() => setActiveTab("active")}
+            className={`flex-1 flex items-center justify-center gap-2 py-3 px-4 rounded-lg font-medium transition-colors ${
+              activeTab === "active" ? "bg-white text-[#FE7743] shadow-sm" : "text-gray-600 hover:text-[#FE7743]"
+            }`}
+          >
+            <Calendar className="h-4 w-4" />
+            Active Bookings
+            <span className="bg-[#FE7743] text-white text-xs px-2 py-1 rounded-full">{getStatusCount("active")}</span>
+          </button>
+          <button
+            onClick={() => setActiveTab("history")}
+            className={`flex-1 flex items-center justify-center gap-2 py-3 px-4 rounded-lg font-medium transition-colors ${
+              activeTab === "history" ? "bg-white text-[#FE7743] shadow-sm" : "text-gray-600 hover:text-[#FE7743]"
+            }`}
+          >
+            <Clock className="h-4 w-4" />
+            Booking History
+            <span className="bg-gray-400 text-white text-xs px-2 py-1 rounded-full">{getStatusCount("history")}</span>
+          </button>
+        </div>
+
+        {/* Search and Filters */}
+        <div className="bg-white rounded-xl p-6 border border-gray-200 shadow-sm mb-6">
+          <div className="flex flex-col sm:flex-row gap-4">
+            <div className="flex-1">
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+                <Input
+                  placeholder="Search by provider, child name, or booking ID..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="pl-10"
+                />
+              </div>
+            </div>
+            <div className="flex gap-2">
+              <select
+                value={filterStatus}
+                onChange={(e) => setFilterStatus(e.target.value)}
+                className="px-4 py-2 border border-gray-300 rounded-lg focus:border-[#FE7743] focus:outline-none focus:ring-1 focus:ring-[#FE7743]"
+              >
+                <option value="all">All Status</option>
+                <option value="pending">Pending</option>
+                <option value="confirmed">Confirmed</option>
+                <option value="active">Active</option>
+                <option value="completed">Completed</option>
+                <option value="cancelled">Cancelled</option>
+              </select>
+              <Button 
+                variant="outline"
+                onClick={() => fetchBookings()}
+                disabled={loading}
+              >
+                <Filter className="h-4 w-4" />
+              </Button>
+            </div>
+          </div>
+        </div>
+
+        {/* Bookings List */}
+        {loading ? (
+          <div className="flex justify-center items-center py-12">
+            <LoadingSpinner size="lg" className="text-[#FE7743]" />
+          </div>
+        ) : filteredBookings.length === 0 ? (
+          <div className="bg-white rounded-xl p-12 border border-gray-200 shadow-sm text-center">
+            <Calendar className="h-16 w-16 text-gray-300 mx-auto mb-4" />
+            <h3 className="text-xl font-semibold text-[#273F4F] mb-2">
+              {activeTab === "active" ? "No Active Bookings" : "No Booking History"}
+            </h3>
+            <p className="text-gray-600 mb-6">
+              {activeTab === "active"
+                ? "You don't have any active bookings at the moment."
+                : "You haven't made any bookings yet."}
+            </p>
+            <Button
+              onClick={() => router.push("/childcare")}
+              className="bg-[#FE7743] hover:bg-[#e56a3a] text-white px-6 py-3 rounded-xl"
+            >
+              Find Childcare Providers
+            </Button>
+          </div>
+        ) : (
+          <div className="space-y-4">
+            {filteredBookings.map((booking) => (
+              <BookingCard
+                key={booking._id}
+                booking={booking}
+                onViewDetails={(id: string) => router.push(`/bookings/${id}`)}
+                onCancel={(id: string) => handleCancelBooking(id)}
+                onRebook={handleRebook}
+                actionLoading={actionLoading}
+              />
+            ))}
+          </div>
+        )}
+
+        {/* Summary Stats */}
+        {!loading && filteredBookings.length > 0 && (
+          <div className="mt-8 bg-white rounded-xl p-6 border border-gray-200 shadow-sm">
+            <h3 className="text-lg font-semibold text-[#273F4F] mb-4">Summary</h3>
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+              <div className="text-center">
+                <div className="text-2xl font-bold text-[#FE7743]">
+                  {bookings.filter((b) => b.status === "confirmed").length}
+                </div>
+                <div className="text-sm text-gray-600">Confirmed</div>
+              </div>
+              <div className="text-center">
+                <div className="text-2xl font-bold text-yellow-500">
+                  {bookings.filter((b) => b.status === "pending").length}
+                </div>
+                <div className="text-sm text-gray-600">Pending</div>
+              </div>
+              <div className="text-center">
+                <div className="text-2xl font-bold text-blue-500">
+                  {bookings.filter((b) => b.status === "completed").length}
+                </div>
+                <div className="text-sm text-gray-600">Completed</div>
+              </div>
+              <div className="text-center">
+                <div className="text-2xl font-bold text-gray-500">{bookings.length}</div>
+                <div className="text-sm text-gray-600">Total</div>
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  )
+}

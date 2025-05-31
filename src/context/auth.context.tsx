@@ -50,8 +50,15 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>(null)
   const [token, setToken] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(true)
+  const [mounted, setMounted] = useState(false)
 
   useEffect(() => {
+    setMounted(true)
+  }, [])
+
+  useEffect(() => {
+    if (!mounted) return
+
     const storedToken = localStorage.getItem('kiddzy_token')
     const storedUser = localStorage.getItem('kiddzy_user')
   
@@ -82,7 +89,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     }
   
     setIsLoading(false)
-  }, [])
+  }, [mounted])
 
   const login = async (email: string, password: string) => {
     try {
