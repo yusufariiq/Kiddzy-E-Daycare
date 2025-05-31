@@ -67,7 +67,7 @@ export default function ProfilePage() {
       const apiData = {
         firstName: userData.firstName,
         lastName: userData.lastName,
-        phoneNumber: userData.phone,
+        phoneNumber: userData.phoneNumber,
         email: userData.email,
       }
 
