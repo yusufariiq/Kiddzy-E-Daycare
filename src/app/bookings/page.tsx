@@ -237,18 +237,19 @@ export default function BookingsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen">
       {/* Header */}
-      <div className="bg-white border-b border-gray-200">
+      <div className="bg-[#FE7743] border-b border-gray-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between text-white gap-4">
             <div>
-              <h1 className="text-3xl font-bold text-[#273F4F]">My Bookings</h1>
-              <p className="text-gray-600 mt-1">Manage your childcare bookings and view booking history</p>
+              <h1 className="text-3xl font-bold ">My Bookings</h1>
+              <p className="mt-1">Manage your childcare bookings and view booking history</p>
             </div>
             <Button
               onClick={() => router.push("/childcare")}
-              className="bg-[#FE7743] hover:bg-[#e56a3a] text-white px-6 py-3 rounded-xl flex items-center gap-2"
+              variant="default"
+              className="bg-white text-[#273F4F] px-6 py-3 rounded-xl flex items-center gap-2 hover:bg-[#273F4F] hover:text-white"
             >
               <Plus className="h-4 w-4" />
               New Booking
@@ -263,7 +264,7 @@ export default function BookingsPage() {
           <button
             onClick={() => setActiveTab("active")}
             className={`flex-1 flex items-center justify-center gap-2 py-3 px-4 rounded-lg font-medium transition-colors ${
-              activeTab === "active" ? "bg-white text-[#FE7743] shadow-sm" : "text-gray-600 hover:text-[#FE7743]"
+              activeTab === "active" ? "bg-white text-[#FE7743] shadow" : "text-gray-600 hover:text-[#FE7743]"
             }`}
           >
             <Calendar className="h-4 w-4" />
@@ -283,8 +284,8 @@ export default function BookingsPage() {
         </div>
 
         {/* Search and Filters */}
-        <div className="bg-white rounded-xl p-6 border border-gray-200 shadow-sm mb-6">
-          <div className="flex flex-col sm:flex-row gap-4">
+        <div className="bg-white rounded-xl py-3 mb-6">
+          <div className="flex flex-col sm:flex-row gap-3">
             <div className="flex-1">
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
@@ -296,7 +297,7 @@ export default function BookingsPage() {
                 />
               </div>
             </div>
-            <div className="flex gap-2">
+            <div className="flex gap-3">
               <select
                 value={filterStatus}
                 onChange={(e) => setFilterStatus(e.target.value)}
@@ -310,9 +311,10 @@ export default function BookingsPage() {
                 <option value="cancelled">Cancelled</option>
               </select>
               <Button 
-                variant="outline"
+                variant="default"
                 onClick={() => fetchBookings()}
                 disabled={loading}
+                className="bg-[#FE7743] rounded-lg h-auto"
               >
                 <Filter className="h-4 w-4" />
               </Button>
@@ -326,7 +328,7 @@ export default function BookingsPage() {
             <LoadingSpinner size="lg" className="text-[#FE7743]" />
           </div>
         ) : filteredBookings.length === 0 ? (
-          <div className="bg-white rounded-xl p-12 border border-gray-200 shadow-sm text-center">
+          <div className="bg-white rounded-xl p-12 border-2 border-gray-200 text-center">
             <Calendar className="h-16 w-16 text-gray-300 mx-auto mb-4" />
             <h3 className="text-xl font-semibold text-[#273F4F] mb-2">
               {activeTab === "active" ? "No Active Bookings" : "No Booking History"}
@@ -359,7 +361,7 @@ export default function BookingsPage() {
         )}
 
         {/* Summary Stats */}
-        {!loading && filteredBookings.length > 0 && (
+        {/* {!loading && filteredBookings.length > 0 && (
           <div className="mt-8 bg-white rounded-xl p-6 border border-gray-200 shadow-sm">
             <h3 className="text-lg font-semibold text-[#273F4F] mb-4">Summary</h3>
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
@@ -387,7 +389,7 @@ export default function BookingsPage() {
               </div>
             </div>
           </div>
-        )}
+        )} */}
       </div>
     </div>
   )
