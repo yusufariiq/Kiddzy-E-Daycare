@@ -15,4 +15,22 @@ export class ChildRepository {
     async findById(id: string): Promise<IChild | null> {
         return await Child.findById(id);
     }
+
+    async findByIds(ids: string[]): Promise<IChild[]> {
+        return await Child.find({ 
+            _id: { $in: ids } 
+        });
+    }
+
+    async findByIdsAndUser(ids: string[], userId: string): Promise<IChild[]> {
+        return await Child.find({ 
+            _id: { $in: ids },
+            userId: userId
+        });
+    }
+
+    async findByUser(userId: string): Promise<IChild[]> {
+        return await Child.find({ userId })
+            .sort({ createdAt: -1 });
+    }
 }

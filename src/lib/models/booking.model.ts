@@ -3,7 +3,7 @@ import mongoose, { Document, Schema } from 'mongoose';
 export interface IBooking extends Document {
     userId: mongoose.Types.ObjectId;
     providerId: mongoose.Types.ObjectId;
-    childId: mongoose.Types.ObjectId;
+    childrenIds: mongoose.Types.ObjectId[];
     startDate: Date;
     endDate: Date;
     status: 'pending' | 'confirmed' | 'active' | 'completed' | 'cancelled';
@@ -30,11 +30,11 @@ const bookingSchema = new Schema<IBooking>(
             ref: 'Provider',
             required: true,
         },
-        childId: {
+        childrenIds: [{
             type: Schema.Types.ObjectId,
             ref: 'Child',
             required: true,
-        },
+        }],
         startDate: {
             type: Date,
             required: true,
@@ -55,7 +55,13 @@ const bookingSchema = new Schema<IBooking>(
         childrenCount: {
             type: Number,
             required: true,
-            min: 1
+            min: 1,
+            validate: {
+                validator: function(this: IBooking) {
+                    return this.childrenCount === this.childrenIds.length;
+                },
+                message: 'childrenCount must match the number of children in childrenIds'
+            }
         },
         paymentMethod: {
             type: String,
@@ -95,9 +101,9 @@ bookingSchema.virtual('provider', {
     justOne: true
 });
 
-bookingSchema.virtual('child', {
+bookingSchema.virtual('children', {
     ref: 'Child',
-    localField: 'childId',
+    localField: 'childrenIds',
     foreignField: '_id',
     justOne: true
 });

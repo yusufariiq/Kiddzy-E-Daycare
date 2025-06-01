@@ -1,10 +1,11 @@
 import { BookingRepository } from '../repositories/booking.repository';
 import { ProviderRepository } from '../repositories/provider.repostiroy';
 import { IBooking } from '../models/booking.model';
+import { ChildRepository } from '../repositories/child.repostiory';
 
 export interface CreateBookingData {
   providerId: string;
-  childId: string;
+  childrenIds: string[];
   startDate: Date;
   endDate: Date;
   childrenCount: number;
@@ -20,13 +21,30 @@ export interface CreateBookingData {
 export class BookingService {
   private bookingRepository: BookingRepository;
   private providerRepository: ProviderRepository;
+  private childRepository: ChildRepository;
   
   constructor() {
     this.bookingRepository = new BookingRepository();
     this.providerRepository = new ProviderRepository();
+    this.childRepository = new ChildRepository();
   }
 
   async createBooking(userId: string, bookingData: CreateBookingData): Promise<IBooking> {
+
+    if (bookingData.childrenCount !== bookingData.childrenIds.length) {
+      throw new Error('Children count must match the number of children provided');
+    }
+
+    if (bookingData.childrenIds.length < 1) {
+      throw new Error('At least one child is required for booking');
+    }
+
+    const children = await this.childRepository.findByIds(bookingData.childrenIds);
+
+    if (children.length !== bookingData.childrenIds.length) {
+      throw new Error('Some children not found');
+    }
+
     // Check if provider exists
     const provider = await this.providerRepository.findById(bookingData.providerId?.toString() || '');
     
@@ -61,7 +79,7 @@ export class BookingService {
     const booking = await this.bookingRepository.create({
       userId,
       providerId: bookingData.providerId,
-      childId: bookingData.childId,
+      childrenIds: bookingData.childrenIds,
       startDate,
       endDate,
       childrenCount: bookingData.childrenCount,
@@ -69,7 +87,7 @@ export class BookingService {
       paymentMethod: bookingData.paymentMethod,
       emergencyContact: bookingData.emergencyContact,
       notes: bookingData.notes,
-      status: 'pending'
+      status: 'confirmed'
     });
 
     return booking;

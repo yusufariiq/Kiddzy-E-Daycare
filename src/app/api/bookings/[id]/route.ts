@@ -28,7 +28,7 @@ export async function GET(req: NextRequest, { params }: { params: { id: string }
           );
       }
 
-      // Get specific booking details
+      // Get specific booking details - now includes multiple children
       const booking = await bookingService.getBookingDetails(bookingId, userId);
       
       if (!booking) {

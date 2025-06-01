@@ -165,13 +165,13 @@ export default function BookingPage() {
 
       const bookingPayload = {
         providerId: id,
-        childId: childrenIds[0], // Primary child ID
+        childrenIds: childrenIds,
         startDate: bookingData.startDate.toISOString(),
         endDate: bookingData.endDate.toISOString(),
-        childrenCount: childrenData.length, // Use actual children count
+        childrenCount: childrenData.length, 
         notes: bookingData.notes,
         paymentMethod: data.paymentMethod,
-        totalAmount: totalAmount // Use calculated total
+        totalAmount: totalAmount
       }
 
       console.log('Booking payload:', bookingPayload) // Debug log
@@ -313,10 +313,10 @@ export default function BookingPage() {
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto flex flex-col md:flex-row">
+      <div className="max-w-7xl mx-auto flex flex-col md:flex-row gap-5 md:gap-0">
         {/* Provider Summary */}
-        <div className="w-1/3 h-fit bg-white border-2 border-gray-200 rounded-xl">
-          <div className="flex flex-col gap-4">
+        <div className="w-full md:w-1/3 h-fit px-4 sm:px-6">
+          <div className="flex flex-col gap-4 border-2 border-gray-200 rounded-xl">
             <div className="relative w-full overflow-hidden">
               <img
                 src={"/image5.webp"}
@@ -326,14 +326,14 @@ export default function BookingPage() {
             </div>
             <div className="px-4 sm:px-6 lg:px-8 pb-4">
               <h3 className="text-xl font-semibold text-[#273F4F]">{provider.name}</h3>
-              <p className="text-lg text-gray-600">{provider.address}</p>
+              <p className="text-base text-gray-600 mb-2">{provider.address}</p>
               <p className="text-lg font-bold text-[#FE7743]">Rp {provider.price.toLocaleString()}/day</p>
             </div>
           </div>
         </div>
 
         {/* Step Content */}
-        <div className="w-2/3 mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="w-full md:w-2/3 mx-auto px-4 sm:px-6">
           {currentStep === 1 && (
             <BookingDetailsStep 
               onSubmit={handleBookingDetailsSubmit} 
