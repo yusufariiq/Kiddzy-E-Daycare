@@ -25,13 +25,19 @@ interface BookingDetailsStepProps {
   onSubmit: (data: BookingData) => void
   initialData?: BookingData | null
   provider: Provider
+  childrenCount: number // Auto-calculated from children added
 }
 
-export default function BookingDetailsStep({ onSubmit, initialData, provider }: BookingDetailsStepProps) {
+export default function BookingDetailsStep({ 
+  onSubmit, 
+  initialData, 
+  provider, 
+  childrenCount 
+}: BookingDetailsStepProps) {
   const [formData, setFormData] = useState<BookingData>({
     startDate: initialData?.startDate || new Date(),
     endDate: initialData?.endDate || new Date(),
-    childrenCount: initialData?.childrenCount || 1,
+    childrenCount: childrenCount, // Always use passed childrenCount
     notes: initialData?.notes || "",
   })
   const [errors, setErrors] = useState<Record<string, string>>({})
@@ -46,7 +52,7 @@ export default function BookingDetailsStep({ onSubmit, initialData, provider }: 
   }
 
   const calculateTotal = () => {
-    return calculateDays() * formData.childrenCount * provider.price
+    return calculateDays() * childrenCount * provider.price // Use childrenCount prop
   }
 
   const validateForm = () => {
@@ -66,9 +72,6 @@ export default function BookingDetailsStep({ onSubmit, initialData, provider }: 
     if (endDate < startDate) {
       newErrors.endDate = "End date must be after start date"
     }
-    if (formData.childrenCount < 1) {
-      newErrors.childrenCount = "At least 1 child is required"
-    }
   
     setErrors(newErrors)
     return Object.keys(newErrors).length === 0
@@ -77,7 +80,11 @@ export default function BookingDetailsStep({ onSubmit, initialData, provider }: 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
     if (validateForm()) {
-      onSubmit(formData)
+      // Always submit with the correct childrenCount
+      onSubmit({
+        ...formData,
+        childrenCount: childrenCount
+      })
     }
   }
 
@@ -91,7 +98,7 @@ export default function BookingDetailsStep({ onSubmit, initialData, provider }: 
       <form onSubmit={handleSubmit} className="space-y-6">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div>
-            <Label htmlFor="startDate">Start Date *</Label>
+            <Label htmlFor="startDate">Start Date <span className="text-red-500">*</span></Label>
             <div className="relative">
               <Input
                 id="startDate"
@@ -105,7 +112,7 @@ export default function BookingDetailsStep({ onSubmit, initialData, provider }: 
           </div>
 
           <div>
-            <Label htmlFor="endDate">End Date *</Label>
+            <Label htmlFor="endDate">End Date <span className="text-red-500">*</span></Label>
             <div className="relative">
               <Input
                 id="endDate"
@@ -119,17 +126,14 @@ export default function BookingDetailsStep({ onSubmit, initialData, provider }: 
           </div>
         </div>
 
-        <div>
-          <Label htmlFor="childrenCount">Number of Children *</Label>
-          <Input
-            id="childrenCount"
-            type="number"
-            min="1"
-            value={formData.childrenCount}
-            onChange={(e) => setFormData({ ...formData, childrenCount: Number.parseInt(e.target.value) || 1 })}
-            className={errors.childrenCount ? "border-red-500" : ""}
-          />
-          {errors.childrenCount && <p className="text-red-500 text-sm mt-1">{errors.childrenCount}</p>}
+        {/* Display children count as read-only info */}
+        <div className="bg-[#273F4F]/5 border border-[#273F4F]/20 rounded-lg p-4">
+          <div className="flex items-center justify-between">
+            <div>
+              <Label className="text-sm font-medium text-[#273F4F]">Number of Children</Label>
+              <p className="text-xl font-bold text-[#273F4F]">{childrenCount}</p>
+            </div>
+          </div>
         </div>
 
         <div>
@@ -155,7 +159,7 @@ export default function BookingDetailsStep({ onSubmit, initialData, provider }: 
             </div>
             <div className="flex justify-between">
               <span>Children:</span>
-              <span>{formData.childrenCount}</span>
+              <span>{childrenCount}</span>
             </div>
             <div className="flex justify-between">
               <span>Rate per child per day:</span>
@@ -172,7 +176,7 @@ export default function BookingDetailsStep({ onSubmit, initialData, provider }: 
 
         <div className="flex justify-end gap-2 pt-6">
           <Button type="submit" className="bg-[#FE7743] hover:bg-[#e56a3a] text-white px-8 py-3 rounded-xl">
-            Continue to Children Form
+            Continue to Emergency Contact
           </Button>
         </div>
       </form>

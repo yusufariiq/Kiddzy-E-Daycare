@@ -15,16 +15,18 @@ import {
 import LoadingSpinner from "@/components/ui/loading-spinner"
 import { useAuth } from "@/context/auth.context"
 
+interface Childrens {
+  _id: string
+  fullname: string
+  nickname: string
+  age: number
+  gender: string
+}
+
 interface BookingDetails {
   _id: string
   status: "pending" | "confirmed" | "active" | "completed" | "cancelled"
-  childId: {
-    _id: string
-    fullname: string
-    nickname: string
-    age: number
-    gender: string
-  }
+  childrenIds: Childrens[]
   providerId: {
     _id: string
     name: string
@@ -283,28 +285,35 @@ export default function BookingDetailsPage() {
 
                     {/* Child Information */}
                     <div>
-                      <h4 className="text-lg font-semibold text-[#273F4F] mb-4">Child Information</h4>
-                      <div className="bg-gray-50 rounded-lg p-4">
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                          <div>
-                            <label className="text-sm font-medium text-gray-600">Full Name</label>
-                            <p className="text-[#273F4F] font-medium mt-1">{booking.childId.fullname}</p>
+                      {booking.childrenIds?.map((child: any) => {
+                        return (
+                          <div className="my-4">
+                            <h4 className="text-lg font-semibold text-[#273F4F] mb-4">Child Information</h4>
+                            <div className="bg-gray-50 rounded-lg p-4">
+                              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                  <label className="text-sm font-medium text-gray-600">Full Name</label>
+                                  <p className="text-[#273F4F] font-medium mt-1">{child.fullname}</p>
+                                </div>
+                                <div>
+                                  <label className="text-sm font-medium text-gray-600">Nickname</label>
+                                  <p className="text-[#273F4F] font-medium mt-1">{child.nickname}</p>
+                                </div>
+                                <div>
+                                  <label className="text-sm font-medium text-gray-600">Age</label>
+                                  <p className="text-[#273F4F] font-medium mt-1">{child.age} years old</p>
+                                </div>
+                                <div>
+                                  <label className="text-sm font-medium text-gray-600">Gender</label>
+                                  <p className="text-[#273F4F] font-medium mt-1 capitalize">{child.gender}</p>
+                                </div>
+                              </div>
+                            </div>
                           </div>
-                          <div>
-                            <label className="text-sm font-medium text-gray-600">Nickname</label>
-                            <p className="text-[#273F4F] font-medium mt-1">{booking.childId.nickname}</p>
-                          </div>
-                          <div>
-                            <label className="text-sm font-medium text-gray-600">Age</label>
-                            <p className="text-[#273F4F] font-medium mt-1">{booking.childId.age} years old</p>
-                          </div>
-                          <div>
-                            <label className="text-sm font-medium text-gray-600">Gender</label>
-                            <p className="text-[#273F4F] font-medium mt-1 capitalize">{booking.childId.gender}</p>
-                          </div>
-                        </div>
-                      </div>
+                        )
+                      })}
                     </div>
+                    
 
                     {/* Notes */}
                     {booking.notes && (
@@ -317,6 +326,21 @@ export default function BookingDetailsPage() {
                           </h5>
                           <p className="text-gray-700">{booking.notes}</p>
                         </div>
+                      </div>
+                    )}
+
+                    {/* Action Buttons */}
+                    {(canModify || canCancel) && (
+                      <div className="flex justify-end gap-3">
+                      {canCancel && (
+                        <Button
+                          onClick={handleCancelBooking}
+                          disabled={actionLoading}
+                          variant="default"
+                        >
+                          Cancel Booking
+                        </Button>
+                      )}
                       </div>
                     )}
                   </div>
@@ -354,42 +378,6 @@ export default function BookingDetailsPage() {
                 )}
               </div>
             </div>
-
-            {/* Action Buttons */}
-            {(canModify || canCancel) && (
-              <div className="bg-white rounded-xl p-6 border border-gray-200">
-                <h4 className="text-lg font-semibold text-[#273F4F] mb-4">Actions</h4>
-                <div className="flex flex-wrap gap-3">
-                  {booking.status === "confirmed" && (
-                    <Button
-                      onClick={() => handleUpdateStatus("active")}
-                      disabled={actionLoading}
-                      className="bg-blue-600 hover:bg-blue-700"
-                    >
-                      Start Booking
-                    </Button>
-                  )}
-                  {booking.status === "active" && (
-                    <Button
-                      onClick={() => handleUpdateStatus("completed")}
-                      disabled={actionLoading}
-                      className="bg-gray-600 hover:bg-gray-700"
-                    >
-                      Complete Booking
-                    </Button>
-                  )}
-                  {canCancel && (
-                    <Button
-                      onClick={handleCancelBooking}
-                      disabled={actionLoading}
-                      variant="default"
-                    >
-                      Cancel Booking
-                    </Button>
-                  )}
-                </div>
-              </div>
-            )}
           </div>
 
           {/* Sidebar */}

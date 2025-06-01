@@ -55,17 +55,17 @@ export default function BookingsPage() {
 
   useEffect(() => {
     setMounted(true)
+
+    if (!isAuthenticated || !token) {
+      router.push("/auth/login")
+      return
+    }
   }, [])
 
   const fetchBookings = async (filter?: string) => {
     try {
       setLoading(true)
       setError(null)
-
-      if (!isAuthenticated || !token) {
-        router.push("/auth/login")
-        return
-      }
       
       const params = new URLSearchParams()
       if (filter && filter !== 'all') {

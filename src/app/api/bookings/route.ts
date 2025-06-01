@@ -55,7 +55,7 @@ export async function POST(req: NextRequest) {
         const data = await req.json();
 
         // Validate required fields
-        const requiredFields = ['providerId', 'childrenIds', 'startDate', 'endDate', 'childrenCount', 'paymentMethod'];
+        const requiredFields = ['providerId', 'childrenIds', 'startDate', 'endDate', 'childrenCount', 'paymentMethod', 'totalAmount'];
         const missingFields = requiredFields.filter(field => !data[field]);
 
         if (missingFields.length > 0) {
@@ -72,8 +72,15 @@ export async function POST(req: NextRequest) {
             );
         }
 
+        if (!Number.isFinite(data.totalAmount) || data.totalAmount <= 0) {
+            return NextResponse.json(
+                { error: 'Total amount must be a positive number' },
+                { status: 400 }
+            );
+        }
+
         // Validate payment method
-        const validPaymentMethods = ['credit_card', 'debit_card', 'bank_transfer', 'cash', 'e_wallet'];
+        const validPaymentMethods = ['debit_card', 'bank_transfer', 'e_wallet'];
 
         if (!validPaymentMethods.includes(data.paymentMethod)) {
             return NextResponse.json(
@@ -117,6 +124,7 @@ export async function POST(req: NextRequest) {
             childrenCount: data.childrenCount,
             paymentMethod: data.paymentMethod,
             emergencyContact: data.emergencyContact,
+            totalAmount: data.totalAmount,
             notes: data.notes
         });
 

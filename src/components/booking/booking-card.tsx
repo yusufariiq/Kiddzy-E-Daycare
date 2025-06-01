@@ -21,7 +21,7 @@ interface Booking {
   _id: string
   bookingId: string
   providerId: Provider
-  childId: Child
+  childrenIds: Child[]
   startDate: string
   endDate: string
   status: "pending" | "confirmed" | "active" | "completed" | "cancelled"
@@ -89,8 +89,8 @@ export default function BookingCard({
   // Safe access to provider and child properties
   const providerName = booking.providerId?.name || 'Unknown Provider'
   const providerAddress = booking.providerId?.address || 'No address provided'
-  const childFullname = booking.childId?.fullname || 'Unknown Child'
-  const childNickname = booking.childId?.nickname || 'Unknown'
+  const childFullnames = booking.childrenIds?.map(child => child.fullname).join(', ') || 'Unknown Children'
+  const childNicknames = booking.childrenIds?.map(child => child.nickname).join(', ') || 'Unknown Children'
 
   return (
     <>
@@ -112,7 +112,7 @@ export default function BookingCard({
                 <div className="flex items-center gap-1 text-gray-600">
                   <User className="h-4 w-4" />
                   <span className="text-sm">
-                    {childFullname} ({childNickname})
+                    {childFullnames}
                   </span>
                 </div>
               </div>
@@ -213,7 +213,7 @@ export default function BookingCard({
             </p>
             <div className="text-sm text-gray-500 mb-6">
               <p><strong>Provider:</strong> {providerName}</p>
-              <p><strong>Child:</strong> {childFullname}</p>
+              <p><strong>Child:</strong> {childFullnames}</p>
               <p><strong>Date:</strong> {formatDate(booking.startDate)} - {formatDate(booking.endDate)}</p>
             </div>
             <div className="flex gap-3 justify-end">

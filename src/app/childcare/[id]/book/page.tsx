@@ -3,12 +3,13 @@
 import { useState, useEffect } from "react"
 import { useParams, useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
-import { ArrowLeft, User, Calendar, CreditCard } from "lucide-react"
+import { ArrowLeft, User, Calendar, CreditCard, Phone } from "lucide-react"
 import LoadingSpinner from "@/components/ui/loading-spinner"
 import BookingConfirmation from "@/components/booking/booking-confirmation"
 import BookingDetailsStep from "@/components/booking/booking-details-step"
 import ChildInfoStep from "@/components/booking/child-info-step"
 import PaymentStep from "@/components/booking/payment-step"
+import EmergencyContactForm from "@/components/booking/emergency-contact-form"
 import { useAuth } from "@/context/auth.context"
 import toast from "react-hot-toast"
 
@@ -32,8 +33,15 @@ interface ChildData {
 interface BookingData {
   startDate: Date
   endDate: Date
-  childrenCount: number
+  childrenCount: number // This will be auto-calculated
   notes?: string
+}
+
+interface EmergencyContact {
+  name: string
+  phone: string
+  relationship: string
+  isAuthorizedForPickup: boolean
 }
 
 interface PaymentData {
@@ -42,9 +50,10 @@ interface PaymentData {
 }
 
 const steps = [
-  { id: 1, name: "Booking Details", icon: Calendar },
-  { id: 2, name: "Child Information", icon: User },
-  { id: 3, name: "Payment", icon: CreditCard },
+  { id: 1, name: "Child Information", icon: User },
+  { id: 2, name: "Booking Details", icon: Calendar },
+  { id: 3, name: "Emergency Contact", icon: Phone },
+  { id: 4, name: "Payment", icon: CreditCard },
 ]
 
 export default function BookingPage() {
@@ -54,6 +63,7 @@ export default function BookingPage() {
   const [childrenData, setChildrenData] = useState<ChildData[]>([])
   const [childrenIds, setChildrenIds] = useState<string[]>([])
   const [bookingData, setBookingData] = useState<BookingData | null>(null)
+  const [emergencyContact, setEmergencyContact] = useState<EmergencyContact | null>(null)
   const [paymentData, setPaymentData] = useState<PaymentData | null>(null)
   const [bookingId, setBookingId] = useState<string | null>(null)
   const [isProcessing, setIsProcessing] = useState(false)
@@ -139,42 +149,40 @@ export default function BookingPage() {
   }
 
   const handleBookingDetailsSubmit = (data: BookingData) => {
-    // Set childrenCount to match actual number of children added
+    // Auto-calculate childrenCount from actual children added
     const updatedData = {
       ...data,
-      childrenCount: childrenData.length
+      childrenCount: childrenData.length // Always use actual children count
     }
     setBookingData(updatedData)
     handleNext()
   }
 
+  const handleEmergencyContactSubmit = (data: EmergencyContact) => {
+    setEmergencyContact(data)
+    handleNext()
+  }
+
   const handlePaymentSubmit = async (data: PaymentData) => {
-    if (!childrenIds.length || !bookingData || !provider) return
+    if (!childrenIds.length || !bookingData || !provider || !emergencyContact) return
     
     setIsProcessing(true)
     setPaymentData(data)
 
     try {
-      // Calculate total amount correctly
-      const calculateDays = () => {
-        const diffTime = Math.abs(bookingData.endDate.getTime() - bookingData.startDate.getTime())
-        return Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1
-      }
-
-      const totalAmount = calculateDays() * childrenData.length * provider.price
-
       const bookingPayload = {
         providerId: id,
         childrenIds: childrenIds,
         startDate: bookingData.startDate.toISOString(),
         endDate: bookingData.endDate.toISOString(),
-        childrenCount: childrenData.length, 
+        childrenCount: childrenData.length, // Use actual children count
         notes: bookingData.notes,
         paymentMethod: data.paymentMethod,
-        totalAmount: totalAmount
+        totalAmount: data.totalAmount,
+        emergencyContact: emergencyContact
       }
 
-      console.log('Booking payload:', bookingPayload) // Debug log
+      console.log('Booking payload:', bookingPayload)
 
       const bookingResponse = await fetch("/api/bookings", {
         method: "POST",
@@ -194,14 +202,7 @@ export default function BookingPage() {
       const createdBookingId = bookingResult.booking._id
 
       setBookingId(createdBookingId)
-      
-      // Update payment data with correct total
-      setPaymentData({
-        ...data,
-        totalAmount: totalAmount
-      })
-      
-      // Show confirmation first
+      setPaymentData(data)
       setShowConfirmation(true)
       
       // Auto redirect after 3 seconds
@@ -303,7 +304,7 @@ export default function BookingPage() {
                 </div>
                 {index < steps.length - 1 && (
                   <div
-                    className={`hidden sm:block w-16 h-0.5 ml-6 
+                    className={`hidden sm:block w-10 h-0.5 mx-3 
                     ${isCompleted ? "bg-[#FE7743]" : "bg-gray-300"}`}
                   />
                 )}
@@ -328,6 +329,20 @@ export default function BookingPage() {
               <h3 className="text-xl font-semibold text-[#273F4F]">{provider.name}</h3>
               <p className="text-base text-gray-600 mb-2">{provider.address}</p>
               <p className="text-lg font-bold text-[#FE7743]">Rp {provider.price.toLocaleString()}/day</p>
+              
+              {/* Show children count when available */}
+              {childrenData.length > 0 && (
+                <div className="mt-3 p-3 bg-[#FFF8F5] rounded-lg border border-[#FE7743]/20">
+                  <p className="text-sm font-medium text-[#273F4F]">
+                    Children: {childrenData.length}
+                  </p>
+                  <div className="text-xs text-gray-600 mt-1">
+                    {childrenData.map((child, index) => (
+                      <div key={index}>{child.nickname} ({child.age}y)</div>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         </div>
@@ -335,20 +350,27 @@ export default function BookingPage() {
         {/* Step Content */}
         <div className="w-full md:w-2/3 mx-auto px-4 sm:px-6">
           {currentStep === 1 && (
-            <BookingDetailsStep 
-              onSubmit={handleBookingDetailsSubmit} 
-              initialData={bookingData} 
-              provider={provider} 
-            />
-          )}
-          {currentStep === 2 && (
             <ChildInfoStep 
               onSubmit={handleChildInfoSubmit} 
               initialData={childrenData} 
               isProcessing={isProcessing}
             />
           )}
+          {currentStep === 2 && (
+            <BookingDetailsStep 
+              onSubmit={handleBookingDetailsSubmit} 
+              initialData={bookingData} 
+              provider={provider}
+              childrenCount={childrenData.length}
+            />
+          )}
           {currentStep === 3 && (
+            <EmergencyContactForm
+              onSubmit={handleEmergencyContactSubmit}
+              initialData={emergencyContact}
+            />
+          )}
+          {currentStep === 4 && (
             <PaymentStep
               onSubmit={handlePaymentSubmit}
               provider={provider}

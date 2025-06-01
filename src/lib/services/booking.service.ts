@@ -15,6 +15,7 @@ export interface CreateBookingData {
     phone: string;
     relationship: string;
   };
+  totalAmount: number;
   notes?: string;
 }
 
@@ -83,7 +84,7 @@ export class BookingService {
       startDate,
       endDate,
       childrenCount: bookingData.childrenCount,
-      totalAmount,
+      totalAmount: totalAmount || bookingData.totalAmount,
       paymentMethod: bookingData.paymentMethod,
       emergencyContact: bookingData.emergencyContact,
       notes: bookingData.notes,
