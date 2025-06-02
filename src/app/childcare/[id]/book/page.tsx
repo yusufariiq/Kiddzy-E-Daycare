@@ -328,7 +328,7 @@ export default function BookingPage() {
             <div className="px-4 sm:px-6 lg:px-8 pb-4">
               <h3 className="text-xl font-semibold text-[#273F4F]">{provider.name}</h3>
               <p className="text-base text-gray-600 mb-2">{provider.address}</p>
-              <p className="text-lg font-bold text-[#FE7743]">Rp {provider.price.toLocaleString()}/day</p>
+              <p className="text-lg font-bold text-[#FE7743]">Rp {provider.price.toLocaleString("id-ID")}/day</p>
               
               {/* Show children count when available */}
               {childrenData.length > 0 && (

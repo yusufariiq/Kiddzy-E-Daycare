@@ -185,7 +185,7 @@ export default function BookingCard({
             </div>
             <div>
               <p className="text-xs text-gray-500">Total Amount</p>
-              <p className="text-lg font-bold text-[#FE7743]">Rp {booking.totalAmount.toLocaleString()}</p>
+              <p className="text-lg font-bold text-[#FE7743]">Rp {booking.totalAmount.toLocaleString("id-ID")}</p>
             </div>
           </div>
 

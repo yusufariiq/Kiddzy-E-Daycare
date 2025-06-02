@@ -158,7 +158,7 @@ export default function ChildcareProviderPage() {
 
               <div className="border-t border-gray-200 my-4 pt-4">
                 <p className="text-sm text-gray-600 mb-1">Start from</p>
-                <div className="text-2xl font-bold text-[#273F4F] mb-4">Rp {provider.price.toLocaleString()}</div>
+                <div className="text-2xl font-bold text-[#273F4F] mb-4">Rp {provider.price.toLocaleString("id-ID")}</div>
 
                 <Button
                   onClick={() => router.push(`/childcare/${id}/book`)}

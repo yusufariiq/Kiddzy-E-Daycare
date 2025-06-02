@@ -110,7 +110,7 @@ export default function BookingConfirmation({
               </div>
               <div>
                 <p className="font-medium">Payment</p>
-                <p className="text-gray-600">Rp {paymentData.totalAmount.toLocaleString()}</p>
+                <p className="text-gray-600">Rp {paymentData.totalAmount.toLocaleString("id-ID")}</p>
                 <p className="text-sm text-gray-500">Paid via {paymentData.paymentMethod.replace("_", " ")}</p>
               </div>
             </div>

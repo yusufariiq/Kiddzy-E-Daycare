@@ -163,12 +163,12 @@ export default function BookingDetailsStep({
             </div>
             <div className="flex justify-between">
               <span>Rate per child per day:</span>
-              <span>Rp {provider.price.toLocaleString()}</span>
+              <span>Rp {provider.price.toLocaleString("id-ID")}</span>
             </div>
             <div className="border-t border-[#FE7743]/20 pt-2 mt-2">
               <div className="flex justify-between font-semibold text-lg">
                 <span>Total Amount:</span>
-                <span className="text-[#FE7743]">Rp {calculateTotal().toLocaleString()}</span>
+                <span className="text-[#FE7743]">Rp {calculateTotal().toLocaleString("id-ID")}</span>
               </div>
             </div>
           </div>

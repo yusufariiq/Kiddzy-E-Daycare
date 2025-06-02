@@ -7,7 +7,7 @@ export interface ChildcareCardProps {
   image: string
   name: string
   location: string
-  price: string
+  price: number
   availability?: string
   className?: string
 }
@@ -67,7 +67,7 @@ export default function ChildcareCard({
           <div className="border-t-2 pt-2 border-gray-200">
             <p className="text-sm">Start from </p> 
             <div className="text-lg font-bold text-[#273F4F]">
-              Rp {price}
+              Rp {Number(price).toLocaleString("id-ID")}
             </div>
           </div>
         )}
