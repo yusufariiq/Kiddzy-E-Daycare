@@ -96,7 +96,7 @@ export default function ChildcarePage() {
                       image={provider.images[0] || "/placeholder.svg"}
                       name={provider.name}
                       location={provider.address}
-                      price={provider.price.toString()}
+                      price={provider.price}
                       availability={hoursDisplay}
                     />
                   )
