@@ -1,6 +1,6 @@
 "use client"
 
-import { createContext, useContext, useEffect, useState, ReactNode } from 'react'
+import { createContext, useContext, useEffect, useState, ReactNode, useCallback } from 'react'
 import toast from 'react-hot-toast'
 import { User } from '@/lib/types/user' 
 import { jwtDecode } from "jwt-decode"
@@ -15,7 +15,6 @@ interface DecodedToken {
 interface AuthContextType {
   user: User | null
   token: string | null
-  isLoading: boolean
   login: (email: string, password: string) => Promise<void>
   register: (userData: RegisterData) => Promise<void>
   logout: () => void
@@ -33,9 +32,13 @@ interface RegisterData {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined)
 
-// Custom event to notify navbar of user changes
+const TOKEN_KEY = 'kiddzy_token'
+const USER_KEY = 'kiddzy_user'
+
 const dispatchUserUpdate = () => {
-  window.dispatchEvent(new CustomEvent('userUpdated'))
+  if (typeof window !== 'undefined') {
+    window.dispatchEvent(new CustomEvent('userUpdated'))
+  }
 }
 
 export const useAuth = () => {
@@ -49,47 +52,120 @@ export const useAuth = () => {
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>(null)
   const [token, setToken] = useState<string | null>(null)
-  const [isLoading, setIsLoading] = useState(true)
-  const [mounted, setMounted] = useState(false)
+  const [isHydrated, setIsHydrated] = useState(false)
+
+  const secureLogout = useCallback((showToast: boolean = true) => {
+    setUser(null)
+    setToken(null)
+    
+    if (typeof window !== 'undefined') {
+      try {
+        localStorage.removeItem(TOKEN_KEY)
+        localStorage.removeItem(USER_KEY)
+      } catch (error) {
+        console.error('Error clearing localStorage:', error)
+      }
+    }
+    
+    dispatchUserUpdate()
+    
+    if (showToast) {
+      toast.success('Logged out successfully')
+    }
+  }, [])
+
+  const setAuthenticationState = useCallback((tokenValue: string, userData: User) => {
+    setToken(tokenValue)
+    setUser(userData)
+    dispatchUserUpdate()
+  }, [])
+
+  const isTokenValid = useCallback((tokenValue: string): boolean => {
+    try {
+      const decoded = jwtDecode<DecodedToken>(tokenValue)
+      const now = Math.floor(Date.now() / 1000)
+      const bufferTime = 60
+      
+      return decoded.exp > (now + bufferTime)
+    } catch (error) {
+      return false
+    }
+  }, [])
+
+  // Synchronous initialization - no loading state
+  const initializeAuth = useCallback(() => {
+    if (!isHydrated) return
+
+    try {
+      const storedToken = localStorage.getItem(TOKEN_KEY)
+      const storedUser = localStorage.getItem(USER_KEY)
+
+      if (!storedToken || !storedUser) {
+        return
+      }
+
+      if (!isTokenValid(storedToken)) {
+        secureLogout(false)
+        toast.error("Session expired. Please log in again.")
+        return
+      }
+
+      let parsedUser: User
+      try {
+        parsedUser = JSON.parse(storedUser)
+      } catch (parseError) {
+        secureLogout(false)
+        toast.error("Invalid session data. Please log in again.")
+        return
+      }
+
+      setAuthenticationState(storedToken, parsedUser)
+
+      // Set up automatic logout timer
+      const decoded = jwtDecode<DecodedToken>(storedToken)
+      const now = Math.floor(Date.now() / 1000)
+      const timeUntilExpiry = (decoded.exp - now - 60) * 1000
+
+      if (timeUntilExpiry > 0) {
+        const timer = setTimeout(() => {
+          secureLogout()
+          toast.error("Session expired. Please log in again.")
+        }, timeUntilExpiry)
+
+        return () => clearTimeout(timer)
+      }
+
+    } catch (error) {
+      secureLogout(false)
+      toast.error("Authentication error. Please log in again.")
+    }
+  }, [isHydrated, isTokenValid, setAuthenticationState, secureLogout])
 
   useEffect(() => {
-    setMounted(true)
+    setIsHydrated(true)
   }, [])
 
   useEffect(() => {
-    if (!mounted) return
+    if (!isHydrated) return
+    
+    const cleanup = initializeAuth()
+    return cleanup
+  }, [isHydrated, initializeAuth])
 
-    const storedToken = localStorage.getItem('kiddzy_token')
-    const storedUser = localStorage.getItem('kiddzy_user')
-  
-    if (storedToken && storedUser) {
-      try {
-        const decoded = jwtDecode<DecodedToken>(storedToken)
-        const now = Date.now() / 1000
-  
-        if (decoded.exp < now) {
-          logout()
-          toast.error("Session expired. Please log in again.")
-        } else {
-          setToken(storedToken)
-          setUser(JSON.parse(storedUser))
-  
-          const timeout = (decoded.exp - now) * 1000
-          const timer = setTimeout(() => {
-            logout()
-            toast.error("Session expired. Please log in again.")
-          }, timeout)
-  
-          return () => clearTimeout(timer)
+  const secureStorage = {
+    set: (key: string, value: string) => {
+      if (typeof window !== 'undefined') {
+        try {
+          localStorage.setItem(key, value)
+          return true
+        } catch (error) {
+          console.error(`Failed to store ${key}:`, error)
+          return false
         }
-      } catch (error) {
-        logout()
-        toast.error("Invalid session. Please log in again.")
       }
+      return false
     }
-  
-    setIsLoading(false)
-  }, [mounted])
+  }
 
   const login = async (email: string, password: string) => {
     try {
@@ -107,17 +183,20 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         throw new Error(data.message || 'Login failed')
       }
 
-      setUser(data.user)
-      setToken(data.token)
-      
-      // Store in localStorage
-      localStorage.setItem('kiddzy_token', data.token)
-      
-      // Notify navbar of user update
-      dispatchUserUpdate()
-      
-      // Show success toast
+      if (!isTokenValid(data.token)) {
+        throw new Error('Received invalid token from server')
+      }
+
+      const tokenStored = secureStorage.set(TOKEN_KEY, data.token)
+      const userStored = secureStorage.set(USER_KEY, JSON.stringify(data.user))
+
+      if (!tokenStored || !userStored) {
+        throw new Error('Failed to store authentication data')
+      }
+
+      setAuthenticationState(data.token, data.user)
       toast.success(`Welcome back, ${data.user.firstName}!`)
+      
     } catch (error: any) {
       toast.error(error.message || 'Login failed. Please try again.')
       throw error
@@ -146,17 +225,20 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         throw new Error(data.message || 'Registration failed')
       }
 
-      setUser(data.user)
-      setToken(data.token)
-      
-      // Store in localStorage
-      localStorage.setItem('kiddzy_token', data.token)
-      
-      // Notify navbar of user update
-      dispatchUserUpdate()
-      
-      // Show success toast
+      if (!isTokenValid(data.token)) {
+        throw new Error('Received invalid token from server')
+      }
+
+      const tokenStored = secureStorage.set(TOKEN_KEY, data.token)
+      const userStored = secureStorage.set(USER_KEY, JSON.stringify(data.user))
+
+      if (!tokenStored || !userStored) {
+        throw new Error('Failed to store authentication data')
+      }
+
+      setAuthenticationState(data.token, data.user)
       toast.success(`Welcome to Kiddzy, ${data.user.firstName}!`)
+      
     } catch (error: any) {
       toast.error(error.message || 'Registration failed. Please try again.')
       throw error
@@ -167,9 +249,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     if (!user || !token) {
       throw new Error('User not authenticated')
     }
-  
+
     try {
-      // Use the correct endpoint that matches your API structure
       const response = await fetch(`/api/user/${user._id}`, {
         method: 'PUT',
         headers: {
@@ -184,56 +265,46 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           address: userData.address,
         }),
       })
-  
+
       const data = await response.json()
-  
+
       if (!response.ok) {
+        if (response.status === 401) {
+          secureLogout()
+          toast.error("Session expired. Please log in again.")
+          throw new Error('Session expired')
+        }
         throw new Error(data.message || 'Failed to update profile')
       }
-  
-      // Map API response back to User type
+
       const updatedUser = {
         ...user,
         ...data.data,
         phone: data.data.phoneNumber,
         address: data.data.address,
       }
-      
+
+      secureStorage.set(USER_KEY, JSON.stringify(updatedUser))
       setUser(updatedUser)
-      
-      // Update localStorage
-      localStorage.setItem('kiddzy_user', JSON.stringify(updatedUser))
-      
-      // Notify components of user update
       dispatchUserUpdate()
-      
-      // Show success toast
+
       toast.success('Profile updated successfully!')
-      
       return updatedUser
     } catch (error: any) {
-      toast.error(error.message || 'Failed to update profile. Please try again.')
+      if (error.message !== 'Session expired') {
+        toast.error(error.message || 'Failed to update profile. Please try again.')
+      }
       throw error
     }
   }
 
   const logout = () => {
-    setUser(null)
-    setToken(null)
-    localStorage.removeItem('kiddzy_token')
-    localStorage.removeItem('kiddzy_user')
-    
-    // Notify navbar of user update
-    dispatchUserUpdate()
-    
-    // Show success toast
-    toast.success('Logged out successfully')
+    secureLogout(true)
   }
 
   const value: AuthContextType = {
     user,
     token,
-    isLoading,
     login,
     register,
     logout,

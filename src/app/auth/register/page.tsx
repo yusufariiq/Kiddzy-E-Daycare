@@ -99,7 +99,7 @@ export default function RegisterPage() {
   }
 
   return (
-    <div className="min-h-[90vh] flex flex-1 items-center justify-center bg-[#EFEEEA]">
+    <div className="min-h-screen flex flex-1 items-center justify-center bg-[#EFEEEA]">
         <div className="w-full max-w-2xl px-4">
             <div className="rounded-lg bg-white p-8 border-2 border-gray-200">
                 <div className="mb-6 text-center">
