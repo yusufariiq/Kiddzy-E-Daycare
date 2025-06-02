@@ -49,28 +49,6 @@ export default function ProfileSidebar({ user, activeSection, setActiveSection }
                     <User2 className="mr-2 h-5 w-5 text-[#FE7743]" />
                     Personal Information
                 </button>
-                <button
-                    onClick={() => setActiveSection("preferences")}
-                    className={`flex items-center rounded-md px-3 py-2 text-left ${
-                    activeSection === "preferences"
-                        ? "bg-[#FE7743]/10 font-medium text-[#273F4F]"
-                        : "text-[#273F4F] hover:bg-gray-100"
-                    }`}
-                >
-                    <Bell className="mr-2 h-5 w-5 text-[#FE7743]" />
-                    Preferences
-                </button>
-                <button
-                    onClick={() => setActiveSection("payment")}
-                    className={`flex items-center rounded-md px-3 py-2 text-left ${
-                    activeSection === "payment"
-                        ? "bg-[#FE7743]/10 font-medium text-[#273F4F]"
-                        : "text-[#273F4F] hover:bg-gray-100"
-                    }`}
-                >
-                    <CreditCard className="mr-2 h-5 w-5 text-[#FE7743]" />
-                    Payment Methods
-                </button>
             </nav>
         </div>
 

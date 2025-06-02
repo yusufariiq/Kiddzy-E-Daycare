@@ -86,7 +86,6 @@ export default function ProfilePage() {
         throw new Error(data.message || 'Failed to update profile')
       }
 
-      // Map API response back to User type
       const updatedUser = {
         ...data.data,
         phone: data.data.phoneNumber || data.data.phone,
@@ -128,89 +127,64 @@ export default function ProfilePage() {
   }
 
   return (
-    <div className="min-h-[90vh] flex justify-center items-center py-16">
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div className="text-white mt-10 mb-5 mx-auto max-w-lg sm:max-w-2xl md:max-w-4xl lg:max-w-7xl px-4 text-center sm:px-6 lg:px-8 py-16 bg-[#FE7743] rounded-2xl">
-            <h1 className="text-3xl font-bold md:text-5xl">Profile Settings</h1>
-            <p className="mx-auto mt-4 max-w-2xl text-base md:text-lg">
-              Manage your account information and preferences
-            </p>
-        </div>
-        {/* Mobile View (visible on small screens) */}
-        <div className="md:hidden">
-          <div className="mb-6 flex overflow-x-auto">
-            <button
-              onClick={() => setActiveSection("personal-info")}
-              className={`mr-4 whitespace-nowrap rounded-md px-4 py-2 text-sm font-medium ${
-                activeSection === "personal-info"
-                  ? "bg-[#FE7743]/10 text-[#FE7743]"
-                  : "bg-white text-[#273F4F] hover:bg-gray-100"
-              }`}
-            >
-              Personal Information
-            </button>
-            <button
-              onClick={() => setActiveSection("preferences")}
-              className={`mr-4 whitespace-nowrap rounded-md px-4 py-2 text-sm font-medium ${
-                activeSection === "preferences"
-                  ? "bg-[#FE7743]/10 text-[#FE7743]"
-                  : "bg-white text-[#273F4F] hover:bg-gray-100"
-              }`}
-            >
-              Preferences
-            </button>
-            <button
-              onClick={() => setActiveSection("payment")}
-              className={`whitespace-nowrap rounded-md px-4 py-2 text-sm font-medium ${
-                activeSection === "payment"
-                  ? "bg-[#FE7743]/10 text-[#FE7743]"
-                  : "bg-white text-[#273F4F] hover:bg-gray-100"
-              }`}
-            >
-              Payment Methods
-            </button>
+    <div className="min-h-[90vh]">
+      <div className="w-full bg-[#FE7743] border-b border-gray-200">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between text-white gap-4">
+            <div>
+              <h1 className="text-3xl font-bold ">Profile Settings</h1>
+              <p className="mt-1">              Manage your account information and preferences
+              </p>
+            </div>
           </div>
-
-          {activeSection === "personal-info" && (
-            <div className="rounded-lg bg-white p-6 shadow-md">
-              <ProfileInformation user={user} updateUser={updateUserData} />
-            </div>
-          )}
-
-          {activeSection === "preferences" && (
-            <div className="rounded-lg bg-white p-6 shadow-md">
-              <h3 className="text-xl font-bold text-[#273F4F]">Preferences</h3>
-              <p className="mt-1 text-gray-600">Manage your preferences and settings</p>
-              <p className="mt-4 text-gray-500">Preference settings coming soon.</p>
-            </div>
-          )}
-
-          {activeSection === "payment" && (
-            <div className="rounded-lg bg-white p-6 shadow-md">
-              <h3 className="text-xl font-bold text-[#273F4F]">Payment Methods</h3>
-              <p className="mt-1 text-gray-600">Manage your payment methods</p>
-              <p className="mt-4 text-gray-500">Payment methods coming soon.</p>
-            </div>
-          )}
         </div>
+      </div>
 
-        {/* Desktop Layout (visible on medium and larger screens) */}
-        <div className="hidden md:grid md:grid-cols-4 md:gap-8">
-          {/* Sidebar */}
-          <div className="md:col-span-1">
-            <ProfileSidebar user={user} activeSection={activeSection} setActiveSection={setActiveSection} />
-          </div>
+      <div className="flex flex-col justify-center items-center py-16">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          {/* Mobile View (visible on small screens) */}
+          <div className="md:hidden">
+            <div className="mb-6 flex overflow-x-auto">
+              <button
+                onClick={() => setActiveSection("personal-info")}
+                className={`mr-4 whitespace-nowrap rounded-md px-4 py-2 text-sm font-medium ${
+                  activeSection === "personal-info"
+                    ? "bg-[#FE7743]/10 text-[#FE7743]"
+                    : "bg-white text-[#273F4F] hover:bg-gray-100"
+                }`}
+              >
+                Personal Information
+              </button>
+              <button
+                onClick={() => setActiveSection("preferences")}
+                className={`mr-4 whitespace-nowrap rounded-md px-4 py-2 text-sm font-medium ${
+                  activeSection === "preferences"
+                    ? "bg-[#FE7743]/10 text-[#FE7743]"
+                    : "bg-white text-[#273F4F] hover:bg-gray-100"
+                }`}
+              >
+                Preferences
+              </button>
+              <button
+                onClick={() => setActiveSection("payment")}
+                className={`whitespace-nowrap rounded-md px-4 py-2 text-sm font-medium ${
+                  activeSection === "payment"
+                    ? "bg-[#FE7743]/10 text-[#FE7743]"
+                    : "bg-white text-[#273F4F] hover:bg-gray-100"
+                }`}
+              >
+                Payment Methods
+              </button>
+            </div>
 
-          {/* Main content */}
-          <div className="h-full md:col-span-3">
             {activeSection === "personal-info" && (
-              <div className="rounded-lg bg-white p-6" id="personal-info">
+              <div className="rounded-lg bg-white p-6 shadow-md">
                 <ProfileInformation user={user} updateUser={updateUserData} />
               </div>
             )}
 
             {activeSection === "preferences" && (
-              <div className="rounded-lg bg-white p-6 shadow-md" id="preferences">
+              <div className="rounded-lg bg-white p-6 shadow-md">
                 <h3 className="text-xl font-bold text-[#273F4F]">Preferences</h3>
                 <p className="mt-1 text-gray-600">Manage your preferences and settings</p>
                 <p className="mt-4 text-gray-500">Preference settings coming soon.</p>
@@ -218,12 +192,29 @@ export default function ProfilePage() {
             )}
 
             {activeSection === "payment" && (
-              <div className="rounded-lg bg-white p-6 shadow-md" id="payment">
+              <div className="rounded-lg bg-white p-6 shadow-md">
                 <h3 className="text-xl font-bold text-[#273F4F]">Payment Methods</h3>
                 <p className="mt-1 text-gray-600">Manage your payment methods</p>
                 <p className="mt-4 text-gray-500">Payment methods coming soon.</p>
               </div>
             )}
+          </div>
+
+          {/* Desktop Layout (visible on medium and larger screens) */}
+          <div className="hidden md:grid md:grid-cols-4 md:gap-8">
+            {/* Sidebar */}
+            <div className="md:col-span-1">
+              <ProfileSidebar user={user} activeSection={activeSection} setActiveSection={setActiveSection} />
+            </div>
+
+            {/* Main content */}
+            <div className="h-full w-full md:col-span-3">
+              {activeSection === "personal-info" && (
+                <div className="rounded-lg bg-white p-6" id="personal-info">
+                  <ProfileInformation user={user} updateUser={updateUserData} />
+                </div>
+              )}
+            </div>
           </div>
         </div>
       </div>
