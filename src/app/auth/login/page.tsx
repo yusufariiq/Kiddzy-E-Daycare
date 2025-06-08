@@ -20,16 +20,29 @@ type LoginFormData = yup.InferType<typeof loginSchema>
 
 export default function LoginPage() {
   const router = useRouter()
-  const { login, isAuthenticated, isLoading: authLoading } = useAuth()
+  const { login, isAuthenticated, isLoading: authLoading, user } = useAuth()
   const [isLoading, setIsLoading] = useState(false)
   const [showPassword, setShowPassword] = useState(false)
   const [loginError, setLoginError] = useState<string | null>(null)
 
-  useEffect(() => {
-    if (!authLoading && isAuthenticated) {
-      router.replace("/")
+  // Role-based redirect function
+  const redirectBasedOnRole = (userRole: string) => {
+    switch (userRole) {
+      case 'admin':
+        router.replace("/admin")
+        break
+      case 'user':
+      default:
+        router.replace("/")
+        break
     }
-  }, [isAuthenticated, authLoading, router])
+  }
+
+  useEffect(() => {
+    if (!authLoading && isAuthenticated && user) {
+      redirectBasedOnRole(user.role)
+    }
+  }, [isAuthenticated, authLoading, user, router])
 
   const {
     register,
@@ -45,7 +58,7 @@ export default function LoginPage() {
 
     try {
       await login(data.email, data.password)
-      router.push("/")
+      // Role-based redirect will be handled by useEffect after login
     } catch (error: any) {
       setLoginError(error.message || "Login failed. Please try again.")
     } finally {

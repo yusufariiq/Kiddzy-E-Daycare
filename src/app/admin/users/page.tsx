@@ -1,0 +1,13 @@
+export default function AdminUsers() {
+    return (
+      <div className="space-y-6">
+        <div>
+          <h1 className="text-3xl font-bold text-[#273F4F]">Users</h1>
+          <p className="text-gray-600 mt-1">Manage user accounts and permissions</p>
+        </div>
+        <div className="bg-white rounded-xl p-8 border border-gray-200 shadow-sm text-center">
+          <p className="text-gray-500">Users management interface will be implemented here</p>
+        </div>
+      </div>
+    )
+}  
