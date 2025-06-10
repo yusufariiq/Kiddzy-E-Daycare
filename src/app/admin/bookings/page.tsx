@@ -4,11 +4,12 @@ import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Search, Eye, Calendar, AlertCircle } from "lucide-react"
+import { Search, Eye, Calendar, AlertCircle, Filter } from "lucide-react"
 import LoadingSpinner from "@/components/ui/loading-spinner"
 import BookingModal from "@/components/common/booking-modal"
 import { useAuth } from "@/context/auth.context"
 import toast from "react-hot-toast"
+import { Select } from "@/components/ui/select"
 
 interface Booking {
   _id: string
@@ -191,6 +192,15 @@ export default function AdminBookings() {
     return matchesSearch && matchesStatus
   })
 
+  const filterOptions = [
+    { value: "all", label: "All Status" },
+    { value: "pending", label: "Pending" },
+    { value: "confirmed", label: "Confirmed" },
+    { value: "active", label: "Active" },
+    { value: "completed", label: "Completed" },
+    { value: "cancelled", label: "Cancelled" },
+  ]
+
   const getStatusColor = (status: string) => {
     switch (status) {
       case "confirmed":
@@ -247,33 +257,29 @@ export default function AdminBookings() {
 
       {/* Filters */}
       <Card>
-        <CardContent className="p-4">
-          <div className="flex flex-col sm:flex-row gap-4">
-            <div className="flex-1">
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
-                <Input
-                  placeholder="Search by child name, parent, provider, or booking ID..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-10"
-                />
-              </div>
+        <div className="flex flex-col sm:flex-row gap-4">
+          <div className="flex-1">
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[#FE7743]" />
+              <Input
+                placeholder="Search by child name, parent, provider, or booking ID..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="pl-10"
+              />
             </div>
-            <select
+          </div>
+          <div>
+            <Select
+              id="ageGroup"
+              options={filterOptions}
+              placeholder="All Status"
               value={filterStatus}
               onChange={(e) => setFilterStatus(e.target.value)}
-              className="px-3 py-2 border border-gray-300 rounded-md focus:border-[#FE7743] focus:outline-none"
-            >
-              <option value="all">All Status</option>
-              <option value="pending">Pending</option>
-              <option value="confirmed">Confirmed</option>
-              <option value="active">Active</option>
-              <option value="completed">Completed</option>
-              <option value="cancelled">Cancelled</option>
-            </select>
+              className="py-3 px-5 border-gray-300 rounded-md focus:border-[#FE7743] focus:outline-none"
+            />
           </div>
-        </CardContent>
+        </div>
       </Card>
 
       {/* Bookings Table */}
