@@ -18,6 +18,7 @@ import {
   ChevronRight,
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
+import ProtectedRoute from "@/components/common/ProtectedRoute"
 
 interface AdminLayoutProps {
   children: React.ReactNode
@@ -130,17 +131,18 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
                 {/* Main content */}
                 <div className={`transition-all duration-300 ${sidebarCollapsed ? "lg:ml-16" : "lg:ml-64"}`}>
                     {/* Top bar */}
-                    <header className="bg-white border-b border-gray-200 h-16 flex items-center justify-between px-4 lg:px-6">
-                    <Button variant="ghost" onClick={() => setSidebarOpen(true)} className="lg:hidden">
-                        <Menu className="h-5 w-5" />
-                    </Button>
-                    <div className="flex items-center gap-4">
-                        <div className="text-sm text-gray-600">Welcome to Kiddzy Admin Dashboard</div>
-                    </div>
+                    <header className="bg-white flex items-center justify-end py-2 px-4 lg:px-6">
+                      <Button variant="ghost" onClick={() => setSidebarOpen(true)} className="lg:hidden">
+                          <Menu className="h-5 w-5" />
+                      </Button>
                     </header>
 
                     {/* Page content */}
-                    <main className="p-4 lg:p-6">{children}</main>
+                    <main className="p-4 lg:p-6">
+                      <ProtectedRoute requiredRole="admin">
+                        {children}
+                      </ProtectedRoute>
+                    </main>
                 </div>
             </div>
         </body>
