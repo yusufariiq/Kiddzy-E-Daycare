@@ -135,6 +135,10 @@ export class BookingService {
     return booking;
   }
 
+  async getBookingDetailsForAdmin(bookingId: string): Promise<IBooking | null> {
+    return await this.bookingRepository.findById(bookingId);
+  }
+
   async updateBookingStatus(
     bookingId: string, 
     status: 'pending' | 'confirmed' | 'active' | 'completed' | 'cancelled',
@@ -186,7 +190,28 @@ export class BookingService {
     return await this.bookingRepository.updateStatus(bookingId, 'cancelled');
   }
 
-  async getAllBookings(adminId: string): Promise<IBooking[]> {
+  async adminCancelBooking(bookingId: string, reason?: string): Promise<IBooking | null> {
+    const booking = await this.bookingRepository.findById(bookingId);
+    
+    if (!booking) {
+      throw new Error('Booking not found');
+    }
+    
+    if (booking.status === 'completed' || booking.status === 'cancelled') {
+      throw new Error('Cannot cancel a completed or already cancelled booking');
+    }
+    
+    // Add admin cancellation reason to notes
+    const updatedNotes = reason 
+      ? `${booking.notes || ''}\nAdmin cancellation reason: ${reason}`.trim()
+      : booking.notes;
+    
+    await this.bookingRepository.updateNotes(bookingId, updatedNotes);
+    
+    return await this.bookingRepository.updateStatus(bookingId, 'cancelled');
+  }
+
+  async getAllBookings(): Promise<IBooking[]> {
     return await this.bookingRepository.findAll();
   }
 

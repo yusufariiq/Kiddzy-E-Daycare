@@ -42,15 +42,8 @@ const providerSchema = new Schema<IProvider>(
             required: true
         },
         location: {
-            type: {
-                type: String,
-                enum: ['Point'],
-                default: 'Point',
-            },
-            coordinates: {
-                type: [Number],
-                required: true,
-            },
+            type: String,
+            required: true
         },
         whatsapp: {
             type: String,
