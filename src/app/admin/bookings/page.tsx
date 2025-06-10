@@ -1,13 +1,391 @@
+"use client"
+
+import { useState, useEffect } from "react"
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Search, Eye, Calendar, AlertCircle } from "lucide-react"
+import LoadingSpinner from "@/components/ui/loading-spinner"
+import BookingModal from "@/components/common/booking-modal"
+import { useAuth } from "@/context/auth.context"
+import toast from "react-hot-toast"
+
+interface Booking {
+  _id: string
+  bookingId: string
+  childName: string
+  providerName: string
+  providerAddress?: string
+  startDate: string
+  endDate: string
+  status: "pending" | "confirmed" | "active" | "completed" | "cancelled"
+  totalAmount: number
+  paymentMethod?: string
+  createdAt: string
+  notes?: string
+  children?: any[]
+  childrenCount?: number
+  emergencyContact?: {
+    name: string
+    phone: string
+    relationship: string
+  }
+  userId?: {
+    firstName: string
+    lastName?: string
+  }
+  providerId?: {
+    name: string
+    address?: string
+  }
+}
+
 export default function AdminBookings() {
-    return (
-        <div className="space-y-6">
-            <div>
-                <h1 className="text-3xl font-bold text-[#273F4F]">Bookings</h1>
-                <p className="text-gray-600 mt-1">Manage all childcare bookings</p>
-            </div>
-                <div className="bg-white rounded-xl p-8 border border-gray-200 shadow-sm text-center">
-                <p className="text-gray-500">Bookings management interface will be implemented here</p>
-            </div>
+  const [bookings, setBookings] = useState<Booking[]>([])
+  const [loading, setLoading] = useState(true)
+  const [searchTerm, setSearchTerm] = useState("")
+  const [filterStatus, setFilterStatus] = useState<string>("all")
+  const [selectedBooking, setSelectedBooking] = useState<Booking | null>(null)
+  const [isModalOpen, setIsModalOpen] = useState(false)
+  const [isUpdating, setIsUpdating] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+  const { token } = useAuth()
+
+  useEffect(() => {
+    fetchBookings()
+  }, [])
+
+  const fetchBookings = async () => {
+    try {
+      setLoading(true)
+      const response = await fetch('/api/admin/booking', {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        },
+      })
+      const data = await response.json()
+      
+      if (response.ok) {
+        setBookings(data.bookings || [])
+        setError(null)
+      } else {
+        setError(data.error || 'Failed to fetch bookings')
+      }
+    } catch (err) {
+      setError('Failed to fetch bookings')
+      console.error('Error fetching bookings:', err)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const fetchBookingDetails = async (bookingId: string) => {
+    try {
+      const response = await fetch(`/api/admin/booking/${bookingId}`, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        },
+      })
+      const data = await response.json()
+      
+      if (response.ok) {
+        setSelectedBooking(data.booking)
+        setIsModalOpen(true)
+      } else {
+        setError(data.error || 'Failed to fetch booking details')
+      }
+    } catch (err) {
+      setError('Failed to fetch booking details')
+      console.error('Error fetching booking details:', err)
+    }
+  }
+
+  const handleStatusUpdate = async (bookingId: string, status: string) => {
+    try {
+      setIsUpdating(true)
+      const response = await fetch(`/api/admin/booking/${bookingId}`, {
+        method: 'PUT',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ status })
+      })
+      
+      const data = await response.json()
+      
+      if (response.ok) {
+        // Update the booking in the list
+        setBookings(prev => prev.map(booking => 
+          booking._id === bookingId ? { ...booking, status: status as any } : booking
+        ))
+        
+        // Update the selected booking if it's the same one
+        if (selectedBooking && selectedBooking._id === bookingId) {
+          setSelectedBooking({ ...selectedBooking, status: status as any })
+        }
+        toast.success(`Booking status updated to ${selectedBooking?.status}`);
+        setError(null)
+      } else {
+        setError(data.error || 'Failed to update booking status')
+      }
+    } catch (err) {
+      setError('Failed to update booking status')
+      console.error('Error updating booking:', err)
+    } finally {
+      setIsUpdating(false)
+      setIsModalOpen(false)
+    }
+  }
+
+  const handleCancelBooking = async (bookingId: string, reason: string) => {
+    try {
+      setIsUpdating(true)
+      const response = await fetch(`/api/admin/booking/${bookingId}`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ reason })
+      })
+      
+      const data = await response.json()
+      
+      if (response.ok) {
+        // Update the booking status to cancelled
+        setBookings(prev => prev.map(booking => 
+          booking._id === bookingId ? { ...booking, status: 'cancelled' } : booking
+        ))
+        
+        // Update the selected booking if it's the same one
+        if (selectedBooking && selectedBooking._id === bookingId) {
+          setSelectedBooking({ ...selectedBooking, status: 'cancelled' })
+        }
+        
+        toast.success("Booking successfully cancelled");
+        setError(null)
+      } else {
+        setError(data.error || 'Failed to cancel booking')
+      }
+    } catch (err) {
+      setError('Failed to cancel booking')
+      console.error('Error cancelling booking:', err)
+    } finally {
+      setIsUpdating(false)
+      setIsModalOpen(false)
+
+    }
+  }
+
+  const filteredBookings = bookings.filter((booking) => {
+    const matchesSearch = searchTerm === "" || 
+      booking.childName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      booking.userId?.firstName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      booking.providerName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      booking.providerId?.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      booking.bookingId?.toLowerCase().includes(searchTerm.toLowerCase())
+    
+    const matchesStatus = filterStatus === "all" || booking.status === filterStatus
+    
+    return matchesSearch && matchesStatus
+  })
+
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case "confirmed":
+        return "bg-green-100 text-green-800"
+      case "pending":
+        return "bg-yellow-100 text-yellow-800"
+      case "active":
+        return "bg-blue-100 text-blue-800"
+      case "completed":
+        return "bg-gray-100 text-gray-800"
+      case "cancelled":
+        return "bg-red-100 text-red-800"
+      default:
+        return "bg-gray-100 text-gray-800"
+    }
+  }
+
+  const getPaymentMethodColor = (method: string) => {
+    switch (method) {
+      case "e_wallet":
+        return "bg-green-100 text-green-800"
+      case "debit_card":
+        return "bg-blue-100 text-blue-800"
+      case "bank_transfer":
+        return "bg-purple-100 text-purple-800"
+      default:
+        return "bg-gray-100 text-gray-800"
+    }
+  }
+
+  return (
+    <div className="space-y-6">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div>
+          <h1 className="text-3xl font-bold text-[#273F4F]">Bookings</h1>
+          <p className="text-gray-600 mt-1">Manage all childcare bookings</p>
         </div>
-    )
-}  
+      </div>
+
+      {error && (
+        <div className="bg-red-50 border border-red-200 rounded-lg p-4 flex items-center gap-2">
+          <AlertCircle className="h-5 w-5 text-red-500" />
+          <span className="text-red-700">{error}</span>
+          <Button 
+            variant="ghost" 
+            size="sm" 
+            onClick={() => setError(null)}
+            className="ml-auto text-red-500 hover:text-red-700"
+          >
+            ×
+          </Button>
+        </div>
+      )}
+
+      {/* Filters */}
+      <Card>
+        <CardContent className="p-4">
+          <div className="flex flex-col sm:flex-row gap-4">
+            <div className="flex-1">
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+                <Input
+                  placeholder="Search by child name, parent, provider, or booking ID..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="pl-10"
+                />
+              </div>
+            </div>
+            <select
+              value={filterStatus}
+              onChange={(e) => setFilterStatus(e.target.value)}
+              className="px-3 py-2 border border-gray-300 rounded-md focus:border-[#FE7743] focus:outline-none"
+            >
+              <option value="all">All Status</option>
+              <option value="pending">Pending</option>
+              <option value="confirmed">Confirmed</option>
+              <option value="active">Active</option>
+              <option value="completed">Completed</option>
+              <option value="cancelled">Cancelled</option>
+            </select>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Bookings Table */}
+      <Card className="border border-gray-200">
+        <CardHeader>
+          <CardTitle>Bookings ({filteredBookings.length})</CardTitle>
+        </CardHeader>
+        <CardContent>
+          {loading ? (
+            <div className="flex justify-center py-8">
+              <LoadingSpinner size="lg" className="text-[#FE7743]" />
+            </div>
+          ) : filteredBookings.length === 0 ? (
+            <div className="text-center py-8 text-gray-500">
+              No bookings found matching your criteria
+            </div>
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead>
+                  <tr className="border-b border-gray-200">
+                    <th className="text-left py-3 px-4 font-medium text-gray-600">No</th>
+                    <th className="text-left py-3 px-4 font-medium text-gray-600">Child/Children</th>
+                    <th className="text-left py-3 px-4 font-medium text-gray-600">Parent</th>
+                    <th className="text-left py-3 px-4 font-medium text-gray-600">Provider</th>
+                    <th className="text-left py-3 px-4 font-medium text-gray-600">Dates</th>
+                    <th className="text-left py-3 px-4 font-medium text-gray-600">Amount</th>
+                    <th className="text-left py-3 px-4 font-medium text-gray-600">Status</th>
+                    <th className="text-left py-3 px-4 font-medium text-gray-600">Payment</th>
+                    <th className="text-left py-3 px-4 font-medium text-gray-600">Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {filteredBookings.map((booking, index) => (
+                    <tr key={booking._id} className="border-b text-[#273F4F] border-gray-100 hover:bg-gray-50">
+                      <td className="py-3 px-4">{index + 1}</td>
+                      <td className="py-3 px-4">
+                        {booking.childrenCount ? (
+                          <span className="text-sm bg-blue-100 px-2 py-1 rounded">
+                            {booking.childrenCount} Child{booking.childrenCount > 1 ? 'ren' : ''}
+                          </span>
+                        ) : (
+                          booking.childName || 'N/A'
+                        )}
+                      </td>
+                      <td className="py-3 px-4">
+                        {booking.userId?.firstName || 'N/A'}
+                      </td>
+                      <td className="py-3 px-4">
+                        {booking.providerId?.name || booking.providerName || 'N/A'}
+                      </td>
+                      <td className="py-3 px-4">
+                        <div className="flex items-center gap-1">
+                          <Calendar className="h-4 w-4" />
+                          <span className="text-sm">
+                            {new Date(booking.startDate).toLocaleDateString()} -{" "}
+                            {new Date(booking.endDate).toLocaleDateString()}
+                          </span>
+                        </div>
+                      </td>
+                      <td className="py-3 px-4 font-medium text-[#FE7743]">
+                        Rp {booking.totalAmount.toLocaleString()}
+                      </td>
+                      <td className="py-3 px-4">
+                        <span
+                          className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(booking.status)}`}
+                        >
+                          {booking.status}
+                        </span>
+                      </td>
+                      <td className="py-3 px-4">
+                        {booking.paymentMethod && (
+                          <span
+                            className={`px-2 py-1 rounded-full text-xs font-medium ${getPaymentMethodColor(booking.paymentMethod)}`}
+                          >
+                            {booking.paymentMethod.replace('_', ' ')}
+                          </span>
+                        )}
+                      </td>
+                      <td className="py-3 px-4">
+                        <div className="flex items-center gap-2">
+                          <Button 
+                            variant="ghost" 
+                            size="sm" 
+                            onClick={() => fetchBookingDetails(booking._id)}
+                            className="text-blue-600 hover:text-blue-700"
+                          >
+                            <Eye className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
+      {/* Booking Modal */}
+      <BookingModal
+        booking={selectedBooking}
+        isOpen={isModalOpen}
+        onClose={() => {
+          setIsModalOpen(false)
+          setSelectedBooking(null)
+        }}
+        onStatusUpdate={handleStatusUpdate}
+        onCancel={handleCancelBooking}
+        isUpdating={isUpdating}
+      />
+    </div>
+  )
+}
