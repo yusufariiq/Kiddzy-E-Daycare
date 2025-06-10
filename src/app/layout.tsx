@@ -8,6 +8,7 @@ import Footer from "@/components/common/footer";
 import { AuthProvider } from "@/context/auth.context";
 import { Toaster } from "react-hot-toast";
 import { usePathname } from "next/navigation";
+import ProtectedRoute from "@/components/common/ProtectedRoute";
 
 const inter = Inter({
   weight: ['400', '900'],
@@ -27,7 +28,7 @@ export default function RootLayout({
 
   const pathname = usePathname()
   const hideLayout = pathname.startsWith("/admin")
-  const hideFooter = pathname.startsWith("/auth")
+  const hideFooter = pathname.startsWith("/auth") || pathname.startsWith("/profile")
 
   return (
     <html lang="en">
