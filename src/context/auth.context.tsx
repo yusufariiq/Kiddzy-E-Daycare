@@ -20,6 +20,7 @@ interface AuthContextType {
   logout: () => void
   updateUser: (userData: Partial<User>) => Promise<void>
   isAuthenticated: boolean
+  isLoading: boolean
 }
 
 interface RegisterData {
@@ -52,7 +53,7 @@ export const useAuth = () => {
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>(null)
   const [token, setToken] = useState<string | null>(null)
-  const [isHydrated, setIsHydrated] = useState(false)
+  const [isLoading, setIsLoading] = useState(true)
 
   const secureLogout = useCallback((showToast: boolean = true) => {
     setUser(null)
@@ -92,21 +93,21 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     }
   }, [])
 
-  // Synchronous initialization - no loading state
+  // Initialize auth state
   const initializeAuth = useCallback(() => {
-    if (!isHydrated) return
-
     try {
       const storedToken = localStorage.getItem(TOKEN_KEY)
       const storedUser = localStorage.getItem(USER_KEY)
 
       if (!storedToken || !storedUser) {
+        setIsLoading(false)
         return
       }
 
       if (!isTokenValid(storedToken)) {
         secureLogout(false)
         toast.error("Session expired. Please log in again.")
+        setIsLoading(false)
         return
       }
 
@@ -116,6 +117,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       } catch (parseError) {
         secureLogout(false)
         toast.error("Invalid session data. Please log in again.")
+        setIsLoading(false)
         return
       }
 
@@ -132,25 +134,22 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           toast.error("Session expired. Please log in again.")
         }, timeUntilExpiry)
 
+        setIsLoading(false)
         return () => clearTimeout(timer)
       }
 
+      setIsLoading(false)
     } catch (error) {
       secureLogout(false)
       toast.error("Authentication error. Please log in again.")
+      setIsLoading(false)
     }
-  }, [isHydrated, isTokenValid, setAuthenticationState, secureLogout])
+  }, [isTokenValid, setAuthenticationState, secureLogout])
 
   useEffect(() => {
-    setIsHydrated(true)
-  }, [])
-
-  useEffect(() => {
-    if (!isHydrated) return
-    
     const cleanup = initializeAuth()
     return cleanup
-  }, [isHydrated, initializeAuth])
+  }, [initializeAuth])
 
   const secureStorage = {
     set: (key: string, value: string) => {
@@ -196,6 +195,14 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
       setAuthenticationState(data.token, data.user)
       toast.success(`Welcome back, ${data.user.firstName}!`)
+
+      setTimeout(() => {
+        if (data.user.role === 'admin') {
+          window.location.href = '/admin'
+        } else {
+          window.location.href = '/'
+        }
+      }, 100)
       
     } catch (error: any) {
       toast.error(error.message || 'Login failed. Please try again.')
@@ -310,6 +317,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     logout,
     updateUser,
     isAuthenticated: !!user && !!token,
+    isLoading,
   }
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>
