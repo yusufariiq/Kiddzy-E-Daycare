@@ -4,10 +4,7 @@ export interface IProvider extends Document {
     name: string;
     description: string;
     address: string;
-    location: {
-      type: string;
-      coordinates: number[];
-    };
+    location: string;
     whatsapp: string;
     email: string;
     images: string[];
@@ -105,7 +102,5 @@ const providerSchema = new Schema<IProvider>(
     },
     { timestamps: true }
 );
-
-providerSchema.index({ location: '2dsphere' });
 
 export const Provider = mongoose.models.Provider || mongoose.model<IProvider>('Provider', providerSchema);

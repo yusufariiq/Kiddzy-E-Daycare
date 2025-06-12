@@ -51,18 +51,4 @@ export class ProviderRepository {
           .limit(limit)
           .skip((page - 1) * limit);
     }
-
-    async findByLocation(longitude: number, latitude: number, maxDistance: number = 5000): Promise<IProvider[]> {
-        return await Provider.find({
-            location: {
-                $near: {
-                $geometry: {
-                    type: 'Point',
-                    coordinates: [longitude, latitude]
-                },
-                $maxDistance: maxDistance
-                }
-            }
-        });
-    }
 }

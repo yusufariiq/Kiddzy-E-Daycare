@@ -20,10 +20,6 @@ export class ProviderService {
         return await this.providerRepository.search(keyword, limit, page);
     }
 
-    async findProvidersByLocation(longitude: number, latitude: number, maxDistance: number = 5000): Promise<IProvider[]> {
-        return await this.providerRepository.findByLocation(longitude, latitude, maxDistance);
-    }
-
     async getActiveProviders(): Promise<IProvider[]> {
         return await this.providerRepository.findActiveProviders();
     }
