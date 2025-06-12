@@ -5,7 +5,7 @@ import { ChevronDown } from "lucide-react"
 import { cn } from "@/utils/utils"
 
 export interface SelectOption {
-  value: string
+  value: string | boolean
   label: string
 }
 

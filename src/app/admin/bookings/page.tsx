@@ -269,7 +269,7 @@ export default function AdminBookings() {
               />
             </div>
           </div>
-          <div>
+          <div className="sm:w-48">
             <Select
               id="ageGroup"
               options={filterOptions}

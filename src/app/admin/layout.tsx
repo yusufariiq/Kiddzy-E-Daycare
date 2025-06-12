@@ -16,6 +16,8 @@ import {
   X,
   ChevronLeft,
   ChevronRight,
+  MessagesSquare,
+  MessageCircleIcon,
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import ProtectedRoute from "@/components/common/ProtectedRoute"
@@ -41,9 +43,9 @@ const navigationItems = [
     icon: Users,
   },
   {
-    name: "Contacts",
+    name: "Messages",
     href: "/admin/contacts",
-    icon: Phone,
+    icon: MessageCircleIcon,
   },
   {
     name: "Providers",
@@ -68,7 +70,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
             <div className="min-h-screen bg-gray-50">
                 {/* Mobile sidebar overlay */}
                 {sidebarOpen && (
-                    <div className="fixed inset-0 z-40 bg-black bg-opacity-50 lg:hidden" onClick={() => setSidebarOpen(false)} />
+                    <div className="fixed inset-0 z-40 bg-black/50 lg:hidden" onClick={() => setSidebarOpen(false)} />
                 )}
 
                 {/* Sidebar */}

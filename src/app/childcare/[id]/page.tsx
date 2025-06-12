@@ -23,8 +23,7 @@ interface Provider {
   availability: boolean
   operatingHours: OperatingHours[]
   description?: string
-  rating?: number
-  facilities?: string[]
+  features?: string[]
 }
 
 export default function ChildcareProviderPage() {
@@ -78,17 +77,9 @@ export default function ChildcareProviderPage() {
     )
   }
 
-  // Sample description and facilities if not provided
   const description =
     provider.description ||
     "This childcare provider offers a safe, nurturing environment for children to learn and grow. With experienced staff and a well-structured program, we ensure your child receives the best care possible."
-  const facilities = provider.facilities || [
-    "Indoor Playground",
-    "Outdoor Area",
-    "Learning Center",
-    "Nap Room",
-    "Kitchen",
-  ]
 
   return (
     <div className="min-h-screen pb-16">
@@ -108,11 +99,10 @@ export default function ChildcareProviderPage() {
           {/* Left column - Images */}
           <div className="lg:col-span-2">
             <div className="relative h-64 sm:h-80 md:h-96 w-full overflow-hidden rounded-xl mb-4">
-              <Image
+              <img
                 src={provider.images[activeImage] || "/placeholder.svg"}
                 alt={provider.name}
-                fill
-                className="object-cover"
+                className="size-full object-cover"
               />
             </div>
 
@@ -144,12 +134,6 @@ export default function ChildcareProviderPage() {
               <h1 className="text-2xl sm:text-3xl font-bold text-[#273F4F] mb-4">{provider.name}</h1>
 
               <div className="flex items-center mb-4">
-                {provider.rating && (
-                  <div className="flex items-center mr-4">
-                    <Star className="h-5 w-5 text-yellow-400 fill-yellow-400 mr-1" />
-                    <span className="font-medium">{provider.rating.toFixed(1)}</span>
-                  </div>
-                )}
                 <div className="flex items-center text-gray-600">
                   <MapPin className="mr-1 h-4 w-4 text-[#FE7743]" />
                   <span className="text-sm">{provider.address}</span>
@@ -184,10 +168,10 @@ export default function ChildcareProviderPage() {
             <div className="bg-white rounded-xl p-6 border border-gray-200 shadow-sm">
               <h2 className="text-xl font-bold text-[#273F4F] mb-4">Facilities</h2>
               <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
-                {facilities.map((facility, index) => (
+                {provider.features?.map((features, index) => (
                   <div key={index} className="flex items-center">
                     <div className="h-2 w-2 rounded-full bg-[#FE7743] mr-2"></div>
-                    <span className="text-gray-700">{facility}</span>
+                    <span className="text-gray-700">{features}</span>
                   </div>
                 ))}
               </div>
@@ -203,9 +187,17 @@ export default function ChildcareProviderPage() {
                   provider.operatingHours.map((hours) => (
                     <div key={hours._id} className="flex justify-between items-center">
                       <span className="font-medium">{hours.day}</span>
-                      <span className="text-gray-600">
-                        {hours.open} - {hours.close}
-                      </span>
+                      {(hours.open && hours.close === "CLOSED" ) ?
+                        (
+                          <span className="text-gray-600">
+                            Closed
+                          </span>
+                        ) : (
+                          <span className="text-gray-600">
+                            {hours.open} - {hours.close}
+                          </span>
+                        )   
+                      }
                     </div>
                   ))
                 ) : (

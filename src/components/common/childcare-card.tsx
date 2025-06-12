@@ -28,11 +28,10 @@ export default function ChildcareCard({
     >
       {/* Card Image */}
       <div className="relative h-48 w-full overflow-hidden sm:h-56 md:h-64">
-        <Image
+        <img
           src={image || "/placeholder.svg"}
           alt={name}
-          fill
-          className="object-cover transition-transform duration-300 group-hover:scale-105"
+          className="object-cover w-full h-full transition-transform duration-300 group-hover:scale-105"
         />
         {/* {price && (
           <div className="absolute right-3 top-3 rounded-full bg-white px-3 py-1 text-sm font-bold text-[#273F4F] shadow-sm">
