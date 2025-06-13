@@ -70,7 +70,7 @@ export default function ChildcareCard({provider, className=""}: ProviderCardProp
       <div className="p-5">
         <div className="space-y-3">
           {/* Provider Name */}
-          <h3 className="text-lg font-semibold text-[#273F4F] line-clamp-1 group-hover:text-[#FE7743] transition-colors">
+          <h3 className="text-lg font-semibold line-clamp-2 text-[#273F4F] group-hover:text-[#FE7743] transition-colors">
             {provider.name}
           </h3>
 
