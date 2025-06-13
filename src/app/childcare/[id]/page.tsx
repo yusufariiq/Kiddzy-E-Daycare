@@ -2,32 +2,15 @@
 
 import { useEffect, useState } from "react"
 import Image from "next/image"
-import { MapPin, ArrowLeft, Star } from "lucide-react"
+import { MapPin, ArrowLeft, Phone, Map } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import LoadingSpinner from "@/components/ui/loading-spinner"
 import { useParams, useRouter } from "next/navigation"
-
-interface OperatingHours {
-  _id: string
-  day: string
-  open: string
-  close: string
-}
-
-interface Provider {
-  _id: string
-  name: string
-  address: string
-  images: string[]
-  price: number
-  availability: boolean
-  operatingHours: OperatingHours[]
-  description?: string
-  features?: string[]
-}
+import Link from "next/link"
+import { ProviderData } from "@/lib/types/providers"
 
 export default function ChildcareProviderPage() {
-  const [provider, setProvider] = useState<Provider | null>(null)
+  const [provider, setProvider] = useState<ProviderData | null>(null)
   const [loading, setLoading] = useState(true)
   const [activeImage, setActiveImage] = useState(0)
   const params = useParams()
@@ -133,11 +116,25 @@ export default function ChildcareProviderPage() {
             <div className="bg-white rounded-xl p-6 border border-gray-200 shadow-sm">
               <h1 className="text-2xl sm:text-3xl font-bold text-[#273F4F] mb-4">{provider.name}</h1>
 
-              <div className="flex items-center mb-4">
-                <div className="flex items-center text-gray-600">
-                  <MapPin className="mr-1 h-4 w-4 text-[#FE7743]" />
+              <div className="flex flex-col mb-4 gap-3">
+                <div className="flex items-center gap-3 text-gray-600">
+                  <div className="w-5">
+                    <MapPin className="size-4 text-[#FE7743]" />
+                  </div>
                   <span className="text-sm">{provider.address}</span>
                 </div>
+                <Link href={provider.location} target="_blank" className="flex items-center gap-3 text-gray-600">
+                  <div className="w-5">
+                    <Map className="size-4 text-[#FE7743]" />
+                  </div>
+                  <span className="text-sm underline">{provider.location}</span>
+                </Link>
+                <Link href={`https://wa.me/${provider.whatsapp}`} target="_blank" className="flex items-center gap-3 text-gray-600">
+                  <div className="w-5">
+                    <Phone className="size-4 text-[#FE7743]" />
+                  </div>
+                  <span className="text-sm">{provider.whatsapp}</span>
+                </Link>
               </div>
 
               <div className="border-t border-gray-200 my-4 pt-4">
@@ -187,7 +184,7 @@ export default function ChildcareProviderPage() {
                   provider.operatingHours.map((hours) => (
                     <div key={hours._id} className="flex justify-between items-center">
                       <span className="font-medium">{hours.day}</span>
-                      {(hours.open && hours.close === "CLOSED" ) ?
+                      {hours.open && hours.close === "CLOSED" ?
                         (
                           <span className="text-gray-600">
                             Closed

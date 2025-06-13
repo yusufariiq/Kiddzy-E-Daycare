@@ -14,9 +14,17 @@ export interface ProviderData {
   isActive: boolean
   capacity: number
   operatingHours: Array<{
+    _id: string
     day: string
     open: string
     close: string
   }>
   createdAt: string
+}
+
+export interface OperatingHours {
+  _id: string
+  day: string
+  open: string
+  close: string
 }

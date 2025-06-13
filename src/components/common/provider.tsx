@@ -3,26 +3,10 @@
 import { useEffect, useState } from 'react'
 import ChildcareCard from './childcare-card'
 import LoadingSpinner from '../ui/loading-spinner'
-
-interface OperatingHours {
-  _id: string
-  day: string
-  open: string
-  close: string
-}
-
-interface Provider {
-  _id: string
-  name: string
-  address: string
-  images: string[]
-  price: number
-  availability: boolean
-  operatingHours: OperatingHours[]
-}
+import { ProviderData } from '@/lib/types/providers'
 
 export default function Provider() {
-  const [providers, setProviders] = useState<Provider[]>([])
+  const [providers, setProviders] = useState<ProviderData[]>([])
   const [loading, setLoading] = useState(true)
 
   const fetchProviders = async () => {
@@ -41,7 +25,6 @@ export default function Provider() {
     fetchProviders()
   }, [])
 
-
   return (
     <div className="bg-white py-16">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
@@ -59,18 +42,11 @@ export default function Provider() {
         ) : (
           <div className="mt-12 grid gap-8 md:grid-cols-2 lg:grid-cols-3">
             {providers.map((provider) => {
-              const hours = provider.operatingHours[0]
-              const hoursDisplay = hours ? `${hours.open} - ${hours.close}` : undefined
-
               return (
                 <ChildcareCard
                   key={provider._id}
-                  id={provider._id}
-                  image={provider.images[0] || "/placeholder.svg"}
-                  name={provider.name}
-                  location={provider.address}
-                  price={provider.price}
-                  availability={hoursDisplay}
+                  provider={provider}
+                  className=""
                 />
               )
             })}

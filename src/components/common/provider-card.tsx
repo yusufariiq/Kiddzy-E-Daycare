@@ -2,7 +2,6 @@
 
 import { Button } from "@/components/ui/button"
 import { Edit, Eye, Trash2, MapPin, Clock, Users } from "lucide-react"
-import Image from "next/image"
 
 interface ProviderCardProps {
   provider: {
