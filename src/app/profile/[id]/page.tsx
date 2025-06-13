@@ -22,18 +22,13 @@ export default function ProfilePage() {
 
   useEffect(() => {
     const fetchUserProfile = async () => {
-      if (!isAuthenticated || !token) {
-        router.push("/auth/login")
-        return
-      }
-
       try {
         const response = await fetch(`/api/users/${userId}`, {
           headers: {
             'Authorization': `Bearer ${token}`,
           },
         })
-
+        
         const data = await response.json()
 
         if (!response.ok) {

@@ -12,6 +12,7 @@ import PaymentStep from "@/components/booking/payment-step"
 import EmergencyContactForm from "@/components/booking/emergency-contact-form"
 import { useAuth } from "@/context/auth.context"
 import toast from "react-hot-toast"
+import ProtectedRoute from "@/components/common/ProtectedRoute"
 
 interface Provider {
   _id: string
@@ -76,11 +77,6 @@ export default function BookingPage() {
   
 
   useEffect(() => {
-    if (!isAuthenticated || !token) {
-      router.push("/auth/login")
-      return
-    }
-
     const fetchProvider = async () => {
       try {
         const res = await fetch(`/api/providers/${id}`)
@@ -152,7 +148,7 @@ export default function BookingPage() {
     // Auto-calculate childrenCount from actual children added
     const updatedData = {
       ...data,
-      childrenCount: childrenData.length // Always use actual children count
+      childrenCount: childrenData.length 
     }
     setBookingData(updatedData)
     handleNext()
@@ -175,7 +171,7 @@ export default function BookingPage() {
         childrenIds: childrenIds,
         startDate: bookingData.startDate.toISOString(),
         endDate: bookingData.endDate.toISOString(),
-        childrenCount: childrenData.length, // Use actual children count
+        childrenCount: childrenData.length,
         notes: bookingData.notes,
         paymentMethod: data.paymentMethod,
         totalAmount: data.totalAmount,
@@ -250,140 +246,142 @@ export default function BookingPage() {
   }
 
   return (
-    <div className="min-h-[90vh] space-y-10 mb-10">
-      {/* Header */}
-      <div className="bg-[#FE7743] text-white">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-          <div className="flex items-center justify-between">
-            <Button
-              onClick={handleBack}
-              variant="ghost"
-              className="flex items-center gap-2 hover:text-[#FE7743] text-white"
-            >
-              <ArrowLeft className="size-5" />
-              Back
-            </Button>
-            <div className="text-center">
-              <h1 className="text-3xl font-bold">Book Childcare</h1>
+    <ProtectedRoute requiredRole="user">
+      <div className="min-h-[90vh] space-y-10 mb-10">
+        {/* Header */}
+        <div className="bg-[#FE7743] text-white">
+          <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+            <div className="flex items-center justify-between">
+              <Button
+                onClick={handleBack}
+                variant="ghost"
+                className="flex items-center gap-2 hover:text-[#FE7743] text-white"
+              >
+                <ArrowLeft className="size-5" />
+                Back
+              </Button>
+              <div className="text-center">
+                <h1 className="text-3xl font-bold">Book Childcare</h1>
+              </div>
+              <div className="w-16"></div>
             </div>
-            <div className="w-16"></div>
           </div>
         </div>
-      </div>
-      
-      {/* Progress Steps */}
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between">
-          {steps.map((step, index) => {
-            const Icon = step.icon
-            const isActive = currentStep === step.id
-            const isCompleted = currentStep > step.id
+        
+        {/* Progress Steps */}
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex items-center justify-between">
+            {steps.map((step, index) => {
+              const Icon = step.icon
+              const isActive = currentStep === step.id
+              const isCompleted = currentStep > step.id
 
-            return (
-              <div key={step.id} className="flex items-center">
-                <div
-                  className={`flex items-center justify-center w-10 h-10 rounded-full border-2 
-                  ${
-                    isActive
-                      ? "border-[#FE7743] bg-[#FE7743] text-white"
-                      : isCompleted
+              return (
+                <div key={step.id} className="flex items-center">
+                  <div
+                    className={`flex items-center justify-center w-10 h-10 rounded-full border-2 
+                    ${
+                      isActive
                         ? "border-[#FE7743] bg-[#FE7743] text-white"
-                        : "border-gray-300 bg-white text-gray-400"
-                  }`}
-                >
-                  <Icon className="h-5 w-5" />
-                </div>
-                <div className="ml-3 hidden sm:block">
-                  <p
-                    className={`text-sm font-medium ${
-                      isActive ? "text-[#FE7743]" : isCompleted ? "text-[#FE7743]" : "text-gray-500"
+                        : isCompleted
+                          ? "border-[#FE7743] bg-[#FE7743] text-white"
+                          : "border-gray-300 bg-white text-gray-400"
                     }`}
                   >
-                    {step.name}
-                  </p>
-                </div>
-                {index < steps.length - 1 && (
-                  <div
-                    className={`hidden sm:block w-10 h-0.5 mx-3 
-                    ${isCompleted ? "bg-[#FE7743]" : "bg-gray-300"}`}
-                  />
-                )}
-              </div>
-            )
-          })}
-        </div>
-      </div>
-
-      <div className="max-w-7xl mx-auto flex flex-col md:flex-row gap-5 md:gap-0">
-        {/* Provider Summary */}
-        <div className="w-full md:w-1/3 h-fit px-4 sm:px-6">
-          <div className="flex flex-col gap-4 border-2 border-gray-200 rounded-xl">
-            <div className="relative w-full overflow-hidden">
-              <img
-                src={"/image5.webp"}
-                alt={provider.name}
-                className="w-full h-full rounded-t-xl object-cover"
-              />
-            </div>
-            <div className="px-4 sm:px-6 lg:px-8 pb-4">
-              <h3 className="text-xl font-semibold text-[#273F4F]">{provider.name}</h3>
-              <p className="text-base text-gray-600 mb-2">{provider.address}</p>
-              <p className="text-lg font-bold text-[#FE7743]">Rp {provider.price.toLocaleString("id-ID")}/day</p>
-              
-              {/* Show children count when available */}
-              {childrenData.length > 0 && (
-                <div className="mt-3 p-3 bg-[#FFF8F5] rounded-lg border border-[#FE7743]/20">
-                  <p className="text-sm font-medium text-[#273F4F]">
-                    Children: {childrenData.length}
-                  </p>
-                  <div className="text-xs text-gray-600 mt-1">
-                    {childrenData.map((child, index) => (
-                      <div key={index}>{child.nickname} ({child.age}y)</div>
-                    ))}
+                    <Icon className="h-5 w-5" />
                   </div>
+                  <div className="ml-3 hidden sm:block">
+                    <p
+                      className={`text-sm font-medium ${
+                        isActive ? "text-[#FE7743]" : isCompleted ? "text-[#FE7743]" : "text-gray-500"
+                      }`}
+                    >
+                      {step.name}
+                    </p>
+                  </div>
+                  {index < steps.length - 1 && (
+                    <div
+                      className={`hidden sm:block w-10 h-0.5 mx-3 
+                      ${isCompleted ? "bg-[#FE7743]" : "bg-gray-300"}`}
+                    />
+                  )}
                 </div>
-              )}
-            </div>
+              )
+            })}
           </div>
         </div>
 
-        {/* Step Content */}
-        <div className="w-full md:w-2/3 mx-auto px-4 sm:px-6">
-          {currentStep === 1 && (
-            <ChildInfoStep 
-              onSubmit={handleChildInfoSubmit} 
-              initialData={childrenData} 
-              isProcessing={isProcessing}
-            />
-          )}
-          {currentStep === 2 && (
-            <BookingDetailsStep 
-              onSubmit={handleBookingDetailsSubmit} 
-              initialData={bookingData} 
-              provider={provider}
-              childrenCount={childrenData.length}
-            />
-          )}
-          {currentStep === 3 && (
-            <EmergencyContactForm
-              onSubmit={handleEmergencyContactSubmit}
-              initialData={emergencyContact}
-            />
-          )}
-          {currentStep === 4 && (
-            <PaymentStep
-              onSubmit={handlePaymentSubmit}
-              provider={provider}
-              childData={childrenData[0] || childrenData}
-              bookingData={{
-                ...bookingData!,
-                childrenCount: childrenData.length
-              }}
-              isProcessing={isProcessing}
-            />
-          )}
+        <div className="max-w-7xl mx-auto flex flex-col md:flex-row gap-5 md:gap-0">
+          {/* Provider Summary */}
+          <div className="w-full md:w-1/3 h-fit px-4 sm:px-6">
+            <div className="flex flex-col gap-4 border-2 border-gray-200 rounded-xl">
+              <div className="relative w-full overflow-hidden">
+                <img
+                  src={"/image5.webp"}
+                  alt={provider.name}
+                  className="w-full h-full rounded-t-xl object-cover"
+                />
+              </div>
+              <div className="px-4 sm:px-6 lg:px-8 pb-4">
+                <h3 className="text-xl font-semibold text-[#273F4F]">{provider.name}</h3>
+                <p className="text-base text-gray-600 mb-2">{provider.address}</p>
+                <p className="text-lg font-bold text-[#FE7743]">Rp {provider.price.toLocaleString("id-ID")}/day</p>
+                
+                {/* Show children count when available */}
+                {childrenData.length > 0 && (
+                  <div className="mt-3 p-3 bg-[#FFF8F5] rounded-lg border border-[#FE7743]/20">
+                    <p className="text-sm font-medium text-[#273F4F]">
+                      Children: {childrenData.length}
+                    </p>
+                    <div className="text-xs text-gray-600 mt-1">
+                      {childrenData.map((child, index) => (
+                        <div key={index}>{child.nickname} ({child.age}y)</div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+
+          {/* Step Content */}
+          <div className="w-full md:w-2/3 mx-auto px-4 sm:px-6">
+            {currentStep === 1 && (
+              <ChildInfoStep 
+                onSubmit={handleChildInfoSubmit} 
+                initialData={childrenData} 
+                isProcessing={isProcessing}
+              />
+            )}
+            {currentStep === 2 && (
+              <BookingDetailsStep 
+                onSubmit={handleBookingDetailsSubmit} 
+                initialData={bookingData} 
+                provider={provider}
+                childrenCount={childrenData.length}
+              />
+            )}
+            {currentStep === 3 && (
+              <EmergencyContactForm
+                onSubmit={handleEmergencyContactSubmit}
+                initialData={emergencyContact}
+              />
+            )}
+            {currentStep === 4 && (
+              <PaymentStep
+                onSubmit={handlePaymentSubmit}
+                provider={provider}
+                childData={childrenData[0] || childrenData}
+                bookingData={{
+                  ...bookingData!,
+                  childrenCount: childrenData.length
+                }}
+                isProcessing={isProcessing}
+              />
+            )}
+          </div>
         </div>
       </div>
-    </div>
+    </ProtectedRoute>
   )
 }

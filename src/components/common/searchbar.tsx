@@ -36,10 +36,6 @@ export default function SearchBar({ onSearch, className }: SearchBarProps) {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
-    if (!location.trim()) {
-      setErrors({ location: "Location is required" })
-      return
-    }
     setErrors({})
     onSearch?.({
       location,

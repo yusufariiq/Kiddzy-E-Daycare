@@ -8,11 +8,14 @@ import LoadingSpinner from "@/components/ui/loading-spinner"
 import { useParams, useRouter } from "next/navigation"
 import Link from "next/link"
 import { ProviderData } from "@/lib/types/providers"
+import { useAuth } from "@/context/auth.context"
+import toast from "react-hot-toast"
 
 export default function ChildcareProviderPage() {
   const [provider, setProvider] = useState<ProviderData | null>(null)
   const [loading, setLoading] = useState(true)
   const [activeImage, setActiveImage] = useState(0)
+  const { token, isAuthenticated } = useAuth()
   const params = useParams()
   const router = useRouter()
   const { id } = params
@@ -142,7 +145,14 @@ export default function ChildcareProviderPage() {
                 <div className="text-2xl font-bold text-[#273F4F] mb-4">Rp {provider.price.toLocaleString("id-ID")}</div>
 
                 <Button
-                  onClick={() => router.push(`/childcare/${id}/book`)}
+                  onClick={() => {
+                    if (!isAuthenticated || !token) {
+                      toast.error("To book this childcare, please log in or create an account first.")
+                      return
+                    } else {
+                      router.push(`/childcare/${id}/book`)
+                    }
+                  }}
                   className="w-full bg-[#FE7743] hover:bg-[#e56a3a] text-white py-6 rounded-xl text-lg font-semibold"
                 >
                   Book Now

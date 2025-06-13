@@ -4,7 +4,7 @@ import type React from "react"
 
 import { useState } from "react"
 import Link from "next/link"
-import { usePathname } from "next/navigation"
+import { usePathname, useRouter } from "next/navigation"
 import {
   LayoutDashboard,
   Calendar,
@@ -16,11 +16,12 @@ import {
   X,
   ChevronLeft,
   ChevronRight,
-  MessagesSquare,
   MessageCircleIcon,
+  LogOut,
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import ProtectedRoute from "@/components/common/ProtectedRoute"
+import { useAuth } from "@/context/auth.context"
 
 interface AdminLayoutProps {
   children: React.ReactNode
@@ -62,7 +63,14 @@ const navigationItems = [
 export default function AdminLayout({ children }: AdminLayoutProps) {
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false)
+  const { logout } = useAuth() 
+  const router = useRouter()  
   const pathname = usePathname()
+
+  const handleLogout = () => {
+    logout()
+    router.push("/")
+  }
 
   return (
     <html>
@@ -125,8 +133,17 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
                     </nav>
 
                     {/* Sidebar footer */}
+                    <div className="p-4">
+                      <button
+                        onClick={handleLogout}
+                        className="flex w-full items-center px-4 py-2 text-sm text-red-600 hover:bg-gray-100 gap-2"
+                      >
+                        <LogOut className="size-5" />
+                        Sign out
+                      </button>
+                    </div>
                     <div className="p-4 border-t border-gray-200">
-                    {!sidebarCollapsed && <div className="text-xs text-gray-500 text-center">© 2024 Kiddzy Admin Panel</div>}
+                      {!sidebarCollapsed && <div className="text-xs text-gray-500 text-center">© 2024 Kiddzy Admin Panel</div>}
                     </div>
                 </div>
 

@@ -9,6 +9,7 @@ import { useRouter } from "next/navigation"
 import BookingCard from "@/components/booking/booking-card"
 import toast from "react-hot-toast"
 import { useAuth } from "@/context/auth.context"
+import ProtectedRoute from "@/components/common/ProtectedRoute"
 
 interface Provider {
   _id?: string
@@ -49,18 +50,15 @@ export default function BookingsPage() {
   const [searchTerm, setSearchTerm] = useState("")
   const [filterStatus, setFilterStatus] = useState<string>("all")
   const [error, setError] = useState<string | null>(null)
-  const [mounted, setMounted] = useState(false)
   const router = useRouter()
   const { token, isAuthenticated } = useAuth()
 
   useEffect(() => {
-    setMounted(true)
-
-    if (!isAuthenticated || !token) {
-      router.push("/auth/login")
-      return
+    if (isAuthenticated && token) {
+      const filterParam = activeTab === 'active' ? 'active' : undefined
+      fetchBookings(filterParam)
     }
-  }, [])
+  }, [activeTab, isAuthenticated, token])
 
   const fetchBookings = async (filter?: string) => {
     try {
@@ -157,21 +155,6 @@ export default function BookingsPage() {
     }
   }
 
-  // Initial fetch
-  useEffect(() => {
-    if (mounted && isAuthenticated && token) {
-      fetchBookings()
-    }
-  }, [mounted, isAuthenticated, token])
-
-  // Refetch when tab changes
-  useEffect(() => {
-    if (mounted && isAuthenticated && token) {
-      const filterParam = activeTab === 'active' ? 'active' : undefined
-      fetchBookings(filterParam)
-    }
-  }, [activeTab, mounted, isAuthenticated, token])
-
   const getFilteredBookings = () => {
     let filtered = bookings
 
@@ -208,14 +191,6 @@ export default function BookingsPage() {
     }
   }
 
-  if (!mounted) {
-    return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <LoadingSpinner size="lg" className="text-[#FE7743]" />
-      </div>
-    )
-  }
-
   const filteredBookings = getFilteredBookings()
 
   if (error && bookings.length === 0) {
@@ -237,160 +212,131 @@ export default function BookingsPage() {
   }
 
   return (
-    <div className="min-h-screen">
-      {/* Header */}
-      <div className="bg-[#FE7743] border-b border-gray-200">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between text-white gap-4">
-            <div>
-              <h1 className="text-3xl font-bold ">My Bookings</h1>
-              <p className="mt-1">Manage your childcare bookings and view booking history</p>
-            </div>
-            <Button
-              onClick={() => router.push("/childcare")}
-              variant="default"
-              className="bg-white text-[#273F4F] px-6 py-3 rounded-xl flex items-center gap-2 hover:bg-[#273F4F] hover:text-white"
-            >
-              <Plus className="h-4 w-4" />
-              New Booking
-            </Button>
-          </div>
-        </div>
-      </div>
-
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Tabs */}
-        <div className="flex space-x-1 bg-gray-100 p-1 rounded-xl mb-6">
-          <button
-            onClick={() => setActiveTab("active")}
-            className={`flex-1 flex items-center justify-center gap-2 py-3 px-4 rounded-lg font-medium transition-colors ${
-              activeTab === "active" ? "bg-white text-[#FE7743] shadow" : "text-gray-600 hover:text-[#FE7743]"
-            }`}
-          >
-            <Calendar className="h-4 w-4" />
-            Active Bookings
-            <span className="bg-[#FE7743] text-white text-xs px-2 py-1 rounded-full">{getStatusCount("active")}</span>
-          </button>
-          <button
-            onClick={() => setActiveTab("history")}
-            className={`flex-1 flex items-center justify-center gap-2 py-3 px-4 rounded-lg font-medium transition-colors ${
-              activeTab === "history" ? "bg-white text-[#FE7743] shadow-sm" : "text-gray-600 hover:text-[#FE7743]"
-            }`}
-          >
-            <Clock className="h-4 w-4" />
-            Booking History
-            <span className="bg-gray-400 text-white text-xs px-2 py-1 rounded-full">{getStatusCount("history")}</span>
-          </button>
-        </div>
-
-        {/* Search and Filters */}
-        <div className="bg-white rounded-xl py-3 mb-6">
-          <div className="flex flex-col sm:flex-row gap-3">
-            <div className="flex-1">
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
-                <Input
-                  placeholder="Search by provider, child name, or booking ID..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-10"
-                />
+    <ProtectedRoute requiredRole="user">
+      <div className="min-h-screen">
+        {/* Header */}
+        <div className="bg-[#FE7743] border-b border-gray-200">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between text-white gap-4">
+              <div>
+                <h1 className="text-3xl font-bold ">My Bookings</h1>
+                <p className="mt-1">Manage your childcare bookings and view booking history</p>
               </div>
-            </div>
-            <div className="flex gap-3">
-              <select
-                value={filterStatus}
-                onChange={(e) => setFilterStatus(e.target.value)}
-                className="px-4 py-2 border border-gray-300 rounded-lg focus:border-[#FE7743] focus:outline-none focus:ring-1 focus:ring-[#FE7743]"
-              >
-                <option value="all">All Status</option>
-                <option value="pending">Pending</option>
-                <option value="confirmed">Confirmed</option>
-                <option value="active">Active</option>
-                <option value="completed">Completed</option>
-                <option value="cancelled">Cancelled</option>
-              </select>
-              <Button 
+              <Button
+                onClick={() => router.push("/childcare")}
                 variant="default"
-                onClick={() => fetchBookings()}
-                disabled={loading}
-                className="bg-[#FE7743] rounded-lg h-auto"
+                className="bg-white text-[#273F4F] px-6 py-3 rounded-xl flex items-center gap-2 hover:bg-[#273F4F] hover:text-white"
               >
-                <Filter className="h-4 w-4" />
+                <Plus className="h-4 w-4" />
+                New Booking
               </Button>
             </div>
           </div>
         </div>
 
-        {/* Bookings List */}
-        {loading ? (
-          <div className="flex justify-center items-center py-12">
-            <LoadingSpinner size="lg" className="text-[#FE7743]" />
-          </div>
-        ) : filteredBookings.length === 0 ? (
-          <div className="bg-white rounded-xl p-12 border-2 border-gray-200 text-center">
-            <Calendar className="h-16 w-16 text-gray-300 mx-auto mb-4" />
-            <h3 className="text-xl font-semibold text-[#273F4F] mb-2">
-              {activeTab === "active" ? "No Active Bookings" : "No Booking History"}
-            </h3>
-            <p className="text-gray-600 mb-6">
-              {activeTab === "active"
-                ? "You don't have any active bookings at the moment."
-                : "You haven't made any bookings yet."}
-            </p>
-            <Button
-              onClick={() => router.push("/childcare")}
-              className="bg-[#FE7743] hover:bg-[#e56a3a] text-white px-6 py-3 rounded-xl"
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          {/* Tabs */}
+          <div className="flex space-x-1 bg-gray-100 p-1 rounded-xl mb-6">
+            <button
+              onClick={() => setActiveTab("active")}
+              className={`flex-1 flex items-center justify-center gap-2 py-3 px-4 rounded-lg font-medium transition-colors ${
+                activeTab === "active" ? "bg-white text-[#FE7743] shadow" : "text-gray-600 hover:text-[#FE7743]"
+              }`}
             >
-              Find Childcare Providers
-            </Button>
+              <Calendar className="h-4 w-4" />
+              Active Bookings
+              <span className="bg-[#FE7743] text-white text-xs px-2 py-1 rounded-full">{getStatusCount("active")}</span>
+            </button>
+            <button
+              onClick={() => setActiveTab("history")}
+              className={`flex-1 flex items-center justify-center gap-2 py-3 px-4 rounded-lg font-medium transition-colors ${
+                activeTab === "history" ? "bg-white text-[#FE7743] shadow-sm" : "text-gray-600 hover:text-[#FE7743]"
+              }`}
+            >
+              <Clock className="h-4 w-4" />
+              Booking History
+              <span className="bg-gray-400 text-white text-xs px-2 py-1 rounded-full">{getStatusCount("history")}</span>
+            </button>
           </div>
-        ) : (
-          <div className="space-y-4">
-            {filteredBookings.map((booking) => (
-              <BookingCard
-                key={booking._id}
-                booking={booking}
-                onViewDetails={(id: string) => router.push(`/bookings/${id}`)}
-                onCancel={(id: string) => handleCancelBooking(id)}
-                onRebook={handleRebook}
-                actionLoading={actionLoading}
-              />
-            ))}
-          </div>
-        )}
 
-        {/* Summary Stats */}
-        {/* {!loading && filteredBookings.length > 0 && (
-          <div className="mt-8 bg-white rounded-xl p-6 border border-gray-200 shadow-sm">
-            <h3 className="text-lg font-semibold text-[#273F4F] mb-4">Summary</h3>
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-              <div className="text-center">
-                <div className="text-2xl font-bold text-[#FE7743]">
-                  {bookings.filter((b) => b.status === "confirmed").length}
+          {/* Search and Filters */}
+          <div className="bg-white rounded-xl py-3 mb-6">
+            <div className="flex flex-col sm:flex-row gap-3">
+              <div className="flex-1">
+                <div className="relative">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+                  <Input
+                    placeholder="Search by provider, child name, or booking ID..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="pl-10"
+                  />
                 </div>
-                <div className="text-sm text-gray-600">Confirmed</div>
               </div>
-              <div className="text-center">
-                <div className="text-2xl font-bold text-yellow-500">
-                  {bookings.filter((b) => b.status === "pending").length}
-                </div>
-                <div className="text-sm text-gray-600">Pending</div>
-              </div>
-              <div className="text-center">
-                <div className="text-2xl font-bold text-blue-500">
-                  {bookings.filter((b) => b.status === "completed").length}
-                </div>
-                <div className="text-sm text-gray-600">Completed</div>
-              </div>
-              <div className="text-center">
-                <div className="text-2xl font-bold text-gray-500">{bookings.length}</div>
-                <div className="text-sm text-gray-600">Total</div>
+              <div className="flex gap-3">
+                <select
+                  value={filterStatus}
+                  onChange={(e) => setFilterStatus(e.target.value)}
+                  className="px-4 py-2 border border-gray-300 rounded-lg focus:border-[#FE7743] focus:outline-none focus:ring-1 focus:ring-[#FE7743]"
+                >
+                  <option value="all">All Status</option>
+                  <option value="pending">Pending</option>
+                  <option value="confirmed">Confirmed</option>
+                  <option value="active">Active</option>
+                  <option value="completed">Completed</option>
+                  <option value="cancelled">Cancelled</option>
+                </select>
+                <Button 
+                  variant="default"
+                  onClick={() => fetchBookings()}
+                  disabled={loading}
+                  className="bg-[#FE7743] rounded-lg h-auto"
+                >
+                  <Filter className="h-4 w-4" />
+                </Button>
               </div>
             </div>
           </div>
-        )} */}
+
+          {/* Bookings List */}
+          {loading ? (
+            <div className="flex justify-center items-center py-12">
+              <LoadingSpinner size="lg" className="text-[#FE7743]" />
+            </div>
+          ) : filteredBookings.length === 0 ? (
+            <div className="bg-white rounded-xl p-12 border-2 border-gray-200 text-center">
+              <Calendar className="h-16 w-16 text-gray-300 mx-auto mb-4" />
+              <h3 className="text-xl font-semibold text-[#273F4F] mb-2">
+                {activeTab === "active" ? "No Active Bookings" : "No Booking History"}
+              </h3>
+              <p className="text-gray-600 mb-6">
+                {activeTab === "active"
+                  ? "You don't have any active bookings at the moment."
+                  : "You haven't made any bookings yet."}
+              </p>
+              <Button
+                onClick={() => router.push("/childcare")}
+                className="bg-[#FE7743] hover:bg-[#e56a3a] text-white px-6 py-3 rounded-xl"
+              >
+                Find Childcare Providers
+              </Button>
+            </div>
+          ) : (
+            <div className="space-y-4">
+              {filteredBookings.map((booking) => (
+                <BookingCard
+                  key={booking._id}
+                  booking={booking}
+                  onViewDetails={(id: string) => router.push(`/bookings/${id}`)}
+                  onCancel={(id: string) => handleCancelBooking(id)}
+                  onRebook={handleRebook}
+                  actionLoading={actionLoading}
+                />
+              ))}
+            </div>
+          )}
+        </div>
       </div>
-    </div>
+    </ProtectedRoute>
   )
 }
