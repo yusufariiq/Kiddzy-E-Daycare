@@ -11,4 +11,13 @@ export class ContactRepository {
         .skip((page - 1) * limit)
         .sort({ createdAt: -1 });
     }
+
+    async update(id: string, contactData: Partial<IContact>): Promise<IContact | null> {
+      return await Contact.findByIdAndUpdate(id, contactData, { new: true });
+    }
+
+    async delete(id: string): Promise<boolean> {
+        const result = await Contact.findByIdAndDelete(id);
+        return !!result;
+    }
 }

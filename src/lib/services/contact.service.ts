@@ -11,4 +11,12 @@ export class ContactService {
     async submitContactForm(contactData: Partial<IContact>): Promise<IContact> {
         return await this.contactRepository.create(contactData);
     }
+
+    async updateContact(contactId: string, contactData: Partial<IContact>): Promise<IContact | null> {
+        return await this.contactRepository.update(contactId, contactData);
+    }
+    
+    async deleteContact(contactId: string): Promise<boolean> {
+        return await this.contactRepository.delete(contactId);
+    }
 }
