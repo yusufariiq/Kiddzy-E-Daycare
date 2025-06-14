@@ -3,14 +3,16 @@
 import { useState, useEffect } from "react"
 import { useParams, useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
-import { ArrowLeft, User, Calendar, CreditCard, Phone } from "lucide-react"
+import { ArrowLeft, User, Calendar, CreditCard, Phone, Clock } from "lucide-react"
 import LoadingSpinner from "@/components/ui/loading-spinner"
 import BookingConfirmation from "@/components/booking/booking-confirmation"
 import BookingDetailsStep from "@/components/booking/booking-details-step"
 import ChildInfoStep from "@/components/booking/child-info-step"
 import PaymentStep from "@/components/booking/payment-step"
 import EmergencyContactForm from "@/components/booking/emergency-contact-form"
+import CLosedFacilityModal from "@/components/common/closed-facility-modal"
 import { useAuth } from "@/context/auth.context"
+import { getOperationalStatus } from "@/utils/operationalStatus"
 import toast from "react-hot-toast"
 import ProtectedRoute from "@/components/common/ProtectedRoute"
 
@@ -20,6 +22,9 @@ interface Provider {
   address: string
   images: string[]
   price: number
+  operatingHours: any[]
+  availability: boolean
+  isActive: boolean
 }
 
 interface ChildData {
@@ -34,7 +39,7 @@ interface ChildData {
 interface BookingData {
   startDate: Date
   endDate: Date
-  childrenCount: number // This will be auto-calculated
+  childrenCount: number
   notes?: string
 }
 
@@ -69,12 +74,39 @@ export default function BookingPage() {
   const [bookingId, setBookingId] = useState<string | null>(null)
   const [isProcessing, setIsProcessing] = useState(false)
   const [showConfirmation, setShowConfirmation] = useState(false)
+  
+  // Access control states
+  const [showClosedModal, setShowClosedModal] = useState(false)
+  const [operationalStatus, setOperationalStatus] = useState<any>(null)
+  const [accessDenied, setAccessDenied] = useState(false)
 
   const params = useParams()
   const router = useRouter()
   const { id } = params
   const { token, isAuthenticated } = useAuth()
-  
+
+  // Check operational status periodically
+  useEffect(() => {
+    if (!provider?.operatingHours) return
+
+    const checkOperationalStatus = () => {
+      const status = getOperationalStatus(provider.operatingHours)
+      setOperationalStatus(status)
+      
+      if (!status.isOpen) {
+        setAccessDenied(true)
+        setShowClosedModal(true)
+      }
+    }
+
+    // Initial check
+    checkOperationalStatus()
+
+    // Check every minute
+    const interval = setInterval(checkOperationalStatus, 60000)
+
+    return () => clearInterval(interval)
+  }, [provider?.operatingHours])
 
   useEffect(() => {
     const fetchProvider = async () => {
@@ -82,7 +114,20 @@ export default function BookingPage() {
         const res = await fetch(`/api/providers/${id}`)
         if (!res.ok) throw new Error("Failed to fetch provider")
         const json = await res.json()
-        setProvider(json.data)
+        
+        const providerData = json.data
+        setProvider(providerData)
+
+        // Immediate operational check after fetching provider
+        if (providerData.operatingHours) {
+          const status = getOperationalStatus(providerData.operatingHours)
+          setOperationalStatus(status)
+          
+          if (!status.isOpen || !providerData.availability || !providerData.isActive) {
+            setAccessDenied(true)
+            setShowClosedModal(true)
+          }
+        }
       } catch (e) {
         console.error(e)
         router.push("/childcare")
@@ -94,9 +139,20 @@ export default function BookingPage() {
     if (id) {
       fetchProvider()
     }
-  }, [id, router, token, isAuthenticated])
+  }, [id, router])
+
+  // Block all booking actions if access is denied
+  useEffect(() => {
+    if (accessDenied && !showClosedModal) {
+      router.push(`/childcare/${id}`)
+    }
+  }, [accessDenied, showClosedModal, id, router])
 
   const handleNext = () => {
+    if (accessDenied) {
+      toast.error("Booking is not available while the facility is closed")
+      return
+    }
     if (currentStep < steps.length) {
       setCurrentStep(currentStep + 1)
     }
@@ -110,7 +166,17 @@ export default function BookingPage() {
     }
   }
 
+  const handleRedirectToProvider = () => {
+    setShowClosedModal(false)
+    router.push(`/childcare/${id}`)
+  }
+
   const handleChildInfoSubmit = async (children: ChildData[]) => {
+    if (accessDenied) {
+      toast.error("Booking is not available while the facility is closed")
+      return
+    }
+
     setIsProcessing(true)
     try {
       const createdChildrenIds: string[] = []
@@ -145,7 +211,11 @@ export default function BookingPage() {
   }
 
   const handleBookingDetailsSubmit = (data: BookingData) => {
-    // Auto-calculate childrenCount from actual children added
+    if (accessDenied) {
+      toast.error("Booking is not available while the facility is closed")
+      return
+    }
+
     const updatedData = {
       ...data,
       childrenCount: childrenData.length 
@@ -155,12 +225,33 @@ export default function BookingPage() {
   }
 
   const handleEmergencyContactSubmit = (data: EmergencyContact) => {
+    if (accessDenied) {
+      toast.error("Booking is not available while the facility is closed")
+      return
+    }
+
     setEmergencyContact(data)
     handleNext()
   }
 
   const handlePaymentSubmit = async (data: PaymentData) => {
+    if (accessDenied) {
+      toast.error("Booking is not available while the facility is closed")
+      return
+    }
+
     if (!childrenIds.length || !bookingData || !provider || !emergencyContact) return
+    
+    // Final operational check before processing payment
+    if (provider.operatingHours) {
+      const currentStatus = getOperationalStatus(provider.operatingHours)
+      if (!currentStatus.isOpen) {
+        setAccessDenied(true)
+        setShowClosedModal(true)
+        toast.error("Facility has closed during your booking process")
+        return
+      }
+    }
     
     setIsProcessing(true)
     setPaymentData(data)
@@ -177,8 +268,6 @@ export default function BookingPage() {
         totalAmount: data.totalAmount,
         emergencyContact: emergencyContact
       }
-
-      console.log('Booking payload:', bookingPayload)
 
       const bookingResponse = await fetch("/api/bookings", {
         method: "POST",
@@ -201,7 +290,6 @@ export default function BookingPage() {
       setPaymentData(data)
       setShowConfirmation(true)
       
-      // Auto redirect after 3 seconds
       setTimeout(() => {
         router.push("/bookings")
       }, 3000)
@@ -248,6 +336,17 @@ export default function BookingPage() {
   return (
     <ProtectedRoute requiredRole="user">
       <div className="min-h-[90vh] space-y-10 mb-10">
+        {/* Closed Facility Modal */}
+        {operationalStatus && (
+          <CLosedFacilityModal
+            isOpen={showClosedModal}
+            onClose={() => setShowClosedModal(false)}
+            providerName={provider.name}
+            operationalStatus={operationalStatus}
+            onRedirect={handleRedirectToProvider}
+          />
+        )}
+
         {/* Header */}
         <div className="bg-[#FE7743] text-white">
           <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
@@ -255,7 +354,7 @@ export default function BookingPage() {
               <Button
                 onClick={handleBack}
                 variant="ghost"
-                className="flex items-center gap-2 text-white"
+                className="flex items-center gap-2 hover:text-[#FE7743] text-white"
               >
                 <ArrowLeft className="size-5" />
                 Back
@@ -275,17 +374,20 @@ export default function BookingPage() {
               const Icon = step.icon
               const isActive = currentStep === step.id
               const isCompleted = currentStep > step.id
+              const isDisabled = accessDenied
 
               return (
                 <div key={step.id} className="flex items-center">
                   <div
                     className={`flex items-center justify-center w-10 h-10 rounded-full border-2 
                     ${
-                      isActive
-                        ? "border-[#FE7743] bg-[#FE7743] text-white"
-                        : isCompleted
+                      isDisabled
+                        ? "border-gray-300 bg-gray-100 text-gray-400"
+                        : isActive
                           ? "border-[#FE7743] bg-[#FE7743] text-white"
-                          : "border-gray-300 bg-white text-gray-400"
+                          : isCompleted
+                            ? "border-[#FE7743] bg-[#FE7743] text-white"
+                            : "border-gray-300 bg-white text-gray-400"
                     }`}
                   >
                     <Icon className="h-5 w-5" />
@@ -293,7 +395,13 @@ export default function BookingPage() {
                   <div className="ml-3 hidden sm:block">
                     <p
                       className={`text-sm font-medium ${
-                        isActive ? "text-[#FE7743]" : isCompleted ? "text-[#FE7743]" : "text-gray-500"
+                        isDisabled
+                          ? "text-gray-400"
+                          : isActive
+                            ? "text-[#FE7743]"
+                            : isCompleted
+                              ? "text-[#FE7743]"
+                              : "text-gray-500"
                       }`}
                     >
                       {step.name}
@@ -302,7 +410,7 @@ export default function BookingPage() {
                   {index < steps.length - 1 && (
                     <div
                       className={`hidden sm:block w-10 h-0.5 mx-3 
-                      ${isCompleted ? "bg-[#FE7743]" : "bg-gray-300"}`}
+                      ${isCompleted && !isDisabled ? "bg-[#FE7743]" : "bg-gray-300"}`}
                     />
                   )}
                 </div>
@@ -325,7 +433,7 @@ export default function BookingPage() {
               <div className="px-4 sm:px-6 lg:px-8 pb-4">
                 <h3 className="text-xl font-semibold text-[#273F4F]">{provider.name}</h3>
                 <p className="text-base text-gray-600 mb-2">{provider.address}</p>
-                <p className="text-lg font-bold text-[#FE7743]">Rp {provider.price.toLocaleString("id-ID")} <span className="text-sm text-gray-400 font-normal">/ day</span></p>
+                <p className="text-lg font-bold text-[#FE7743]">Rp {provider.price.toLocaleString("id-ID")}/day</p>
                 
                 {/* Show children count when available */}
                 {childrenData.length > 0 && (
@@ -346,38 +454,66 @@ export default function BookingPage() {
 
           {/* Step Content */}
           <div className="w-full md:w-2/3 mx-auto px-4 sm:px-6">
-            {currentStep === 1 && (
-              <ChildInfoStep 
-                onSubmit={handleChildInfoSubmit} 
-                initialData={childrenData} 
-                isProcessing={isProcessing}
-              />
-            )}
-            {currentStep === 2 && (
-              <BookingDetailsStep 
-                onSubmit={handleBookingDetailsSubmit} 
-                initialData={bookingData} 
-                provider={provider}
-                childrenCount={childrenData.length}
-              />
-            )}
-            {currentStep === 3 && (
-              <EmergencyContactForm
-                onSubmit={handleEmergencyContactSubmit}
-                initialData={emergencyContact}
-              />
-            )}
-            {currentStep === 4 && (
-              <PaymentStep
-                onSubmit={handlePaymentSubmit}
-                provider={provider}
-                childData={childrenData[0] || childrenData}
-                bookingData={{
-                  ...bookingData!,
-                  childrenCount: childrenData.length
-                }}
-                isProcessing={isProcessing}
-              />
+            {/* Show access denied message instead of steps */}
+            {accessDenied ? (
+              <div className="bg-white rounded-xl p-8 border border-red-200 text-center">
+                <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <Clock className="h-8 w-8 text-red-600" />
+                </div>
+                <h2 className="text-xl font-bold text-gray-900 mb-2">
+                  Booking Currently Unavailable
+                </h2>
+                <p className="text-gray-600 mb-4">
+                  {provider.name} is currently closed and not accepting bookings.
+                </p>
+                {operationalStatus && (
+                  <p className="text-sm text-gray-500 mb-6">
+                    {operationalStatus.message}
+                  </p>
+                )}
+                <Button
+                  onClick={handleRedirectToProvider}
+                  className="bg-[#FE7743] hover:bg-[#e56a3a] text-white"
+                >
+                  Return to Provider Page
+                </Button>
+              </div>
+            ) : (
+              <>
+                {currentStep === 1 && (
+                  <ChildInfoStep 
+                    onSubmit={handleChildInfoSubmit} 
+                    initialData={childrenData} 
+                    isProcessing={isProcessing}
+                  />
+                )}
+                {currentStep === 2 && (
+                  <BookingDetailsStep 
+                    onSubmit={handleBookingDetailsSubmit} 
+                    initialData={bookingData} 
+                    provider={provider}
+                    childrenCount={childrenData.length}
+                  />
+                )}
+                {currentStep === 3 && (
+                  <EmergencyContactForm
+                    onSubmit={handleEmergencyContactSubmit}
+                    initialData={emergencyContact}
+                  />
+                )}
+                {currentStep === 4 && (
+                  <PaymentStep
+                    onSubmit={handlePaymentSubmit}
+                    provider={provider}
+                    childData={childrenData[0] || childrenData}
+                    bookingData={{
+                      ...bookingData!,
+                      childrenCount: childrenData.length
+                    }}
+                    isProcessing={isProcessing}
+                  />
+                )}
+              </>
             )}
           </div>
         </div>

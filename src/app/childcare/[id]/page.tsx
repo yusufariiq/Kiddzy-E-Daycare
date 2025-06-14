@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react"
 import Image from "next/image"
-import { MapPin, ArrowLeft, Phone, Map } from "lucide-react"
+import { MapPin, ArrowLeft, Phone, Map, Clock } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import LoadingSpinner from "@/components/ui/loading-spinner"
 import { useParams, useRouter } from "next/navigation"
@@ -11,10 +11,122 @@ import { ProviderData } from "@/lib/types/providers"
 import { useAuth } from "@/context/auth.context"
 import toast from "react-hot-toast"
 
+// Utility function to check if facility is currently open
+const isCurrentlyOpen = (operatingHours: any[]) => {
+  const now = new Date()
+  const currentDay = now.toLocaleDateString('en-US', { weekday: 'long' })
+  const currentTime = now.toLocaleTimeString('en-US', { 
+    hour12: false, 
+    hour: '2-digit', 
+    minute: '2-digit' 
+  })
+
+  const todaySchedule = operatingHours.find(
+    schedule => schedule.day.toLowerCase() === currentDay.toLowerCase()
+  )
+
+  if (!todaySchedule || todaySchedule.open === "CLOSED" || todaySchedule.close === "CLOSED") {
+    return false
+  }
+
+  return currentTime >= todaySchedule.open && currentTime <= todaySchedule.close
+}
+
+// Utility function to get operational status message
+const getOperationalStatus = (operatingHours: any[]) => {
+  const now = new Date()
+  const currentDay = now.toLocaleDateString('en-US', { weekday: 'long' })
+  
+  const todaySchedule = operatingHours.find(
+    schedule => schedule.day.toLowerCase() === currentDay.toLowerCase()
+  )
+
+  if (!todaySchedule || todaySchedule.open === "CLOSED") {
+    // Find next opening day
+    const daysOfWeek = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
+    const currentDayIndex = daysOfWeek.indexOf(currentDay)
+    
+    for (let i = 1; i <= 7; i++) {
+      const nextDayIndex = (currentDayIndex + i) % 7
+      const nextDay = daysOfWeek[nextDayIndex]
+      const nextSchedule = operatingHours.find(
+        schedule => schedule.day.toLowerCase() === nextDay.toLowerCase()
+      )
+      
+      if (nextSchedule && nextSchedule.open !== "CLOSED") {
+        return {
+          isOpen: false,
+          message: `Closed today • Opens ${nextDay} at ${nextSchedule.open}`,
+          status: 'closed'
+        }
+      }
+    }
+    
+    return {
+      isOpen: false,
+      message: 'Currently closed',
+      status: 'closed'
+    }
+  }
+
+  const currentTime = now.toLocaleTimeString('en-US', { 
+    hour12: false, 
+    hour: '2-digit', 
+    minute: '2-digit' 
+  })
+
+  const isOpen = currentTime >= todaySchedule.open && currentTime <= todaySchedule.close
+
+  if (isOpen) {
+    return {
+      isOpen: true,
+      message: `Open now • Closes at ${todaySchedule.close}`,
+      status: 'open'
+    }
+  } else if (currentTime < todaySchedule.open) {
+    return {
+      isOpen: false,
+      message: `Closed • Opens today at ${todaySchedule.open}`,
+      status: 'closed'
+    }
+  } else {
+    // Find next opening time
+    const daysOfWeek = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
+    const currentDayIndex = daysOfWeek.indexOf(currentDay)
+    
+    for (let i = 1; i <= 7; i++) {
+      const nextDayIndex = (currentDayIndex + i) % 7
+      const nextDay = daysOfWeek[nextDayIndex]
+      const nextSchedule = operatingHours.find(
+        schedule => schedule.day.toLowerCase() === nextDay.toLowerCase()
+      )
+      
+      if (nextSchedule && nextSchedule.open !== "CLOSED") {
+        return {
+          isOpen: false,
+          message: `Closed • Opens ${nextDay} at ${nextSchedule.open}`,
+          status: 'closed'
+        }
+      }
+    }
+    
+    return {
+      isOpen: false,
+      message: 'Currently closed',
+      status: 'closed'
+    }
+  }
+}
+
 export default function ChildcareProviderPage() {
   const [provider, setProvider] = useState<ProviderData | null>(null)
   const [loading, setLoading] = useState(true)
   const [activeImage, setActiveImage] = useState(0)
+  const [operationalStatus, setOperationalStatus] = useState<{
+    isOpen: boolean
+    message: string
+    status: string
+  } | null>(null)
   const { token, isAuthenticated } = useAuth()
   const params = useParams()
   const router = useRouter()
@@ -40,8 +152,37 @@ export default function ChildcareProviderPage() {
     }
   }, [id])
 
+  useEffect(() => {
+    if (!provider?.operatingHours) return
+
+    const updateStatus = () => {
+      const status = getOperationalStatus(provider.operatingHours)
+      setOperationalStatus(status)
+    }
+
+    updateStatus()
+
+    const interval = setInterval(updateStatus, 60000)
+
+    return () => clearInterval(interval)
+  }, [provider?.operatingHours])
+
   const handleBack = () => {
     router.back()
+  }
+
+  const handleBooking = () => {
+    if (!isAuthenticated || !token) {
+      toast.error("To book this childcare, please log in or create an account first.")
+      return
+    }
+
+    if (!operationalStatus?.isOpen) {
+      toast.error("This childcare is currently closed. Please check operating hours.")
+      return
+    }
+
+    router.push(`/childcare/${id}/book`)
   }
 
   if (loading) {
@@ -67,6 +208,8 @@ export default function ChildcareProviderPage() {
     provider.description ||
     "This childcare provider offers a safe, nurturing environment for children to learn and grow. With experienced staff and a well-structured program, we ensure your child receives the best care possible."
 
+  const isBookingEnabled = operationalStatus?.isOpen && provider.availability && provider.isActive
+
   return (
     <div className="min-h-screen pb-16">
       {/* Back button */}
@@ -84,7 +227,7 @@ export default function ChildcareProviderPage() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Left column - Images */}
           <div className="lg:col-span-2">
-            <div className="relative h-64 sm:h-80 md:h-96 w-full overflow-hidden rounded-xl mb-4">
+            <div className="relative h-64 sm:h-80 md:h-[500px] w-full overflow-hidden rounded-xl mb-4">
               <img
                 src={provider.images[activeImage] || "/placeholder.svg"}
                 alt={provider.name}
@@ -116,10 +259,9 @@ export default function ChildcareProviderPage() {
 
           {/* Right column - Details and Booking */}
           <div className="lg:col-span-1">
-            <div className="bg-white rounded-xl p-6 border border-gray-200 shadow-sm">
-              <h1 className="text-2xl sm:text-3xl font-bold text-[#273F4F] mb-4">{provider.name}</h1>
-
+            <div className="h-[500px] flex flex-col justify-between bg-white rounded-xl p-6 border border-gray-200 shadow-sm">
               <div className="flex flex-col mb-4 gap-3">
+                <h1 className="text-2xl sm:text-3xl font-bold text-[#273F4F] mb-4">{provider.name}</h1>
                 <div className="flex items-center gap-3 text-gray-600">
                   <div className="w-5">
                     <MapPin className="size-4 text-[#FE7743]" />
@@ -145,18 +287,22 @@ export default function ChildcareProviderPage() {
                 <div className="text-2xl font-bold text-[#273F4F] mb-4">Rp {provider.price.toLocaleString("id-ID")}</div>
 
                 <Button
-                  onClick={() => {
-                    if (!isAuthenticated || !token) {
-                      toast.error("To book this childcare, please log in or create an account first.")
-                      return
-                    } else {
-                      router.push(`/childcare/${id}/book`)
-                    }
-                  }}
-                  className="w-full bg-[#FE7743] hover:bg-[#e56a3a] text-white py-6 rounded-xl text-lg font-semibold"
+                  onClick={handleBooking}
+                  disabled={!isBookingEnabled}
+                  className={`w-full py-6 rounded-xl text-lg font-semibold transition-colors ${
+                    isBookingEnabled
+                      ? 'bg-[#FE7743] hover:bg-[#e56a3a] text-white'
+                      : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                  }`}
                 >
-                  Book Now
+                  {isBookingEnabled ? 'Book Now' : 'Currently Closed'}
                 </Button>
+                
+                {!isBookingEnabled && operationalStatus && (
+                  <p className="text-xs text-gray-500 mt-2 text-center">
+                    {operationalStatus.message}
+                  </p>
+                )}
               </div>
             </div>
           </div>
@@ -191,22 +337,19 @@ export default function ChildcareProviderPage() {
               <h2 className="text-xl font-bold text-[#273F4F] mb-4">Operating Hours</h2>
               <div className="space-y-3">
                 {provider.operatingHours.length > 0 ? (
-                  provider.operatingHours.map((hours) => (
-                    <div key={hours._id} className="flex justify-between items-center">
-                      <span className="font-medium">{hours.day}</span>
-                      {hours.open && hours.close === "CLOSED" ?
-                        (
-                          <span className="text-gray-600">
-                            Closed
-                          </span>
-                        ) : (
-                          <span className="text-gray-600">
-                            {hours.open} - {hours.close}
-                          </span>
-                        )   
-                      }
-                    </div>
-                  ))
+                  provider.operatingHours.map((hours) => {
+                    const isToday = new Date().toLocaleDateString('en-US', { weekday: 'long' }).toLowerCase() === hours.day.toLowerCase()
+                    const isClosed = hours.open === "CLOSED" || hours.close === "CLOSED"
+                    
+                    return (
+                      <div key={hours._id} className={`flex justify-between items-center ${isToday ? 'font-semibold text-[#FE7743]' : ''}`}>
+                        <span className="font-medium">{hours.day}</span>
+                        <span className={`${isClosed ? 'text-red-600' : 'text-gray-600'}`}>
+                          {isClosed ? 'Closed' : `${hours.open} - ${hours.close}`}
+                        </span>
+                      </div>
+                    )
+                  })
                 ) : (
                   <div className="text-gray-600">Operating hours not available</div>
                 )}
