@@ -255,7 +255,7 @@ export default function BookingPage() {
               <Button
                 onClick={handleBack}
                 variant="ghost"
-                className="flex items-center gap-2 hover:text-[#FE7743] text-white"
+                className="flex items-center gap-2 text-white"
               >
                 <ArrowLeft className="size-5" />
                 Back
@@ -317,7 +317,7 @@ export default function BookingPage() {
             <div className="flex flex-col gap-4 border-2 border-gray-200 rounded-xl">
               <div className="relative w-full overflow-hidden">
                 <img
-                  src={"/image5.webp"}
+                  src={provider.images[0] || "/image5.webp"}
                   alt={provider.name}
                   className="w-full h-full rounded-t-xl object-cover"
                 />
@@ -325,7 +325,7 @@ export default function BookingPage() {
               <div className="px-4 sm:px-6 lg:px-8 pb-4">
                 <h3 className="text-xl font-semibold text-[#273F4F]">{provider.name}</h3>
                 <p className="text-base text-gray-600 mb-2">{provider.address}</p>
-                <p className="text-lg font-bold text-[#FE7743]">Rp {provider.price.toLocaleString("id-ID")}/day</p>
+                <p className="text-lg font-bold text-[#FE7743]">Rp {provider.price.toLocaleString("id-ID")} <span className="text-sm text-gray-400 font-normal">/ day</span></p>
                 
                 {/* Show children count when available */}
                 {childrenData.length > 0 && (
