@@ -8,8 +8,6 @@ import { usePathname, useRouter } from "next/navigation"
 import {
   LayoutDashboard,
   Calendar,
-  Users,
-  Phone,
   Building2,
   UserCheck,
   Menu,
@@ -39,24 +37,19 @@ const navigationItems = [
     icon: Calendar,
   },
   {
-    name: "Children",
-    href: "/admin/children",
-    icon: Users,
-  },
-  {
-    name: "Messages",
-    href: "/admin/contacts",
-    icon: MessageCircleIcon,
-  },
-  {
     name: "Providers",
     href: "/admin/providers",
     icon: Building2,
   },
   {
-    name: "Users",
-    href: "/admin/users",
+    name: "Parents",
+    href: "/admin/parents",
     icon: UserCheck,
+  },
+  {
+    name: "Messages",
+    href: "/admin/contacts",
+    icon: MessageCircleIcon,
   },
 ]
 
