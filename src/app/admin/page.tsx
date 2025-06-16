@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Users, Baby, Calendar, Building2, AlertCircle, Loader2 } from 'lucide-react';
+import { Users, Baby, Calendar, Building2, AlertCircle } from 'lucide-react';
 import LoadingSpinner from '@/components/ui/loading-spinner';
 import { useAuth } from '@/context/auth.context';
 
@@ -62,7 +62,6 @@ export default function AdminDashboard() {
         'Authorization': `Bearer ${token}`,
       };
 
-      // Fetch all data in parallel
       const [bookingsRes, childrenRes, usersRes, providersRes] = await Promise.all([
         fetch('/api/admin/booking', { headers }),
         fetch('/api/admin/children?limit=1000', { headers }),
@@ -70,7 +69,6 @@ export default function AdminDashboard() {
         fetch('/api/admin/providers?limit=1000', { headers }),
       ]);
 
-      // Check if all responses are ok
       if (!bookingsRes.ok || !childrenRes.ok || !usersRes.ok || !providersRes.ok) {
         throw new Error('Failed to fetch dashboard data');
       }
@@ -201,7 +199,7 @@ export default function AdminDashboard() {
         <Card className='bg-white border-1 border-gray-200'>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium text-gray-600">
-              Active Children
+              Registered Children
             </CardTitle>
             <Baby className="h-4 w-4 text-green-600" />
           </CardHeader>
@@ -213,7 +211,7 @@ export default function AdminDashboard() {
         <Card className='bg-white border-1 border-gray-200'>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium text-gray-600">
-              Total Users
+              Total Parents
             </CardTitle>
             <Users className="h-4 w-4 text-purple-600" />
           </CardHeader>
