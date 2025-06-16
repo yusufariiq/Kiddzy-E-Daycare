@@ -4,21 +4,34 @@ import { useEffect, useState } from "react"
 import ChildcareCard from "@/components/common/childcare-card"
 import SearchBar from "@/components/common/searchbar"
 import { Button } from "@/components/ui/button"
-import { RefreshCcw } from "lucide-react"
+import { RefreshCcw, ChevronLeft, ChevronRight } from "lucide-react"
 import LoadingSpinner from "@/components/ui/loading-spinner"
 import { ProviderData } from "@/lib/types/providers"
 
 export default function ChildcarePage() {
   const [providers, setProviders] = useState<ProviderData[]>([])
   const [loading, setLoading] = useState(false)
+  const [currentPage, setCurrentPage] = useState(1)
+  const [totalPages, setTotalPages] = useState(1)
+  const [hasNextPage, setHasNextPage] = useState(false)
+  const [currentFilters, setCurrentFilters] = useState<any>({})
 
-  const fetchProviders = async (params?: any) => {
+  const fetchProviders = async (params?: any, page: number = 1) => {
     setLoading(true)
     try {
-      const query = params ? new URLSearchParams(params).toString() : ""
-      const res = await fetch(`/api/providers?${query}`)
+      const queryParams = new URLSearchParams({
+        page: page.toString(),
+        limit: '10',
+        ...params
+      })
+      
+      const res = await fetch(`/api/providers?${queryParams.toString()}`)
       const json = await res.json()
+      
       setProviders(json.data || [])
+      setTotalPages(json.totalPages || 1)
+      setHasNextPage(json.hasNextPage || false)
+      setCurrentPage(page)
     } catch (e) {
       console.error(e)
     } finally {
@@ -27,13 +40,30 @@ export default function ChildcarePage() {
   }
 
   const handleSearch = (params: any) => {
-    fetchProviders({ keyword: params.location })
+    const searchParams = {
+      ...(params.keyword && { keyword: params.keyword }),
+      ...(params.location && { location: params.location }),
+      ...(params.ageGroup && { ageGroup: params.ageGroup }),
+      ...(params.maxPrice && { maxPrice: params.maxPrice.toString() })
+    }
+    
+    setCurrentFilters(searchParams)
+    setCurrentPage(1)
+    fetchProviders(searchParams, 1)
   }
 
-  const handleReset = () => fetchProviders()
+  const handleReset = () => {
+    setCurrentFilters({})
+    setCurrentPage(1)
+    fetchProviders({}, 1)
+  }
+
+  const handlePageChange = (page: number) => {
+    fetchProviders(currentFilters, page)
+  }
 
   useEffect(() => {
-    fetchProviders()
+    fetchProviders({}, 1)
   }, [])
 
   return (
@@ -46,7 +76,7 @@ export default function ChildcarePage() {
         </div>
 
         <div className="py-8">
-          <SearchBar onSearch={handleSearch} />
+          <SearchBar onSearch={handleSearch} onReset={handleReset} />
         </div>
         
         <div className="mx-auto max-w-7xl flex justify-end">
@@ -68,15 +98,58 @@ export default function ChildcarePage() {
                 <LoadingSpinner size="lg" className="text-[#FE7743]"/>
               </div>
             ) : (
-              <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-                {providers.map((provider) => (
-                  <ChildcareCard
-                    key={provider._id}
-                    provider={provider}
-                    className=""
-                  />
-                ))}
-              </div>
+              <>
+                <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+                  {providers.map((provider) => (
+                    <ChildcareCard
+                      key={provider._id}
+                      provider={provider}
+                      className=""
+                    />
+                  ))}
+                </div>
+                
+                {/* Pagination */}
+                {totalPages > 1 && (
+                  <div className="flex justify-center items-center gap-4 mt-8">
+                    <Button
+                      variant="outline"
+                      onClick={() => handlePageChange(currentPage - 1)}
+                      disabled={currentPage === 1}
+                      className="flex items-center gap-2"
+                    >
+                      <ChevronLeft className="h-4 w-4" />
+                      Previous
+                    </Button>
+                    
+                    <div className="flex items-center gap-2">
+                      {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+                        const pageNum = Math.max(1, Math.min(totalPages - 4, currentPage - 2)) + i
+                        return (
+                          <Button
+                            key={pageNum}
+                            variant={pageNum === currentPage ? "default" : "outline"}
+                            onClick={() => handlePageChange(pageNum)}
+                            className="w-10 h-10 p-0"
+                          >
+                            {pageNum}
+                          </Button>
+                        )
+                      })}
+                    </div>
+                    
+                    <Button
+                      variant="outline"
+                      onClick={() => handlePageChange(currentPage + 1)}
+                      disabled={!hasNextPage}
+                      className="flex items-center gap-2"
+                    >
+                      Next
+                      <ChevronRight className="h-4 w-4" />
+                    </Button>
+                  </div>
+                )}
+              </>
             )}
           </div>
         </div>
