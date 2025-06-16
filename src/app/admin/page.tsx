@@ -5,29 +5,13 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Users, Baby, Calendar, Building2, AlertCircle } from 'lucide-react';
 import LoadingSpinner from '@/components/ui/loading-spinner';
 import { useAuth } from '@/context/auth.context';
+import Booking from '@/lib/types/booking';
 
 interface DashboardStats {
   totalBookings: number;
   activeChildren: number;
   totalUsers: number;
   totalProviders: number;
-}
-
-interface RecentBooking {
-  _id: string;
-  userId: {
-    firstName: string;
-    lastName: string;
-  }
-  childrenIds: {
-    fullname: string;
-  };
-  providerId: {
-    name: string;
-  };
-  startDate: string;
-  endDate: string;
-  status: string;
 }
 
 interface ApiResponse<T> {
@@ -47,7 +31,7 @@ export default function AdminDashboard() {
     totalUsers: 0,
     totalProviders: 0,
   });
-  const [recentBookings, setRecentBookings] = useState<RecentBooking[]>([]);
+  const [recentBookings, setRecentBookings] = useState<Booking[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
    const { token } = useAuth()
@@ -74,7 +58,7 @@ export default function AdminDashboard() {
       }
 
       const [bookingsData, childrenData, usersData, providersData] = await Promise.all([
-        bookingsRes.json() as Promise<ApiResponse<RecentBooking[]>>,
+        bookingsRes.json() as Promise<ApiResponse<Booking[]>>,
         childrenRes.json() as Promise<ApiResponse<any[]>>,
         usersRes.json() as Promise<ApiResponse<any[]>>,
         providersRes.json() as Promise<ApiResponse<any[]>>,
@@ -101,7 +85,7 @@ export default function AdminDashboard() {
 
       // Set recent bookings (last 5)
       const sortedBookings = bookings
-        .sort((a: RecentBooking, b: RecentBooking) => 
+        .sort((a: Booking, b: Booking) => 
           new Date(b.startDate).getTime() - new Date(a.endDate).getTime()
         )
         .slice(0, 5);
@@ -126,6 +110,22 @@ export default function AdminDashboard() {
         year: 'numeric',
         month: 'short',
         day: 'numeric',
+      });
+    } catch {
+      return 'Invalid Date';
+    }
+  };
+  
+  const formatHour = (dateString: string) => {
+    try {
+      return new Date(dateString).toLocaleString('en-US', {
+        weekday: 'short',
+        day: 'numeric',
+        month: 'short',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+        hour12: false
       });
     } catch {
       return 'Invalid Date';
@@ -246,33 +246,45 @@ export default function AdminDashboard() {
             </div>
           ) : (
             <div className="space-y-4">
-              {recentBookings.map((booking) => (
-                <div
-                  key={booking._id}
-                  className="flex flex-col sm:flex-row sm:items-center justify-between p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors"
-                >
-                  <div className="flex-1">
-                    <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4">
-                      <div>
-                        <p className="font-medium text-gray-900">
-                          {booking.userId.firstName} {booking.userId.lastName}
-                        </p>
-                        <p className="text-sm text-gray-600">
-                          {booking.providerId.name || 'Unknown Provider'}
-                        </p>
-                      </div>
-                      <div className="flex items-center gap-3">
-                        <p className="text-sm text-gray-500">
-                          {formatDate(booking.startDate)}
-                        </p>
-                        <span className={getStatusBadgeClass(booking.status)}>
-                          {booking.status || 'Unknown'}
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              ))}
+              <table className="w-full">
+                <thead>
+                  <tr className="border-b border-gray-200">
+                    <th className="text-left py-3 px-4 text-gray-600">Recent Update</th>
+                    <th className="text-left py-3 px-4 text-gray-600">Parent</th>
+                    <th className="text-left py-3 px-4 text-gray-600">Provider</th>
+                    <th className="text-left py-3 px-4 text-gray-600">Date</th>
+                    <th className="text-left py-3 px-4 text-gray-600">Children Count</th>
+                    <th className="text-left py-3 px-4 text-gray-600">Status</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {recentBookings.map((booking) => (
+                    <tr 
+                      key={booking._id}
+                      className="font-medium border-b text-[#273F4F] border-gray-100 transition-colors"
+                    >
+                      <td className="py-6 px-4">
+                        {formatHour(booking.createdAt)}
+                      </td>
+                      <td className="py-6 px-4">
+                        {`${booking.userId.firstName} ${booking.userId.lastName}`}
+                      </td>
+                      <td className="py-6 px-4">
+                        {booking.providerId.name || 'Unknown Provider'}
+                      </td>
+                      <td className="py-6 px-4">
+                        {formatDate(booking.startDate)}
+                      </td>
+                      <td className="py-6 px-4">
+                        {booking.childrenCount || 'Unknown'}
+                      </td>
+                      <td className="py-6 px-4">
+                        {booking.status.charAt(0).toUpperCase() + booking.status.slice(1) || 'Unknown'}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
             </div>
           )}
         </CardContent>
