@@ -4,48 +4,21 @@ import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Search, Eye, Calendar, AlertCircle, Filter } from "lucide-react"
+import { Search, Eye, Calendar, AlertCircle, Filter, ChevronUp, ChevronDown } from "lucide-react"
 import LoadingSpinner from "@/components/ui/loading-spinner"
 import BookingModal from "@/components/common/booking-modal"
 import { useAuth } from "@/context/auth.context"
 import toast from "react-hot-toast"
 import { Select } from "@/components/ui/select"
-
-interface Booking {
-  _id: string
-  bookingId: string
-  childName: string
-  providerName: string
-  providerAddress?: string
-  startDate: string
-  endDate: string
-  status: "pending" | "confirmed" | "active" | "completed" | "cancelled"
-  totalAmount: number
-  paymentMethod?: string
-  createdAt: string
-  notes?: string
-  children?: any[]
-  childrenCount?: number
-  emergencyContact?: {
-    name: string
-    phone: string
-    relationship: string
-  }
-  userId?: {
-    firstName: string
-    lastName?: string
-  }
-  providerId?: {
-    name: string
-    address?: string
-  }
-}
+import Booking from "@/lib/types/booking"
 
 export default function AdminBookings() {
   const [bookings, setBookings] = useState<Booking[]>([])
   const [loading, setLoading] = useState(true)
   const [searchTerm, setSearchTerm] = useState("")
   const [filterStatus, setFilterStatus] = useState<string>("all")
+  const [sortField, setSortField] = useState<keyof Booking>("createdAt")
+  const [sortDirection, setSortDirection] = useState<"asc" | "desc">("desc")
   const [selectedBooking, setSelectedBooking] = useState<Booking | null>(null)
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [isUpdating, setIsUpdating] = useState(false)
@@ -180,17 +153,38 @@ export default function AdminBookings() {
   }
 
   const filteredBookings = bookings.filter((booking) => {
-    const matchesSearch = searchTerm === "" || 
-      booking.childName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      booking.userId?.firstName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      booking.providerName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      booking.providerId?.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      booking.bookingId?.toLowerCase().includes(searchTerm.toLowerCase())
-    
-    const matchesStatus = filterStatus === "all" || booking.status === filterStatus
-    
-    return matchesSearch && matchesStatus
+      const matchesSearch = searchTerm === "" || 
+        booking.childName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        booking.userId?.firstName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        booking.providerName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        booking.providerId?.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        booking.bookingId?.toLowerCase().includes(searchTerm.toLowerCase())
+      
+      const matchesStatus = filterStatus === "all" || booking.status === filterStatus
+      
+      return matchesSearch && matchesStatus
+    }
+  )
+  .sort((a, b) => {
+    if (sortField === "createdAt") {
+      return sortDirection === "asc"
+        ? new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
+        : new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+    }
+
+    if (a[sortField] < b[sortField]) return sortDirection === "asc" ? -1 : 1
+    if (a[sortField] > b[sortField]) return sortDirection === "asc" ? 1 : -1
+    return 0
   })
+
+  const handleSort = (field: keyof Booking) => {
+    if (sortField === field) {
+      setSortDirection(sortDirection === "asc" ? "desc" : "asc")
+    } else {
+      setSortField(field)
+      setSortDirection("asc")
+    }
+  }
 
   const filterOptions = [
     { value: "all", label: "All Status" },
@@ -305,7 +299,23 @@ export default function AdminBookings() {
                     <th className="text-left py-3 px-4 font-medium text-gray-600">Child/Children</th>
                     <th className="text-left py-3 px-4 font-medium text-gray-600">Parent</th>
                     <th className="text-left py-3 px-4 font-medium text-gray-600">Provider</th>
-                    <th className="text-left py-3 px-4 font-medium text-gray-600">Dates</th>
+                    <th className="text-left py-3 px-4 font-medium text-gray-600">
+                      <button
+                        className="flex items-center gap-1 hover:text-[#273F4F]"
+                        onClick={() => handleSort("createdAt")}
+                      >
+                        Date
+                        {sortField === "createdAt" && (
+                          <span>
+                            {sortDirection === "asc" ? (
+                              <ChevronUp className="h-4 w-4" />
+                            ) : (
+                              <ChevronDown className="h-4 w-4" />
+                            )}
+                          </span>
+                        )}
+                      </button>
+                    </th>
                     <th className="text-left py-3 px-4 font-medium text-gray-600">Amount</th>
                     <th className="text-left py-3 px-4 font-medium text-gray-600">Status</th>
                     <th className="text-left py-3 px-4 font-medium text-gray-600">Payment</th>
