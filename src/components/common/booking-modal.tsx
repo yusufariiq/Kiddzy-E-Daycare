@@ -3,50 +3,10 @@
 import { useState, useEffect } from "react"
 import { X, Calendar, User, Phone, MapPin, CreditCard, FileText, AlertCircle, Check } from "lucide-react"
 import { Button } from "../ui/button"
-
-interface Child {
-  _id: string
-  name: string
-  fullname?: string
-  age: number
-  gender?: string
-  specialNeeds?: string
-  allergies: string[] | string
-}
-
-interface BookingDetails {
-  _id: string
-  bookingId: string
-  childName: string
-  providerName: string
-  providerAddress?: string
-  startDate: string
-  endDate: string
-  status: "pending" | "confirmed" | "active" | "completed" | "cancelled"
-  totalAmount: number
-  paymentMethod?: string
-  createdAt: string
-  notes?: string
-  childrenIds: Child | Child[]
-  childrenCount: number
-  emergencyContact?: {
-    name: string
-    phone: string
-    relationship: string
-  }
-  userId?: {
-    firstName: string
-    lastName?: string
-    phoneNumber: string
-  }
-  providerId?: {
-    name: string
-    address?: string
-  }
-}
+import Booking from "@/lib/types/booking"
 
 interface BookingModalProps {
-  booking: BookingDetails | null
+  booking: Booking | null
   isOpen: boolean
   onClose: () => void
   onStatusUpdate: (bookingId: string, status: string) => void
@@ -122,7 +82,7 @@ export default function BookingModal({ booking, isOpen, onClose, onStatusUpdate,
         >
           <p className="font-medium text-[#273F4F]">{child.fullname || child.name}</p>
           <p className="text-sm text-[#000000]/70">
-            {child.age} years{child.gender ? ` • ${child.gender}` : ""}
+            {child.age} years{child.gender === "male" ? "• Male" : "• Female"}
           </p>
           {child.specialNeeds && (
             <div className="mt-2">

@@ -268,7 +268,7 @@ export default function ChildcareProviderPage() {
                   </div>
                   <span className="text-sm">{provider.address}</span>
                 </div>
-                <Link href={provider.location} target="_blank" className="flex items-center gap-3 text-gray-600">
+                <Link href={provider.location} target="_blank" className="line-clamp-1 flex items-center gap-3 text-gray-600">
                   <div className="w-5">
                     <Map className="size-4 text-[#FE7743]" />
                   </div>

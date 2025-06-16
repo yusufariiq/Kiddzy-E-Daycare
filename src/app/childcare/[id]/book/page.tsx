@@ -15,39 +15,15 @@ import { useAuth } from "@/context/auth.context"
 import { getOperationalStatus } from "@/utils/operationalStatus"
 import toast from "react-hot-toast"
 import ProtectedRoute from "@/components/common/ProtectedRoute"
-
-interface Provider {
-  _id: string
-  name: string
-  address: string
-  images: string[]
-  price: number
-  operatingHours: any[]
-  availability: boolean
-  isActive: boolean
-}
-
-interface ChildData {
-  _id?: string
-  fullname: string
-  nickname: string
-  age: number
-  gender: "male" | "female" | "other"
-  allergies: string[]
-}
+import { ProviderData } from "@/lib/types/providers"
+import { Children } from "@/lib/types/children"
+import { EmergencyContact } from "@/lib/types/booking"
 
 interface BookingData {
   startDate: Date
   endDate: Date
   childrenCount: number
   notes?: string
-}
-
-interface EmergencyContact {
-  name: string
-  phone: string
-  relationship: string
-  isAuthorizedForPickup: boolean
 }
 
 interface PaymentData {
@@ -64,9 +40,9 @@ const steps = [
 
 export default function BookingPage() {
   const [currentStep, setCurrentStep] = useState(1)
-  const [provider, setProvider] = useState<Provider | null>(null)
+  const [provider, setProvider] = useState<ProviderData | null>(null)
   const [loading, setLoading] = useState(true)
-  const [childrenData, setChildrenData] = useState<ChildData[]>([])
+  const [childrenData, setChildrenData] = useState<Children[]>([])
   const [childrenIds, setChildrenIds] = useState<string[]>([])
   const [bookingData, setBookingData] = useState<BookingData | null>(null)
   const [emergencyContact, setEmergencyContact] = useState<EmergencyContact | null>(null)
@@ -83,9 +59,8 @@ export default function BookingPage() {
   const params = useParams()
   const router = useRouter()
   const { id } = params
-  const { token, isAuthenticated } = useAuth()
+  const { token } = useAuth()
 
-  // Check operational status periodically
   useEffect(() => {
     if (!provider?.operatingHours) return
 
@@ -171,7 +146,7 @@ export default function BookingPage() {
     router.push(`/childcare/${id}`)
   }
 
-  const handleChildInfoSubmit = async (children: ChildData[]) => {
+  const handleChildInfoSubmit = async (children: Children[]) => {
     if (accessDenied) {
       toast.error("Booking is not available while the facility is closed")
       return
@@ -430,10 +405,11 @@ export default function BookingPage() {
                   className="w-full h-full rounded-t-xl object-cover"
                 />
               </div>
-              <div className="px-4 sm:px-6 lg:px-8 pb-4">
+              <div className="px-4 sm:px-6 lg:px-8 pb-4 space-y-3">
                 <h3 className="text-xl font-semibold text-[#273F4F]">{provider.name}</h3>
                 <p className="text-base text-gray-600 mb-2">{provider.address}</p>
-                <p className="text-lg font-bold text-[#FE7743]">Rp {provider.price.toLocaleString("id-ID")}/day</p>
+                <p className="text-base text-gray-600 mb-2">{provider.whatsapp}</p>
+                <p className="text-lg font-bold text-[#FE7743]">Rp {provider.price.toLocaleString("id-ID")} <span className="text-base font-normal text-gray-400">/day</span></p>
                 
                 {/* Show children count when available */}
                 {childrenData.length > 0 && (

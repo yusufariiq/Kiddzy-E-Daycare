@@ -10,11 +10,9 @@ import BookingCard from "@/components/booking/booking-card"
 import toast from "react-hot-toast"
 import { useAuth } from "@/context/auth.context"
 import ProtectedRoute from "@/components/common/ProtectedRoute"
+import Booking, { ProviderInfo } from "@/lib/types/booking"
 
-interface Provider {
-  _id?: string
-  name: string
-  address: string
+interface Provider extends ProviderInfo {
   image?: string[]
 }
 
@@ -24,20 +22,13 @@ interface Child {
   nickname: string
 }
 
-interface Booking {
-  _id: string
-  bookingId: string
+interface BookingPageData extends Omit<Booking, 'provider' | 'child'> {
   provider: Provider
   child: Child
-  startDate: string
-  endDate: string
-  status: "pending" | "confirmed" | "active" | "completed" | "cancelled"
-  totalAmount: number
-  createdAt: string
 }
 
 interface ApiResponse {
-  bookings: Booking[]
+  bookings: BookingPageData[]
   count: number
   filter: string
 }
@@ -140,15 +131,13 @@ export default function BookingsPage() {
     }
   }
 
-  // Handle rebook - redirect to provider page or booking flow
   const handleRebook = (bookingId: string) => {
     const booking = bookings.find(b => b._id === bookingId)
     if (booking) {
-      // Store booking data for rebooking and redirect
       if (typeof window !== 'undefined') {
         sessionStorage.setItem('rebookData', JSON.stringify({
-          providerId: booking.provider,
-          childName: booking.child.fullname
+          providerId: booking.providerId,
+          childName: booking.childName
         }))
       }
       router.push('/childcare')
@@ -169,8 +158,8 @@ export default function BookingsPage() {
     if (searchTerm) {
       filtered = filtered.filter(
         (booking) =>
-          booking.provider.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          booking.child.fullname.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          booking.providerName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          booking.childName.toLowerCase().includes(searchTerm.toLowerCase()) ||
           booking.bookingId.toLowerCase().includes(searchTerm.toLowerCase()),
       )
     }

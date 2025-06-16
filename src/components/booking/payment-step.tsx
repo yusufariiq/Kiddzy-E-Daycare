@@ -91,7 +91,7 @@ export default function PaymentStep({ onSubmit, provider, childData, bookingData
           </div>
           <div className="flex justify-between">
             <span>Rate per child per day:</span>
-            <span>Rp {provider.price.toLocaleString("id-ID")("id-ID")}</span>
+            <span>Rp {provider.price.toLocaleString("id-ID")}</span>
           </div>
           <div className="border-t pt-3">
             <div className="flex justify-between text-xl font-bold">

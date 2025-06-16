@@ -50,7 +50,7 @@ export default function EmergencyContactForm({ onSubmit, initialData }: Emergenc
 
     if (!formData.phone.trim()) {
       newErrors.phone = "Phone number is required"
-    } else if (!/^(\+62|62|0)8[1-9][0-9]{6,9}$/.test(formData.phone)) {
+    } else if (!/^(62|0)8[1-9][0-9]{6,9}$/.test(formData.phone)) {
       newErrors.phone = "Please enter a valid Indonesian phone number"
     }
 

@@ -14,39 +14,10 @@ import {
 } from "lucide-react"
 import LoadingSpinner from "@/components/ui/loading-spinner"
 import { useAuth } from "@/context/auth.context"
-
-interface Childrens {
-  _id: string
-  fullname: string
-  nickname: string
-  age: number
-  gender: string
-}
-
-interface BookingDetails {
-  _id: string
-  status: "pending" | "confirmed" | "active" | "completed" | "cancelled"
-  childrenIds: Childrens[]
-  providerId: {
-    _id: string
-    name: string
-    address: string
-    email: string
-    whatsapp: string
-  }
-  startDate: string
-  endDate: string
-  childrenCount: number
-  notes: string
-  totalAmount: number
-  paymentMethod: string
-  userId: string
-  createdAt: string
-  updatedAt: string
-}
+import Booking from "@/lib/types/booking"
 
 export default function BookingDetailsPage() {
-  const [booking, setBooking] = useState<BookingDetails | null>(null)
+  const [booking, setBooking] = useState<Booking | null>(null)
   const [loading, setLoading] = useState(true)
   const [actionLoading, setActionLoading] = useState(false)
   const [activeTab, setActiveTab] = useState<"overview" | "timeline">("overview")
