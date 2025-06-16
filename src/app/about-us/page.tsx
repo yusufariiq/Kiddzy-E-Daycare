@@ -3,15 +3,15 @@ import Image from "next/image"
 // Stats data
 const stats = [
   {
-    number: "5,000+",
+    number: "5000+",
     label: "Childcare Providers",
   },
   {
-    number: "25,000+",
+    number: "25000+",
     label: "Registered Parents",
   },
   {
-    number: "10,000+",
+    number: "10000+",
     label: "Successful Bookings",
   },
   {
@@ -26,7 +26,7 @@ export default function AboutPage() {
         <main>
             {/* Hero Section */}
             <div className="text-white my-10 mx-auto max-w-lg sm:max-w-2xl md:max-w-4xl lg:max-w-7xl px-4 text-center sm:px-6 lg:px-8 py-16 bg-[#FE7743] rounded-2xl">
-                <h1 className="text-4xl md:text-5xl">The Story Behind <span className="font-bold">Kiddzy</span></h1>
+                <h1 className="font-hashi uppercase tracking-wider text-4xl md:text-5xl">The Story Behind Kiddzy</h1>
             </div>
 
             {/* About Us Content */}
@@ -34,7 +34,7 @@ export default function AboutPage() {
                 <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
                     {/* Mission Statement */}
                     <div className="mb-16">
-                        <h2 className="text-3xl font-bold text-[#273F4F]">Our Mission</h2>
+                        <h2 className="font-hashi text-3xl font-bold text-[#273F4F]">Our Mission</h2>
                         <p className="mt-4 text-lg text-gray-700">
                             Kiddzy is a technology company with a mission to increase access to quality childcare services for all
                             families. We believe that reliable childcare is essential for both child development and parental
@@ -46,7 +46,7 @@ export default function AboutPage() {
                     <div className="mb-16 grid grid-cols-1 gap-8 border-y border-gray-200 py-12 md:grid-cols-2 lg:grid-cols-4">
                         {stats.map((stat, index) => (
                             <div key={index} className="text-center">
-                            <div className="text-4xl font-bold text-[#FE7743]">{stat.number}</div>
+                            <div className="font-hashi text-4xl font-bold text-[#FE7743]">{stat.number}</div>
                             <div className="mt-2 text-gray-600">{stat.label}</div>
                             </div>
                         ))}
@@ -55,7 +55,7 @@ export default function AboutPage() {
                     {/* First Feature Section */}
                     <div className="mb-16 grid items-center gap-8 md:grid-cols-2">
                         <div className="order-2 md:order-1">
-                            <h2 className="text-2xl font-bold text-[#273F4F]">Comprehensive Childcare Information</h2>
+                            <h2 className="font-hashi text-2xl font-bold text-[#273F4F]">Comprehensive Childcare Information</h2>
                             <p className="mt-4 text-gray-700">
                             Kiddzy leverages technology to manage and display detailed childcare provider listings with
                             comprehensive facility descriptions, photos, and details about each service. Our team of Kiddzy
@@ -88,7 +88,7 @@ export default function AboutPage() {
                             </div>
                         </div>
                         <div>
-                            <h2 className="text-2xl font-bold text-[#273F4F]">Connecting Parents and Providers</h2>
+                            <h2 className="font-hashi text-2xl font-bold text-[#273F4F]">Connecting Parents and Providers</h2>
                             <p className="mt-4 text-gray-700">
                             Kiddzy has connected over 25,000 parents with more than 5,000 childcare providers, facilitating
                             10,000+ bookings each month to provide better childcare solutions. Our innovations aim to provide
@@ -99,7 +99,7 @@ export default function AboutPage() {
 
                     {/* Our Story Section */}
                     <div className="mt-16">
-                        <h2 className="text-3xl font-bold text-[#273F4F]">Our Story</h2>
+                        <h2 className="font-hashi text-3xl font-bold text-[#273F4F]">Our Story</h2>
                         <div className="mt-8 space-y-6 text-gray-700">
                             <p>
                             Starting as a platform to help parents find reliable childcare in their neighborhood, Kiddzy has grown

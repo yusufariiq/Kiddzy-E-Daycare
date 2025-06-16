@@ -229,7 +229,7 @@ export default function Navbar() {
               <div className="h-10 w-10 rounded-full bg-[#FE7743] flex items-center justify-center text-white">
                 <User />
               </div>
-              <span className="ml-2 text-xl font-bold text-[#273F4F]">Kiddzy</span>
+              <span className="font-hashi ml-2 text-xl font-bold text-[#273F4F]">Kiddzy</span>
             </Link>
           </div>
 

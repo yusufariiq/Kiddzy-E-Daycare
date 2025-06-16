@@ -40,8 +40,8 @@ export default function ChildcarePage() {
     <div className="min-h-screen pb-10">
       <main>
         <div className="text-white mt-10 mb-5 max-w-lg sm:max-w-2xl md:max-w-4xl lg:max-w-7xl mx-auto px-4 text-center sm:px-6 lg:px-8 py-16 bg-[#FE7743] rounded-2xl">
-          <h1 className="text-3xl text-balance md:text-5xl">
-            Discover Trusted Childcare <span className="font-bold">In Your Area!</span>
+          <h1 className="font-hashi uppercase tracking-wider text-3xl text-balance md:text-5xl">
+            Discover Trusted Childcare In Your Area!
           </h1>
         </div>
 

@@ -27,7 +27,7 @@ export default function Footer() {
                   <path d="M12 12c-2-2.2-2-4.5-2-6.5C10 3.5 11.5 2 13 2c1.5 0 3 1.5 3 3.5 0 1-.5 2-1 3"></path>
                 </svg>
               </div>
-              <span className="ml-2 text-xl font-bold">Kiddzy</span>
+              <span className="font-hashi ml-2 text-xl font-bold">Kiddzy</span>
             </div>
             <p className="mt-4 text-center md:text-left text-gray-300">
               Connecting families with trusted childcare providers. Find the perfect match for your family's needs.
@@ -105,19 +105,8 @@ export default function Footer() {
         </div>
 
         <div className="mt-12 border-t border-white/10 pt-8">
-          <div className="flex flex-col items-center justify-between gap-4 md:flex-row">
+          <div className="flex flex-col items-center justify-center gap-4 md:flex-row">
             <p className="text-sm text-gray-300">© 2025 Kiddzy. All rights reserved.</p>
-            <div className="flex space-x-6">
-              <Link href="#" className="text-sm text-gray-300 hover:text-white">
-                Privacy Policy
-              </Link>
-              <Link href="#" className="text-sm text-gray-300 hover:text-white">
-                Terms of Service
-              </Link>
-              <Link href="#" className="text-sm text-gray-300 hover:text-white">
-                Cookie Policy
-              </Link>
-            </div>
           </div>
         </div>
       </div>

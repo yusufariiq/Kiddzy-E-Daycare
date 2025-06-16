@@ -8,7 +8,7 @@ export default function AppBanner() {
         <div className="flex flex-col-reverse md:flex-row items-center gap-8">
           {/* Left side with image */}
           <div className="space-y-6">
-            <h2 className="text-3xl font-bold md:text-4xl lg:text-5xl">Find Your Perfect Childcare Provider Today!</h2>
+            <h2 className="font-hashi text-3xl font-bold md:text-4xl lg:text-5xl">Find Your Perfect Childcare Provider Today!</h2>
             <p className="text-lg md:text-xl">
               Thousands of trusted childcare providers are waiting for you. Download the Kiddzy app now!
             </p>

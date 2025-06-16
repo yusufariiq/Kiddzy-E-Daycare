@@ -1,24 +1,19 @@
 "use client"
 
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
+import { Poppins } from "next/font/google";
 import "./globals.css";
 import Navbar from "@/components/common/navbar";
 import Footer from "@/components/common/footer";
 import { AuthProvider } from "@/context/auth.context";
 import { Toaster } from "react-hot-toast";
 import { usePathname } from "next/navigation";
-import ProtectedRoute from "@/components/common/ProtectedRoute";
 
-const inter = Inter({
-  weight: ['400', '900'],
+const poppins = Poppins({
+  weight: ['400', '500', '600', '700'],
   subsets: ['latin'],
+  variable: '--font-poppins'
 })
-
-// export const metadata: Metadata = {
-//   title: "Kiddzy E-Daycare",
-//   description: "A platform designed for parents to discover and book childcare services.",
-// };
 
 export default function RootLayout({
   children,
@@ -33,7 +28,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body 
-        className={`${inter} ${inter} antialiased`}
+        className={`${poppins.variable} antialiased font-poppins`}
       >
         <AuthProvider>
           {!hideLayout && <Navbar />}

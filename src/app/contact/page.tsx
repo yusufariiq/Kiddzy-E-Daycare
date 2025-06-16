@@ -92,7 +92,7 @@ export default function ContactPage() {
         <main>
             {/* Hero Section */}
             <div className="text-white mt-10 mb-5 mx-auto max-w-lg sm:max-w-2xl md:max-w-4xl lg:max-w-7xl px-4 text-center sm:px-6 lg:px-8 py-16 bg-[#FE7743] rounded-2xl">
-                <h1 className="text-4xl md:text-5xl">Ask Anything About <span className="font-bold">Kiddzy</span></h1>
+                <h1 className="font-hashi uppercase tracking-wider text-4xl md:text-5xl">Ask Anything About Kiddzy</h1>
             </div>
 
             {/* Contact Content */}
@@ -101,7 +101,7 @@ export default function ContactPage() {
                     <div className="grid gap-12 md:grid-cols-2">
                         {/* Contact Information */}
                         <div>
-                            <h2 className="text-2xl font-bold text-[#273F4F]">Get in Touch</h2>
+                            <h2 className="font-hashi text-2xl font-bold text-[#273F4F]">Get in Touch</h2>
                             <p className="mt-4 text-gray-600">
                                 Our team is here to help with any questions you may have about our childcare services. Fill out the
                                 form and we'll get back to you as soon as possible.
@@ -143,7 +143,7 @@ export default function ContactPage() {
                         {/* Contact Form */}
                         <div>
                             <div className="rounded-xl bg-white p-8 border-2 border-gray-200">
-                                <h2 className="text-2xl font-bold text-[#273F4F]">Send Us a Message</h2>
+                                <h2 className="font-hashi text-2xl font-bold text-[#273F4F]">Send Us a Message</h2>
                                 <p className="mt-2 text-gray-600">
                                 Fill out the form below and we'll get back to you as soon as possible.
                                 </p>

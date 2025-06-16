@@ -23,8 +23,8 @@ export default function Features() {
     <div className="bg-white py-16">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="text-center">
-          <h2 className="text-3xl font-bold text-[#273F4F] md:text-5xl">Why Choose Kiddzy</h2>
-          <p className="mx-auto mt-4 max-w-2xl font- text-lg text-[#273F4F]">
+          <h2 className="font-hashi text-3xl font-bold text-[#273F4F] md:text-5xl">Why Choose Kiddzy</h2>
+          <p className="mx-auto mt-4 max-w-2xl font-medium text-lg text-[#273F4F]">
             We're committed to helping families find the best childcare solutions with confidence and ease.
           </p>
         </div>

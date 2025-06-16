@@ -51,8 +51,8 @@ export default function Testimonials() {
         <div className="grid gap-12 md:gap-8 grid-cols-1 md:grid-cols-2">
           {/* Left side with heading */}
           <div className="relative flex flex-col justify-center">   
-            <div className="bg-[#273F4F] text-white w-full h-full rounded-xl flex justify-center items-center px-4 py-24">
-                <h2 className="text-xl font-bold lg:text-3xl">What Parents Say About Kiddzy?</h2>
+            <div className="bg-[#273F4F] text-white w-full h-full rounded-xl flex justify-center items-center text-center  px-4 py-24">
+                <h2 className="font-hashi uppercase tracking-wider text-xl font-bold lg:text-3xl">What Parents Say About Kiddzy?</h2>
             </div>
           </div>
 
