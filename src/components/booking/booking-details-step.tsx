@@ -7,24 +7,13 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
-
-interface BookingData {
-  startDate: Date
-  endDate: Date
-  childrenCount: number
-  notes?: string
-}
-
-interface Provider {
-  _id: string
-  name: string
-  price: number
-}
+import { ProviderData } from "@/lib/types/providers"
+import Booking from "@/lib/types/booking"
 
 interface BookingDetailsStepProps {
-  onSubmit: (data: BookingData) => void
-  initialData?: BookingData | null
-  provider: Provider
+  onSubmit: (data: Booking) => void
+  initialData?: Booking | null
+  provider: ProviderData
   childrenCount: number // Auto-calculated from children added
 }
 
@@ -34,10 +23,10 @@ export default function BookingDetailsStep({
   provider, 
   childrenCount 
 }: BookingDetailsStepProps) {
-  const [formData, setFormData] = useState<BookingData>({
+  const [formData, setFormData] = useState<Booking>({
     startDate: initialData?.startDate || new Date(),
     endDate: initialData?.endDate || new Date(),
-    childrenCount: childrenCount, // Always use passed childrenCount
+    childrenCount: childrenCount,
     notes: initialData?.notes || "",
   })
   const [errors, setErrors] = useState<Record<string, string>>({})
@@ -52,7 +41,7 @@ export default function BookingDetailsStep({
   }
 
   const calculateTotal = () => {
-    return calculateDays() * childrenCount * provider.price // Use childrenCount prop
+    return calculateDays() * childrenCount * provider.price
   }
 
   const validateForm = () => {
@@ -80,7 +69,6 @@ export default function BookingDetailsStep({
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
     if (validateForm()) {
-      // Always submit with the correct childrenCount
       onSubmit({
         ...formData,
         childrenCount: childrenCount

@@ -10,27 +10,18 @@ import { Textarea } from "@/components/ui/textarea"
 import { Select, type SelectOption } from "@/components/ui/select"
 import { X, Plus, User, Trash2, ArrowRight } from "lucide-react"
 import LoadingSpinner from "../ui/loading-spinner"
+import { Children } from "@/lib/types/children"
 
-interface ChildData {
-  _id?: string
-  fullname: string
-  nickname: string
-  age: number
-  gender: "male" | "female" | "other"
-  specialNeeds?: string
-  allergies: string[]
-}
 
 interface ChildInfoStepProps {
-  onSubmit: (childrenData: ChildData[]) => void
-  initialData?: ChildData[] | null
+  onSubmit: (childrenData: Children[]) => void
+  initialData?: Children[] | null
   isProcessing?: boolean
 }
 
 const genderOptions: SelectOption[] = [
   { value: "male", label: "Male" },
   { value: "female", label: "Female" },
-  { value: "other", label: "Other" },
 ]
 
 export default function ChildInfoStep({ 
@@ -38,8 +29,8 @@ export default function ChildInfoStep({
   initialData,
   isProcessing 
 }: ChildInfoStepProps) {
-  const [childrenData, setChildrenData] = useState<ChildData[]>(initialData || [])
-  const [formData, setFormData] = useState<ChildData>({
+  const [childrenData, setChildrenData] = useState<Children[]>(initialData || [])
+  const [formData, setFormData] = useState<Children>({
     fullname: "",
     nickname: "",
     age: 0,

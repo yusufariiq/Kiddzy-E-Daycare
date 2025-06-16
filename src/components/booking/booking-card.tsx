@@ -1,33 +1,9 @@
 "use client"
 
 import { Button } from "@/components/ui/button"
+import Booking from "@/lib/types/booking"
 import { Calendar, MapPin, User, MoreHorizontal, Eye, RotateCcw, X, Loader2 } from "lucide-react"
 import { useState } from "react"
-
-interface Provider {
-  _id?: string
-  name: string
-  address: string
-  image?: string[]
-}
-
-interface Child {
-  _id?: string
-  fullname: string
-  nickname: string
-}
-
-interface Booking {
-  _id: string
-  bookingId: string
-  providerId: Provider
-  childrenIds: Child[]
-  startDate: string
-  endDate: string
-  status: "pending" | "confirmed" | "active" | "completed" | "cancelled"
-  totalAmount: number
-  createdAt: string
-}
 
 interface BookingCardProps {
   booking: Booking

@@ -8,13 +8,8 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Select } from "@/components/ui/select"
 import { AlertCircle } from "lucide-react"
+import { EmergencyContact } from "@/lib/types/booking"
 
-interface EmergencyContact {
-  name: string
-  phone: string
-  relationship: string
-  isAuthorizedForPickup: boolean
-}
 
 interface EmergencyContactFormProps {
   onSubmit: (data: EmergencyContact) => void
