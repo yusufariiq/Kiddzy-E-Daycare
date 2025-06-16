@@ -3,19 +3,19 @@ import Image from "next/image"
 // Stats data
 const stats = [
   {
-    number: "5000+",
+    number: "50+",
     label: "Childcare Providers",
   },
   {
-    number: "25000+",
-    label: "Registered Parents",
+    number: "500+",
+    label: "Satisfied Parents",
   },
   {
-    number: "10000+",
+    number: "1000+",
     label: "Successful Bookings",
   },
   {
-    number: "500+",
+    number: "5",
     label: "Cities Covered",
   },
 ]
