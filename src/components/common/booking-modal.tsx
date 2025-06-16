@@ -1,9 +1,10 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { X, Calendar, User, Phone, MapPin, CreditCard, FileText, AlertCircle, Check } from "lucide-react"
+import { X, Calendar, User, Phone, MapPin, CreditCard, FileText, AlertCircle, Check, PhoneIcon } from "lucide-react"
 import { Button } from "../ui/button"
 import Booking from "@/lib/types/booking"
+import Link from "next/link"
 
 interface BookingModalProps {
   booking: Booking | null
@@ -422,9 +423,17 @@ export default function BookingModal({ booking, isOpen, onClose, onStatusUpdate,
 
                     <div>
                       <label className="text-xs font-medium text-[#273F4F]/70">Phone Number</label>
-                      <div className="flex items-center gap-1 mt-1">
-                        <Phone className="h-4 w-4 text-[#FE7743]" />
-                        <p className="font-medium text-[#000000]">{booking.userId.phoneNumber}</p>
+                      <div className="flex items-center gap-3 mt-1">
+                        <div className="flex items-center gap-1">
+                          <Phone className="h-4 w-4 text-[#FE7743]" />
+                          <p className="font-medium text-[#000000]">{booking.userId.phoneNumber}</p>
+                        </div>
+                        <Link 
+                          href={`https://wa.me/${booking.userId.phoneNumber}`}
+                          className="bg-[#FE7743] text-white hover:bg-[#e66a3a] py-1 px-3 gap-2 inline-flex items-center justify-center whitespace-nowrap rounded-xl text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50"
+                        >
+                          Contact Parent
+                        </Link>
                       </div>
                     </div>
                   </>
@@ -470,14 +479,18 @@ export default function BookingModal({ booking, isOpen, onClose, onStatusUpdate,
 
               <div className="bg-white p-4 rounded-lg border border-[#273F4F]/10 shadow-sm">
                 <p className="font-medium text-[#273F4F]">{booking.emergencyContact.name}</p>
+                <p className="text-sm text-[#000000]/70">
+                  Relationship: <span className="font-medium">{booking.emergencyContact.relationship[0].toLocaleUpperCase() + booking.emergencyContact.relationship.slice(1)}</span>
+                </p>
                 <div className="mt-2 space-y-1">
-                  <div className="flex items-center gap-2">
-                    <Phone className="h-4 w-4 text-[#FE7743]" />
-                    <p className="text-[#000000]">{booking.emergencyContact.phone}</p>
+                  <div className="flex gap-4">
+                    <Link 
+                      href={`https://wa.me/${booking.emergencyContact.phone}`}
+                      className="bg-[#FE7743] text-white hover:bg-[#e66a3a] py-1 px-3 gap-2 inline-flex items-center justify-center whitespace-nowrap rounded-xl text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50"
+                    >
+                      Contact {booking.emergencyContact.phone}
+                    </Link>
                   </div>
-                  <p className="text-sm text-[#000000]/70">
-                    Relationship: <span className="font-medium">{booking.emergencyContact.relationship}</span>
-                  </p>
                 </div>
               </div>
             </div>
