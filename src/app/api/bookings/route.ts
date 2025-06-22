@@ -8,37 +8,57 @@ const bookingService = new BookingService();
 connectDB();
 
 export async function GET(req: NextRequest) {
-  try {
+    try {
       const authResult = await verifyAuth(req);
       
       if (!authResult.isAuthenticated) {
-          return NextResponse.json(
-              { error: authResult.error },
-              { status: authResult.status || 401 }
-          );
+        return NextResponse.json(
+          { error: authResult.error },
+          { status: authResult.status || 401 }
+        );
       }
       
       const userId = authResult.userId as string;
       const url = new URL(req.url);
-      const filter = url.searchParams.get('filter') as 'active' | 'completed' | 'cancelled' | undefined;
+      const filter = url.searchParams.get('filter') as 'active' | 'completed' | 'cancelled' | 'history' | undefined;
       
-      // Get filtered bookings for the user
-      const bookings = await bookingService.getUserBookings(userId, filter);
+      let bookings;
+      
+      switch (filter) {
+        case 'active':
+          bookings = await bookingService.getUserBookings(userId, 'active');
+          break;
+        case 'completed':
+          bookings = await bookingService.getUserBookings(userId, 'completed');
+          break;
+        case 'cancelled':
+          bookings = await bookingService.getUserBookings(userId, 'cancelled');
+          break;
+        case 'history':
+          const completed = await bookingService.getUserBookings(userId, 'completed');
+          const cancelled = await bookingService.getUserBookings(userId, 'cancelled');
+          bookings = [...completed, ...cancelled].sort((a, b) => 
+            new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime()
+          );
+          break;
+        default:
+          bookings = await bookingService.getUserBookings(userId);
+      }
       
       return NextResponse.json({ 
-          bookings,
-          count: bookings.length,
-          filter: filter || 'all'
+        bookings,
+        count: bookings.length,
+        filter: filter || 'all'
       }, { status: 200 });
       
-  } catch (error: any) {
+    } catch (error: any) {
       console.error('Error fetching bookings:', error);
       return NextResponse.json(
-          { error: error.message || 'Failed to fetch bookings' },
-          { status: 500 }
+        { error: error.message || 'Failed to fetch bookings' },
+        { status: 500 }
       );
+    }
   }
-}
 
 export async function POST(req: NextRequest) {
     try {

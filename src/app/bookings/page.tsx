@@ -10,11 +10,8 @@ import BookingCard from "@/components/booking/booking-card"
 import toast from "react-hot-toast"
 import { useAuth } from "@/context/auth.context"
 import ProtectedRoute from "@/components/common/ProtectedRoute"
-import Booking, { ProviderInfo } from "@/lib/types/booking"
-
-interface Provider extends ProviderInfo {
-  image?: string[]
-}
+import Booking from "@/lib/types/booking"
+import { ProviderData } from "@/lib/types/providers"
 
 interface Child {
   _id?: string
@@ -23,7 +20,7 @@ interface Child {
 }
 
 interface BookingPageData extends Omit<Booking, 'provider' | 'child'> {
-  provider: Provider
+  provider: ProviderData
   child: Child
 }
 
@@ -46,10 +43,10 @@ export default function BookingsPage() {
 
   useEffect(() => {
     if (isAuthenticated && token) {
-      const filterParam = activeTab === 'active' ? 'active' : undefined
-      fetchBookings(filterParam)
+      const filterParam = activeTab === 'active' ? 'active' : 'history';
+      fetchBookings(filterParam);
     }
-  }, [activeTab, isAuthenticated, token])
+  }, [activeTab, isAuthenticated, token]);
 
   const fetchBookings = async (filter?: string) => {
     try {
@@ -79,7 +76,7 @@ export default function BookingsPage() {
         provider: {
           name: booking.provider?.name || 'Unknown Provider',
           address: booking.provider?.address || 'No address provided',
-          image: booking.provider?.image || []
+          image: booking.provider?.images || []
         },
         child: {
           fullname: booking.child?.fullname || 'Unknown Child',
@@ -145,32 +142,23 @@ export default function BookingsPage() {
   }
 
   const getFilteredBookings = () => {
-    let filtered = bookings
-
-    // Filter by tab (active vs history)
-    if (activeTab === "active") {
-      filtered = filtered.filter((booking) => ["pending", "confirmed", "active"].includes(booking.status))
-    } else {
-      filtered = filtered.filter((booking) => ["completed", "cancelled"].includes(booking.status))
-    }
-
-    // Filter by search term
+    let filtered = bookings;
+  
     if (searchTerm) {
       filtered = filtered.filter(
         (booking) =>
           booking.providerName.toLowerCase().includes(searchTerm.toLowerCase()) ||
           booking.childName.toLowerCase().includes(searchTerm.toLowerCase()) ||
           booking.bookingId.toLowerCase().includes(searchTerm.toLowerCase()),
-      )
+      );
     }
-
-    // Filter by status
+  
     if (filterStatus !== "all") {
-      filtered = filtered.filter((booking) => booking.status === filterStatus)
+      filtered = filtered.filter((booking) => booking.status === filterStatus);
     }
-
-    return filtered
-  }
+  
+    return filtered;
+  };
 
   const getStatusCount = (status: string) => {
     if (status === "active") {
