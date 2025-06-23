@@ -7,7 +7,7 @@ const childService = new ChildService();
 
 export async function GET(
     req: NextRequest, 
-    context: { params: { id: string } }
+    context: any
 ){
     try {
       await connectDB();

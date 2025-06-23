@@ -6,7 +6,7 @@ import { verifyAdmin, verifyAuth } from '@/lib/middleware/auth.middleware';
 const bookingService = new BookingService();
 connectDB();
 
-export async function GET(req: NextRequest, context: { params: { id: string } }) {
+export async function GET(req: NextRequest, context: any) {
   try {
       const authResult = await verifyAuth(req);
       
@@ -56,7 +56,7 @@ export async function GET(req: NextRequest, context: { params: { id: string } })
   }
 }
 
-export async function PUT(req: NextRequest, context: { params: { id: string } }) {
+export async function PUT(req: NextRequest, context: any) {
   try {
       const authResult = await verifyAdmin(req);
 
@@ -139,7 +139,7 @@ export async function PUT(req: NextRequest, context: { params: { id: string } })
   }
 }
 
-export async function DELETE(req: NextRequest, context: { params: { id: string } }) {
+export async function DELETE(req: NextRequest, context: any) {
   try {
       const authResult = await verifyAuth(req);
 

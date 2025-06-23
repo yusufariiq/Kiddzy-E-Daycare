@@ -7,7 +7,7 @@ const userService = new UserService();
 
 export async function GET(
     req: NextRequest,
-    context: { params: { id: string } }
+    context: any
 ) {
     try {
         await connectDB();
@@ -53,7 +53,7 @@ export async function GET(
 
 export async function PUT(
     req: NextRequest,
-    context: { params: { id: string } }
+    context: any
 ) {
     try {
         const authResult = await verifyAuth(req);

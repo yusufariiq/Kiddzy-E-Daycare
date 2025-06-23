@@ -6,7 +6,7 @@ import connectDB from '@/config/db';
 const bookingService = new BookingService();
 connectDB();
 
-export async function PUT(req: NextRequest, context: { params: { id: string } }) {
+export async function PUT(req: NextRequest, context: any) {
     try {
         const authResult = await verifyAdmin(req);
         
@@ -45,7 +45,7 @@ export async function PUT(req: NextRequest, context: { params: { id: string } })
     }
 }
 
-export async function DELETE(req: NextRequest, context: { params: { id: string } }) {
+export async function DELETE(req: NextRequest, context: any) {
     try {
         const authResult = await verifyAdmin(req);
         
@@ -77,7 +77,7 @@ export async function DELETE(req: NextRequest, context: { params: { id: string }
     }
 }
 
-export async function GET(req: NextRequest, context: { params: { id: string } }) {
+export async function GET(req: NextRequest, context: any) {
     try {
         const authResult = await verifyAdmin(req);
         

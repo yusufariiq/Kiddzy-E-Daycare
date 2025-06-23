@@ -5,7 +5,7 @@ import connectDB from "@/config/db";
 
 export async function PUT(
   req: NextRequest,
-  context: { params: { id: string } }
+  context: any
 ) {
   try {
       await connectDB();
@@ -42,7 +42,7 @@ export async function PUT(
 
 export async function DELETE(
   request: NextRequest,
-  context: { params: { id: string } }
+  context: any
 ) {
   try {
     await connectDB();

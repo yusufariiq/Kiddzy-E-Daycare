@@ -9,7 +9,7 @@ connectDB();
 
 export async function GET(
   req: NextRequest,
-  context: { params: { userId: string } }
+  context: any
 ) {
   try {
     const authResult = await verifyAdmin(req);

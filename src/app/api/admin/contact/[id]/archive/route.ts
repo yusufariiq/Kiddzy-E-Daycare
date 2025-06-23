@@ -6,7 +6,7 @@ import { ContactService } from '@/lib/services/contact.service';
 const contactService = new ContactService();
 connectDB();
 
-export async function PATCH(req: NextRequest, context: { params: { id: string } }) {
+export async function PATCH(req: NextRequest, context: any) {
     try {
         const authResult = await verifyAdmin(req);
         if (!authResult.isAuthenticated) {
