@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useState } from "react"
+import { useSearchParams } from "next/navigation"
 import ChildcareCard from "@/components/common/childcare-card"
 import SearchBar from "@/components/common/searchbar"
 import { Button } from "@/components/ui/button"
@@ -9,6 +10,7 @@ import LoadingSpinner from "@/components/ui/loading-spinner"
 import { ProviderData } from "@/lib/types/providers"
 
 export default function ChildcarePage() {
+  const searchParams = useSearchParams()
   const [providers, setProviders] = useState<ProviderData[]>([])
   const [loading, setLoading] = useState(false)
   const [currentPage, setCurrentPage] = useState(1)
@@ -63,8 +65,30 @@ export default function ChildcarePage() {
   }
 
   useEffect(() => {
-    fetchProviders({}, 1)
-  }, [])
+    const urlParams = {
+      keyword: searchParams.get('keyword') || '',
+      location: searchParams.get('location') || '',
+      ageGroup: searchParams.get('ageGroup') || '',
+      maxPrice: searchParams.get('maxPrice') || ''
+    }
+
+    // Check if any URL parameters exist
+    const hasUrlParams = Object.values(urlParams).some(value => value !== '')
+    
+    if (hasUrlParams) {
+      const searchFilters = {
+        ...(urlParams.keyword && { keyword: urlParams.keyword }),
+        ...(urlParams.location && { location: urlParams.location }),
+        ...(urlParams.ageGroup && { ageGroup: urlParams.ageGroup }),
+        ...(urlParams.maxPrice && { maxPrice: urlParams.maxPrice })
+      }
+      
+      setCurrentFilters(searchFilters)
+      fetchProviders(searchFilters, 1)
+    } else {
+      fetchProviders({}, 1)
+    }
+  }, [searchParams])
 
   return (
     <div className="min-h-screen pb-10">

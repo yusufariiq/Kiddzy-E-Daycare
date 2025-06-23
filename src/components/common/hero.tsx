@@ -1,5 +1,6 @@
 import Image from "next/image"
 import { Button } from "@/components/ui/button"
+import Link from "next/link"
 
 export default function Hero() {
   return (
@@ -16,10 +17,10 @@ export default function Hero() {
             </p>
             <div className="flex flex-wrap justify-center items-center md:justify-start gap-4">
               <Button size="lg" className="bg-[#FE7743] hover:bg-[#e66a3a]">
-                Get Started
+                <Link href={"/childcare"}>Get Started</Link>
               </Button>
               <Button size="lg" variant="outline" className="border-white text-white hover:bg-white/10">
-                Learn More
+                <Link href={"/about-us"}>Learn More</Link>
               </Button>
             </div>
           </div>
