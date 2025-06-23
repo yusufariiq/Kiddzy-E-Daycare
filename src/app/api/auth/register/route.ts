@@ -1,4 +1,4 @@
-import { AuthController } from '@/app/lib/controllers/auth.controller';
+import { AuthController } from '@/lib/controllers/auth.controller';
 import { NextRequest, NextResponse } from 'next/server';
 
 const authController = new AuthController();

@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-import connectDB from "@/app/config/db";
-import { ProviderService } from "@/app/lib/services/provider.service";
+import connectDB from "@/config/db";
+import { ProviderService } from "@/lib/services/provider.service";
 
 const providerService = new ProviderService();
 
@@ -10,24 +10,49 @@ export async function GET(req: NextRequest) {
 
         const searchParams = req.nextUrl.searchParams;
         const keyword = searchParams.get('keyword');
-        const latitude = searchParams.get('latitude') ? parseFloat(searchParams.get('latitude')!) : null;
-        const longitude = searchParams.get('longitude') ? parseFloat(searchParams.get('longitude')!) : null;
-        const maxDistance = searchParams.get('maxDistance') ? parseFloat(searchParams.get('maxDistance')!) : 5000;
-        const limit = searchParams.get('limit') ? parseInt(searchParams.get('limit')!) : 10;
-        const page = searchParams.get('page') ? parseInt(searchParams.get('page')!) : 1;
+        const location = searchParams.get('location');
+        const ageGroup = searchParams.get('ageGroup');
+        const maxPrice = searchParams.get('maxPrice');
+        const limit = Math.min(parseInt(searchParams.get('limit') || '10'), 50);
+        const page = Math.max(1, parseInt(searchParams.get('page') || '1')); 
     
-        let providers;
+        let result;
 
-        if (keyword) {
-            providers = await providerService.searchProviders(keyword, limit, page);
-        } else if (latitude && longitude) {
-            providers = await providerService.findProvidersByLocation(longitude, latitude, maxDistance);
+        const filters: any = {};
+        if (keyword?.trim()) filters.keyword = keyword.trim();
+        if (location?.trim()) filters.location = location.trim();
+        if (ageGroup?.trim()) filters.ageGroup = ageGroup.trim();
+        if (maxPrice && !isNaN(parseInt(maxPrice))) filters.maxPrice = parseInt(maxPrice);
+
+        if (Object.keys(filters).length > 0) {
+            result = await providerService.searchProvidersWithFilters(filters, limit, page);
         } else {
-            providers = await providerService.getActiveProviders();
+            result = await providerService.getActiveProvidersWithPagination(limit, page);
         }
 
-        return NextResponse.json({ success: true, data: providers });
+        const { providers, totalCount } = result;
+        const totalPages = Math.ceil(totalCount / limit);
+        const hasNextPage = page < totalPages;
+        const hasPrevPage = page > 1;
+
+        return NextResponse.json({ 
+            success: true, 
+            data: providers,
+            pagination: {
+                currentPage: page,
+                totalPages,
+                totalCount,
+                hasNextPage,
+                hasPrevPage,
+                limit,
+                resultsCount: providers.length
+            },
+            // Backward compatibility
+            totalPages,
+            hasNextPage
+        });
     } catch (error: any) {
+        console.error('Provider API Error:', error);
         return NextResponse.json(
             { success: false, error: error.message },
             { status: 500 }

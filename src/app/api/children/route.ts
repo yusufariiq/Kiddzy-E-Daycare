@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { Child } from '@/app/lib/models/child.model';
-import { verifyAuth } from '@/app/lib/middleware/auth.middleware';
-import connectDB from '@/app/config/db';
-import { ChildRepository } from '@/app/lib/repositories/child.repostiory';
+import connectDB from '@/config/db';
+import { verifyAuth } from '@/lib/middleware/auth.middleware';
+import { ChildRepository } from '@/lib/repositories/child.repostiory';
+import { Child } from '@/lib/models/child.model';
 
 export async function POST(req: NextRequest) {
   try {

@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-import connectDB from "@/app/config/db";
-import { ProviderService } from "@/app/lib/services/provider.service";
+import connectDB from "@/config/db";
+import { ProviderService } from "@/lib/services/provider.service";
 
 const providerService = new ProviderService();
 

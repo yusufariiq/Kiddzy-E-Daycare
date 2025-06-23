@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { verifyAuth } from '@/app/lib/middleware/auth.middleware';
-import connectDB from '@/app/config/db';
-import { ChildService } from '@/app/lib/services/child.service';
+import connectDB from '@/config/db';
+import { ChildService } from '@/lib/services/child.service';
+import { verifyAuth } from '@/lib/middleware/auth.middleware';
 
 const childService = new ChildService();
 

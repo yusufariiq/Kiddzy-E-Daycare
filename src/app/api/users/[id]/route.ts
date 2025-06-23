@@ -1,6 +1,6 @@
-import connectDB from "@/app/config/db";
-import { verifyAuth } from "@/app/lib/middleware/auth.middleware";
-import { UserService } from "@/app/lib/services/user.service";
+import connectDB from "@/config/db";
+import { verifyAuth } from "@/lib/middleware/auth.middleware";
+import { UserService } from "@/lib/services/user.service";
 import { NextRequest, NextResponse } from "next/server";
 
 const userService = new UserService();
@@ -76,16 +76,6 @@ export async function PUT(
 
         const body = await req.json();
         const { firstName, lastName, phoneNumber, email } = body;
-
-        if (!firstName || !lastName || !phoneNumber) {
-            return NextResponse.json(
-                { 
-                  success: false, 
-                  message: 'First name, last name, and phone number are required' 
-                },
-                { status: 400 }
-            );
-        }
 
         const updatedUser = await userService.updateUserProfile(id, {
             firstName,

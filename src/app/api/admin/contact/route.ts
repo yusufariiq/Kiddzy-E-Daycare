@@ -1,6 +1,6 @@
-import connectDB from "@/app/config/db";
-import { verifyAdmin } from "@/app/lib/middleware/auth.middleware";
-import { ContactService } from "@/app/lib/services/contact.service";
+import connectDB from "@/config/db";
+import { verifyAdmin } from "@/lib/middleware/auth.middleware";
+import { ContactService } from "@/lib/services/contact.service";
 import { NextRequest, NextResponse } from "next/server";
 
 const contactService = new ContactService();
