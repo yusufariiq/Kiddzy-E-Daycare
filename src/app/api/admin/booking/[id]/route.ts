@@ -92,7 +92,7 @@ export async function GET(req: NextRequest, context: Context) {
             );
         }
         
-        const booking = await bookingService.getBookingDetailsForAdmin(params.id);
+        const booking = await bookingService.getBookingDetailsForAdmin(context.params.id);
         
         if (!booking) {
             return NextResponse.json(
