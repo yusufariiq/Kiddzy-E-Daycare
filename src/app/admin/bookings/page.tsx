@@ -167,9 +167,16 @@ export default function AdminBookings() {
         ? new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
         : new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
     }
-
-    if (a[sortField] < b[sortField]) return sortDirection === "asc" ? -1 : 1
-    if (a[sortField] > b[sortField]) return sortDirection === "asc" ? 1 : -1
+  
+    const aValue = a[sortField]
+    const bValue = b[sortField]
+    
+    if (aValue === undefined && bValue === undefined) return 0
+    if (aValue === undefined) return 1
+    if (bValue === undefined) return -1
+    
+    if (aValue < bValue) return sortDirection === "asc" ? -1 : 1
+    if (aValue > bValue) return sortDirection === "asc" ? 1 : -1
     return 0
   })
 
