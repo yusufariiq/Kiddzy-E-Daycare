@@ -6,7 +6,7 @@ import connectDB from '@/config/db';
 const bookingService = new BookingService();
 connectDB();
 
-export async function PUT(req: NextRequest, { params }: { params: { id: string } }) {
+export async function PUT(req: NextRequest, context: { params: { id: string } }) {
     try {
         const authResult = await verifyAdmin(req);
         
@@ -26,7 +26,7 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
             );
         }
         
-        const booking = await bookingService.updateBookingStatus(params.id, status);
+        const booking = await bookingService.updateBookingStatus(context.params.id, status);
         
         if (!booking) {
             return NextResponse.json(
@@ -45,7 +45,7 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
     }
 }
 
-export async function DELETE(req: NextRequest, { params }: { params: { id: string } }) {
+export async function DELETE(req: NextRequest, context: { params: { id: string } }) {
     try {
         const authResult = await verifyAdmin(req);
         
@@ -58,7 +58,7 @@ export async function DELETE(req: NextRequest, { params }: { params: { id: strin
         
         const { reason } = await req.json();
         
-        const booking = await bookingService.adminCancelBooking(params.id, reason);
+        const booking = await bookingService.adminCancelBooking(context.params.id, reason);
         
         if (!booking) {
             return NextResponse.json(
@@ -77,32 +77,30 @@ export async function DELETE(req: NextRequest, { params }: { params: { id: strin
     }
 }
 
-export async function GET(req: NextRequest, { params }: { params: { id: string } }) {
+export async function GET(req: NextRequest, context: { params: { id: string } }) {
     try {
-        const authResult = await verifyAdmin(req);
-        
-        if (!authResult.isAuthenticated) {
-            return NextResponse.json(
-                { error: authResult.error },
-                { status: authResult.status || 401 }
-            );
-        }
-        
-        const booking = await bookingService.getBookingDetailsForAdmin(params.id);
-        
-        if (!booking) {
-            return NextResponse.json(
-                { error: 'Booking not found' },
-                { status: 404 }
-            );
-        }
-        
-        return NextResponse.json({ booking }, { status: 200 });
-    } catch (error: any) {
-        console.error('Error fetching booking details:', error);
+      const authResult = await verifyAdmin(req)
+  
+      if (!authResult.isAuthenticated) {
         return NextResponse.json(
-            { error: error.message || 'Failed to fetch booking details' },
-            { status: 500 }
-        );
+          { error: authResult.error },
+          { status: authResult.status || 401 }
+        )
+      }
+  
+      const booking = await bookingService.getBookingDetailsForAdmin(context.params.id)
+  
+      if (!booking) {
+        return NextResponse.json({ error: 'Booking not found' }, { status: 404 })
+      }
+  
+      return NextResponse.json({ booking }, { status: 200 })
+    } catch (error: any) {
+      console.error('Error fetching booking details:', error)
+      return NextResponse.json(
+        { error: error.message || 'Failed to fetch booking details' },
+        { status: 500 }
+      )
     }
 }
+  
