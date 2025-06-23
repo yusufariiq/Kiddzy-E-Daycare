@@ -4,12 +4,15 @@ import { BookingService } from '@/lib/services/booking.service';
 import { verifyAdmin} from '@/lib/middleware/auth.middleware';
 
 const bookingService = new BookingService();
-
 connectDB();
+
+type Context = {
+  params: { userId: string }
+}
 
 export async function GET(
   req: NextRequest,
-  { params }: { params: { userId: string } }
+  context: Context
 ) {
   try {
     const authResult = await verifyAdmin(req);
@@ -21,7 +24,7 @@ export async function GET(
       );
     }
     
-    const { userId } = params;
+    const { userId } = context.params;
     const url = new URL(req.url);
     const filter = url.searchParams.get('filter') as 'active' | 'completed' | 'cancelled' | 'history' | undefined;
   

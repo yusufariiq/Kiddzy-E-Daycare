@@ -3,14 +3,18 @@ import { BookingRepository } from '@/lib/repositories/booking.repository'
 import { ProviderRepository } from '@/lib/repositories/provider.repostiroy'
 import connectDB from '@/config/db'
 
+type Context = {
+  params: { id: string }
+}
+
 export async function GET(
   request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
+  context: Context,
 ) {
   try {
     await connectDB()
 
-    const { id } = await params
+    const { id } = await context.params
     const searchParams = request.nextUrl.searchParams
     const year = parseInt(searchParams.get('year') || new Date().getFullYear().toString())
     const month = parseInt(searchParams.get('month') || new Date().getMonth().toString())
@@ -77,12 +81,12 @@ export async function GET(
 // For checking specific date range availability
 export async function POST(
   request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
+  context: Context
 ) {
   try {
     await connectDB()
 
-    const { id } = await params
+    const { id } = await context.params
     const { startDate, endDate, childrenCount = 1 } = await request.json()
     
     if (!startDate || !endDate) {

@@ -6,14 +6,18 @@ import { ContactService } from '@/lib/services/contact.service';
 const contactService = new ContactService();
 connectDB();
 
-export async function PATCH(req: NextRequest, { params }: { params: { id: string } }) {
+type Context = {
+    params: { id: string }
+}
+
+export async function PATCH(req: NextRequest, context: Context) {
     try {
         const authResult = await verifyAdmin(req);
         if (!authResult.isAuthenticated) {
             return NextResponse.json({ error: authResult.error }, { status: authResult.status || 401 });
         }
 
-        const updated = await contactService.updateContact(params.id, { isArchived: true });
+        const updated = await contactService.updateContact(context.params.id, { isArchived: true });
 
         if (!updated) {
             return NextResponse.json({ error: 'Contact not found' }, { status: 404 });

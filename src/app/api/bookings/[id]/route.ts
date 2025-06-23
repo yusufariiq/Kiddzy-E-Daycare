@@ -4,10 +4,13 @@ import { BookingService } from '@/lib/services/booking.service';
 import { verifyAdmin, verifyAuth } from '@/lib/middleware/auth.middleware';
 
 const bookingService = new BookingService();
-
 connectDB();
 
-export async function GET(req: NextRequest, { params }: { params: { id: string } }) {
+type Context = {
+    params: { id: string }
+}
+
+export async function GET(req: NextRequest, context: Context) {
   try {
       const authResult = await verifyAuth(req);
       
@@ -19,7 +22,7 @@ export async function GET(req: NextRequest, { params }: { params: { id: string }
       }
       
       const userId = authResult.userId as string;
-      const bookingId = params.id;
+      const bookingId = context.params.id;
 
       if (!bookingId) {
           return NextResponse.json(
@@ -57,7 +60,7 @@ export async function GET(req: NextRequest, { params }: { params: { id: string }
   }
 }
 
-export async function PUT(req: NextRequest, { params }: { params: { id: string } }) {
+export async function PUT(req: NextRequest, context: Context) {
   try {
       const authResult = await verifyAdmin(req);
 
@@ -69,7 +72,7 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
       }
 
       const userId = authResult.userId as string;
-      const bookingId = params.id;
+      const bookingId = context.params.id;
       const data = await req.json();
 
       if (!bookingId) {
@@ -140,7 +143,7 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
   }
 }
 
-export async function DELETE(req: NextRequest, { params }: { params: { id: string } }) {
+export async function DELETE(req: NextRequest, context: Context) {
   try {
       const authResult = await verifyAuth(req);
 
@@ -152,7 +155,7 @@ export async function DELETE(req: NextRequest, { params }: { params: { id: strin
       }
 
       const userId = authResult.userId as string;
-      const bookingId = params.id;
+      const bookingId = context.params.id;
       const url = new URL(req.url);
       const reason = url.searchParams.get('reason');
 
