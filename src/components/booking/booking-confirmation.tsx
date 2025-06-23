@@ -44,7 +44,7 @@ export default function BookingConfirmation({
   }, [router])
 
   return (
-    <div className="min-h-screen bg-gray-50 flex items-center justify-center px-4">
+    <div className="min-h-screen bg-gray-50 flex items-center justify-center py-6 px-4">
       <div className="max-w-2xl w-full space-y-6">
         {/* Success Message */}
         <div className="text-center">
