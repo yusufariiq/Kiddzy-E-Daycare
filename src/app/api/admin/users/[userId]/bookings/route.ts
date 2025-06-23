@@ -26,8 +26,6 @@ export async function GET(
     const filter = url.searchParams.get('filter') as 'active' | 'completed' | 'cancelled' | 'history' | undefined;
   
     const bookings = await bookingService.getUserBookings(userId);
-    console.log('Fetching bookings for userId:', userId);
-    console.log('UserId type:', typeof userId);
     
     return NextResponse.json({ 
       bookings,

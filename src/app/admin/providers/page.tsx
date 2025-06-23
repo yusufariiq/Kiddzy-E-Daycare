@@ -155,17 +155,11 @@ export default function AdminProviders() {
       const url = editingProvider ? `/api/admin/providers/${editingProvider._id}` : '/api/admin/providers'
       const method = editingProvider ? 'PUT' : 'POST'
       
-      console.log('Making request to:', url, 'with method:', method)
-      console.log('EditingProvider:', editingProvider)
-      
       const requestBody = {
         ...currentFormData,
         availability: true,
         isActive: true,
       }
-      
-      console.log('Request body:', requestBody)
-      console.log('Operating hours being sent:', requestBody.operatingHours)
       
       const response = await fetch(url, {
         method,
@@ -193,8 +187,6 @@ export default function AdminProviders() {
       }
   
       const result = await response.json()
-      console.log('Success response:', result)
-      
       toast.success(result.message || `Provider ${editingProvider ? 'updated' : 'created'} successfully`)
       resetForm()
       await fetchProviders()
