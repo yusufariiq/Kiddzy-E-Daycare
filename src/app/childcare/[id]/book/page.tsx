@@ -329,7 +329,7 @@ export default function BookingPage() {
               <Button
                 onClick={handleBack}
                 variant="ghost"
-                className="flex items-center gap-2 hover:text-[#FE7743] text-white"
+                className="flex items-center gap-2 text-white"
               >
                 <ArrowLeft className="size-5" />
                 Back

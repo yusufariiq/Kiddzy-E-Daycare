@@ -1,5 +1,22 @@
 import { Booking, IBooking } from '../models/booking.model';
 
+export interface DateAvailability {
+    date: string
+    availableSlots: number
+    totalCapacity: number
+    status: 'available' | 'limited' | 'full' | 'closed'
+    bookings: number
+  }
+  
+export interface CalendarAvailability {
+providerId: string
+dateRange: {
+    start: string
+    end: string
+}
+availability: DateAvailability[]
+}
+
 export class BookingRepository {
     async create(bookingData: Partial<IBooking>): Promise<IBooking> {
         const booking = new Booking(bookingData);
@@ -215,5 +232,147 @@ export class BookingRepository {
             .populate('userId', 'firstName lastName email phoneNumber')
             .populate('childrenIds', 'fullname nickname age gender')
             .sort({ startDate: 1 });
+    }
+
+    async getDateRangeAvailability(
+        providerId: string,
+        startDate: Date,
+        endDate: Date,
+        providerCapacity: number,
+        operatingHours: Array<{ day: string; open: string; close: string }>
+      ): Promise<DateAvailability[]> {
+        const availability: DateAvailability[] = []
+        
+        // Get all bookings in the date range
+        const bookings = await Booking.find({
+          providerId,
+          status: { $in: ['confirmed', 'pending'] },
+          startDate: { $lte: endDate },
+          endDate: { $gte: startDate }
+        })
+    
+        // Create booking count map by date
+        const bookingsByDate = new Map<string, number>()
+        
+        bookings.forEach(booking => {
+          const current = new Date(booking.startDate)
+          const end = new Date(booking.endDate)
+          
+          while (current <= end) {
+            const dateKey = current.toISOString().split('T')[0]
+            const currentCount = bookingsByDate.get(dateKey) || 0
+            bookingsByDate.set(dateKey, currentCount + (booking.childrenCount || 1))
+            current.setDate(current.getDate() + 1)
+          }
+        })
+    
+        // Generate availability for each date
+        const current = new Date(startDate)
+        while (current <= endDate) {
+          const dateKey = current.toISOString().split('T')[0]
+          const dayName = current.toLocaleDateString('en-US', { weekday: 'long' })
+          
+          // Check if provider is open on this day
+          const daySchedule = operatingHours.find(
+            schedule => schedule.day.toLowerCase() === dayName.toLowerCase()
+          )
+          
+          const isWeekend = current.getDay() === 0 || current.getDay() === 6
+          const isClosed = !daySchedule || daySchedule.open === "CLOSED" || isWeekend
+          
+          const bookingsCount = bookingsByDate.get(dateKey) || 0
+          const availableSlots = Math.max(0, providerCapacity - bookingsCount)
+          
+          let status: 'available' | 'limited' | 'full' | 'closed'
+          if (isClosed) {
+            status = 'closed'
+          } else if (availableSlots === 0) {
+            status = 'full'
+          } else if (availableSlots <= providerCapacity * 0.3) { // Less than 30% capacity
+            status = 'limited'
+          } else {
+            status = 'available'
+          }
+    
+          availability.push({
+            date: dateKey,
+            availableSlots: isClosed ? 0 : availableSlots,
+            totalCapacity: providerCapacity,
+            status,
+            bookings: bookingsCount
+          })
+          
+          current.setDate(current.getDate() + 1)
+        }
+        
+        return availability
+    }
+
+    async checkMultipleChildrenAvailability(
+        providerId: string,
+        startDate: Date,
+        endDate: Date,
+        childrenCount: number,
+        providerCapacity: number,
+        operatingHours: Array<{ day: string; open: string; close: string }>
+      ): Promise<{
+        available: boolean
+        unavailableDates: string[]
+        reason?: string
+      }> {
+        const availability = await this.getDateRangeAvailability(
+          providerId,
+          startDate,
+          endDate,
+          providerCapacity,
+          operatingHours
+        )
+    
+        const unavailableDates: string[] = []
+        
+        for (const dayAvailability of availability) {
+          if (dayAvailability.status === 'closed') {
+            unavailableDates.push(dayAvailability.date)
+          } else if (dayAvailability.availableSlots < childrenCount) {
+            unavailableDates.push(dayAvailability.date)
+          }
+        }
+    
+        return {
+          available: unavailableDates.length === 0,
+          unavailableDates,
+          reason: unavailableDates.length > 0 
+            ? `Insufficient capacity or closed on ${unavailableDates.length} day(s)`
+            : undefined
+        }
+      }
+    
+      // Get calendar data for a month view
+    async getMonthlyAvailability(
+        providerId: string,
+        year: number,
+        month: number, // 0-based (0 = January)
+        providerCapacity: number,
+        operatingHours: Array<{ day: string; open: string; close: string }>
+    ): Promise<CalendarAvailability> {
+        const startDate = new Date(year, month, 1)
+        const endDate = new Date(year, month + 1, 0) // Last day of month
+        
+        const availability = await this.getDateRangeAvailability(
+          providerId,
+          startDate,
+          endDate,
+          providerCapacity,
+          operatingHours
+        )
+    
+        return {
+          providerId,
+          dateRange: {
+            start: startDate.toISOString().split('T')[0],
+            end: endDate.toISOString().split('T')[0]
+          },
+          availability
+        }
     }
 }

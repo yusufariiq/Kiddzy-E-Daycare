@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react"
 import Image from "next/image"
-import { MapPin, ArrowLeft, Phone, Map, Clock } from "lucide-react"
+import { MapPin, ArrowLeft, Phone, Map } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import LoadingSpinner from "@/components/ui/loading-spinner"
 import { useParams, useRouter } from "next/navigation"
@@ -10,29 +10,8 @@ import Link from "next/link"
 import { ProviderData } from "@/lib/types/providers"
 import { useAuth } from "@/context/auth.context"
 import toast from "react-hot-toast"
+import AvailableCalendar from "@/components/common/calendar"
 
-// Utility function to check if facility is currently open
-const isCurrentlyOpen = (operatingHours: any[]) => {
-  const now = new Date()
-  const currentDay = now.toLocaleDateString('en-US', { weekday: 'long' })
-  const currentTime = now.toLocaleTimeString('en-US', { 
-    hour12: false, 
-    hour: '2-digit', 
-    minute: '2-digit' 
-  })
-
-  const todaySchedule = operatingHours.find(
-    schedule => schedule.day.toLowerCase() === currentDay.toLowerCase()
-  )
-
-  if (!todaySchedule || todaySchedule.open === "CLOSED" || todaySchedule.close === "CLOSED") {
-    return false
-  }
-
-  return currentTime >= todaySchedule.open && currentTime <= todaySchedule.close
-}
-
-// Utility function to get operational status message
 const getOperationalStatus = (operatingHours: any[]) => {
   const now = new Date()
   const currentDay = now.toLocaleDateString('en-US', { weekday: 'long' })
@@ -122,6 +101,9 @@ export default function ChildcareProviderPage() {
   const [provider, setProvider] = useState<ProviderData | null>(null)
   const [loading, setLoading] = useState(true)
   const [activeImage, setActiveImage] = useState(0)
+
+  const [childrenCount, setChildrenCount] = useState(1)
+  const [showCalendar, setShowCalendar] = useState(false)
   const [operationalStatus, setOperationalStatus] = useState<{
     isOpen: boolean
     message: string
@@ -169,6 +151,10 @@ export default function ChildcareProviderPage() {
 
   const handleBack = () => {
     router.back()
+  }
+
+  const handleChildrenCountChange = (count: number) => {
+    setChildrenCount(count)
   }
 
   const handleBooking = () => {
@@ -259,7 +245,7 @@ export default function ChildcareProviderPage() {
 
           {/* Right column - Details and Booking */}
           <div className="lg:col-span-1">
-            <div className="h-[500px] flex flex-col justify-between bg-white rounded-xl p-6 border border-gray-200 shadow-sm">
+            <div className="bg-white rounded-xl p-6 border border-gray-200 shadow-sm">
               <div className="flex flex-col mb-4 gap-3">
                 <h1 className="text-2xl sm:text-3xl font-bold text-[#273F4F] mb-4">{provider.name}</h1>
                 <div className="flex items-center gap-3 text-gray-600">
@@ -285,7 +271,14 @@ export default function ChildcareProviderPage() {
               <div className="border-t border-gray-200 my-4 pt-4">
                 <p className="text-sm text-gray-600 mb-1">Start from</p>
                 <div className="text-2xl font-bold text-[#273F4F] mb-4">Rp {provider.price.toLocaleString("id-ID")}</div>
-
+                <Button
+                  onClick={() => setShowCalendar(!showCalendar)}
+                  variant="outline"
+                  className="w-full py-3 mb-3 rounded-xl text-sm font-medium border-[#FE7743] text-[#FE7743] hover:bg-[#FE7743]/5"
+                >
+                  {showCalendar ? 'Hide Calendar' : 'Check Availability'}
+                </Button>
+                
                 <Button
                   onClick={handleBooking}
                   disabled={!isBookingEnabled}
@@ -307,6 +300,18 @@ export default function ChildcareProviderPage() {
             </div>
           </div>
         </div>
+
+        {/* Calendar section */}
+        {showCalendar && provider && (
+          <div className="mt-8">
+            <AvailableCalendar
+              providerId={typeof id === 'string' ? id : ''}
+              childrenCount={childrenCount}
+              onChildrenCountChange={handleChildrenCountChange}
+              className="max-w-4xl mx-auto"
+            />
+          </div>
+        )}
 
         {/* Provider details section */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mt-8">
