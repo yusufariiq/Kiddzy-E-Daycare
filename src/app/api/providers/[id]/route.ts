@@ -4,13 +4,9 @@ import { ProviderService } from "@/lib/services/provider.service";
 
 const providerService = new ProviderService();
 
-type Context = {
-    params: { id: string }
-}
-
 export async function GET(
     req: NextRequest,
-    context: Context
+    context: { params: { id: string } }
 ) {
     try {
         await connectDB();

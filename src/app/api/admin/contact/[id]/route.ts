@@ -6,11 +6,7 @@ import { ContactService } from '@/lib/services/contact.service';
 const contactService = new ContactService();
 connectDB();
 
-type Context = {
-    params: { id: string }
-}
-
-export async function DELETE(req: NextRequest, context: Context) {
+export async function DELETE(req: NextRequest, context: { params: { id: string } }) {
     try {
         const authResult = await verifyAdmin(req);
         if (!authResult.isAuthenticated) {

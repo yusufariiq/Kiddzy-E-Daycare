@@ -6,13 +6,10 @@ import { verifyAdmin} from '@/lib/middleware/auth.middleware';
 const bookingService = new BookingService();
 connectDB();
 
-type Context = {
-  params: { userId: string }
-}
 
 export async function GET(
   req: NextRequest,
-  context: Context
+  context: { params: { userId: string } }
 ) {
   try {
     const authResult = await verifyAdmin(req);

@@ -9,7 +9,7 @@ type Context = {
 
 export async function GET(
   request: NextRequest,
-  context: Context
+  context: { params: { id: string } }
 ) {
   try {
     await connectDB()
@@ -81,7 +81,7 @@ export async function GET(
 // For checking specific date range availability
 export async function POST(
   request: NextRequest,
-  context: Context
+  context: { params: { id: string } }
 ) {
   try {
     await connectDB()
