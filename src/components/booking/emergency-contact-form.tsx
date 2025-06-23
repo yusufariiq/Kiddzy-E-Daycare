@@ -45,7 +45,7 @@ export default function EmergencyContactForm({ onSubmit, initialData }: Emergenc
 
     if (!formData.phone.trim()) {
       newErrors.phone = "Phone number is required"
-    } else if (!/^(62|0)8[1-9][0-9]{6,9}$/.test(formData.phone)) {
+    } else if (!/^(0)8[1-9][0-9]{6,9}$/.test(formData.phone)) {
       newErrors.phone = "Please enter a valid Indonesian phone number"
     }
 
@@ -91,7 +91,7 @@ export default function EmergencyContactForm({ onSubmit, initialData }: Emergenc
             value={formData.phone}
             onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
             error={errors.phone}
-            placeholder="e.g. +62 812 3456 7890"
+            placeholder="e.g. 0812 3456 7890"
           />
         </div>
 
