@@ -47,7 +47,6 @@ export default function AdminUsers() {
         }
 
         setUsers(data.data)
-        console.log(data.data)
       } catch (error: any) {
         toast.error(error.message || "Failed to load profile")
       } finally {
