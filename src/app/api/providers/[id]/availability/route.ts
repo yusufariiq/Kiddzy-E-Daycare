@@ -9,7 +9,7 @@ type Context = {
 
 export async function GET(
   request: NextRequest,
-  context: Context,
+  context: Context
 ) {
   try {
     await connectDB()

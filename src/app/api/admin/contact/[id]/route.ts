@@ -6,14 +6,18 @@ import { ContactService } from '@/lib/services/contact.service';
 const contactService = new ContactService();
 connectDB();
 
-export async function DELETE(req: NextRequest, { params }: { params: { id: string } }) {
+type Context = {
+    params: { id: string }
+}
+
+export async function DELETE(req: NextRequest, context: Context) {
     try {
         const authResult = await verifyAdmin(req);
         if (!authResult.isAuthenticated) {
             return NextResponse.json({ error: authResult.error }, { status: authResult.status || 401 });
         }
 
-        const deleted = await contactService.deleteContact(params.id);
+        const deleted = await contactService.deleteContact(context.params.id);
 
         if (!deleted) {
             return NextResponse.json({ error: 'Contact not found or already deleted' }, { status: 404 });

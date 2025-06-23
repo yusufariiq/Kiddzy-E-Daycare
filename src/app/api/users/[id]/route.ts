@@ -5,9 +5,13 @@ import { NextRequest, NextResponse } from "next/server";
 
 const userService = new UserService();
 
+type Context = {
+    params: { id: string }
+}
+
 export async function GET(
     req: NextRequest,
-    context: { params: { id: string } }
+    context: Context
 ) {
     try {
         await connectDB();

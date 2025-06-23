@@ -83,22 +83,25 @@ export async function DELETE(req: NextRequest, context: Context) {
 
 export async function GET(req: NextRequest, context: Context) {
     try {
-      const authResult = await verifyAdmin(req)
-  
-      if (!authResult.isAuthenticated) {
-        return NextResponse.json(
-          { error: authResult.error },
-          { status: authResult.status || 401 }
-        )
-      }
-  
-      const booking = await bookingService.getBookingDetailsForAdmin(context.params.id)
-  
-      if (!booking) {
-        return NextResponse.json({ error: 'Booking not found' }, { status: 404 })
-      }
-  
-      return NextResponse.json({ booking }, { status: 200 })
+        const authResult = await verifyAdmin(req);
+        
+        if (!authResult.isAuthenticated) {
+            return NextResponse.json(
+                { error: authResult.error },
+                { status: authResult.status || 401 }
+            );
+        }
+        
+        const booking = await bookingService.getBookingDetailsForAdmin(params.id);
+        
+        if (!booking) {
+            return NextResponse.json(
+                { error: 'Booking not found' },
+                { status: 404 }
+            );
+        }
+        
+        return NextResponse.json({ booking }, { status: 200 });
     } catch (error: any) {
       console.error('Error fetching booking details:', error)
       return NextResponse.json(
