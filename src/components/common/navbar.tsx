@@ -226,10 +226,7 @@ export default function Navbar() {
         <div className="flex justify-between h-16">
           <div className="flex items-center">
             <Link href="/" className="flex-shrink-0 flex items-center">
-              <div className="h-10 w-10 rounded-full bg-[#FE7743] flex items-center justify-center text-white">
-                <User />
-              </div>
-              <span className="font-hashi ml-2 text-xl font-bold text-[#273F4F]">Kiddzy</span>
+              <span className="font-hashi text-2xl font-bold text-[#FE7743] hover:text-[#273F4F] transition-colors duration-300">Kiddzy</span>
             </Link>
           </div>
 

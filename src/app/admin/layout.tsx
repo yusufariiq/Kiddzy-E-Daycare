@@ -84,10 +84,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
                     <div className="flex items-center justify-between h-16 px-4 border-b border-gray-200">
                     {!sidebarCollapsed && (
                         <div className="flex items-center gap-2">
-                        <div className="w-8 h-8 bg-[#FE7743] rounded-lg flex items-center justify-center">
-                            <span className="text-white font-bold text-sm">K</span>
-                        </div>
-                        <span className="text-xl font-bold text-[#273F4F]">Kiddzy Admin</span>
+                          <span className="text-xl font-bold text-[#273F4F]">Kiddzy Admin</span>
                         </div>
                     )}
                     <div className="flex items-center gap-2">

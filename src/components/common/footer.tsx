@@ -8,27 +8,7 @@ export default function Footer() {
         <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-4">
           {/* Company Info */}
           <div className="col-span-2 flex flex-col justify-center items-center md:items-start">
-            <div className="flex items-center">
-              <div className="h-10 w-10 rounded-full bg-[#FE7743] flex items-center justify-center text-white">
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="20"
-                  height="20"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                >
-                  <path d="M9 18h6"></path>
-                  <path d="M10 22h4"></path>
-                  <path d="m2 2 20 20"></path>
-                  <path d="M12 12c-2-2.2-2-4.5-2-6.5C10 3.5 11.5 2 13 2c1.5 0 3 1.5 3 3.5 0 1-.5 2-1 3"></path>
-                </svg>
-              </div>
-              <span className="font-hashi ml-2 text-xl font-bold">Kiddzy</span>
-            </div>
+            <p className="font-hashi text-4xl font-bold">Kiddzy</p>
             <p className="mt-4 text-center md:text-left text-gray-300">
               Connecting families with trusted childcare providers. Find the perfect match for your family's needs.
             </p>
