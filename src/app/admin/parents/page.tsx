@@ -28,34 +28,34 @@ export default function AdminUsers() {
   const [showBookingDetailModal, setShowBookingDetailModal] = useState(false)
   const { token } = useAuth()
 
-  useEffect(() => {
-    const fetchUsers = async () => {
-      try {
-        setLoading(true)
-        setError(null)
-
-        const response = await fetch(`/api/admin/users`, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        })
-
-        const data = await response.json()
-
-        if (!response.ok) {
-          throw new Error(data.message || "Failed to fetch profile")
-        }
-
-        setUsers(data.data)
-      } catch (error: any) {
-        toast.error(error.message || "Failed to load profile")
-      } finally {
-        setLoading(false)
-      }
-    }
-
+  useEffect(() => {  
     fetchUsers()
   }, [])
+
+  const fetchUsers = async () => {
+    try {
+      setLoading(true)
+      setError(null)
+
+      const response = await fetch(`/api/admin/users`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      })
+
+      const data = await response.json()
+
+      if (!response.ok) {
+        throw new Error(data.message || "Failed to fetch profile")
+      }
+
+      setUsers(data.data)
+    } catch (error: any) {
+      toast.error(error.message || "Failed to load profile")
+    } finally {
+      setLoading(false)
+    }
+  }
 
   const handleViewBookings = async (userId: string, userName: string) => {
     try {
@@ -124,6 +124,34 @@ export default function AdminUsers() {
     } finally {
       setShowBookingDetailModal(false)
     }
+  }
+
+  const handleDeleteUser = async (userId: string) => {
+    if (!window.confirm("Are you sure you want to cancel this booking?")) return
+    
+    setLoading(true)
+    setSelectedUserId(userId)
+
+    try {
+      const response = await fetch(`/api/admin/users/${userId}`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        }
+      })
+
+      if (!response.ok) {
+        const errorData = await response.json()
+        throw new Error(errorData.error || 'Failed to delete message')
+      }
+
+      toast.success('Message deleted successfully')
+      await fetchUsers()
+    } catch (error: any) {
+      toast.error(error.message || 'Failed to delete message')
+    }
+
+    setLoading(false)
   }
 
   const handleCancelBooking = async (bookingId: string, reason: string) => {
@@ -254,6 +282,10 @@ export default function AdminUsers() {
                           variant="ghost"
                           size="sm"
                           className="flex items-center gap-2 text-red-600 hover:text-red-700"
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            handleDeleteUser(user._id)
+                          }}
                         >
                           <Trash2 className="h-4 w-4" />
                         </Button>

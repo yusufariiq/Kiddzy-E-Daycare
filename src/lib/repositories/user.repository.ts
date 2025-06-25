@@ -24,4 +24,9 @@ export class UserRepository {
     async findByRole(role: string): Promise<IUser[]> {
         return await User.find({ role }).select('-password');
     }
+
+    async delete(id: string): Promise<boolean> {
+        const result = await User.findByIdAndDelete(id);
+        return !!result;
+    }
 }

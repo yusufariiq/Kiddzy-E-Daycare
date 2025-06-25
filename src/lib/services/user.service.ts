@@ -28,4 +28,8 @@ export class UserService {
         const { role, ...updatableData } = userData;
         return await this.userRepository.update(userId, updatableData);
     }
+    
+    async deleteUser(userId: string): Promise<boolean> {
+        return await this.userRepository.delete(userId);
+    }
 }
