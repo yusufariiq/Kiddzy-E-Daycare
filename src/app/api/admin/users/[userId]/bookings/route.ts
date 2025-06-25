@@ -12,6 +12,8 @@ export async function GET(
   context: any
 ) {
   try {
+    const { userId } = context.params;
+    
     const authResult = await verifyAdmin(req);
     
     if (!authResult.isAuthenticated) {
@@ -21,7 +23,6 @@ export async function GET(
       );
     }
     
-    const { userId } = context.params;
     const url = new URL(req.url);
     const filter = url.searchParams.get('filter') as 'active' | 'completed' | 'cancelled' | 'history' | undefined;
   
