@@ -2,10 +2,11 @@
 
 import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Users, Baby, Calendar, Building2, AlertCircle } from 'lucide-react';
+import { Users, Baby, Calendar, Building2, AlertCircle, RefreshCcw } from 'lucide-react';
 import LoadingSpinner from '@/components/ui/loading-spinner';
 import { useAuth } from '@/context/auth.context';
 import Booking from '@/lib/types/booking';
+import { Button } from '@/components/ui/button';
 
 interface DashboardStats {
   totalBookings: number;
@@ -177,9 +178,14 @@ export default function AdminDashboard() {
   return (
     <div className="space-y-6 p-6">
       {/* Header */}
-      <div>
-        <h1 className="text-3xl font-bold text-gray-900">Dashboard</h1>
-        <p className="text-gray-600 mt-2">Overview of your childcare platform</p>
+      <div className='flex flex-col sm:flex-row justify-between items-center'>
+        <div>
+          <h1 className="text-3xl font-bold text-gray-900">Dashboard</h1>
+          <p className="text-gray-600 mt-2">Overview of your childcare platform</p>
+        </div>
+        <Button variant="default" onClick={() => fetchDashboardData()} className="rounded-lg h-auto p-3">
+            <RefreshCcw className="size-6"/>
+        </Button>
       </div>
 
       {/* Stats Cards */}

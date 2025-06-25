@@ -18,6 +18,7 @@ import {
   X,
   Mail,
   Archive,
+  RefreshCcw,
 } from "lucide-react"
 import LoadingSpinner from "@/components/ui/loading-spinner"
 import { useAuth } from "@/context/auth.context"
@@ -50,37 +51,37 @@ export default function AdminContactMessages() {
   const { token } = useAuth()
 
   useEffect(() => {
-    const fetchMessages = async () => {
-      setLoading(true)
-      try {
-        const response = await fetch('/api/admin/contact', {
-          headers: {
-            'Authorization': `Bearer ${token}`,
-          }
-        })
-
-        const data = await response.json()
-        
-        if (!response.ok) {
-          throw new Error(data.message || 'Failed to fetch messages')
-        }
-        
-        // Map the messages to include computed status
-        const mappedMessages = data.data.map((msg: any) => ({
-          ...msg,
-          status: msg.isArchived ? 'archived' : (msg.isRead ? 'read' : 'unread')
-        }))
-        
-        setMessages(mappedMessages)
-      } catch (error: any) {
-        toast.error(error.message || 'Failed to load messages')
-      } finally {
-        setLoading(false)
-      }
-    }
-
     fetchMessages()
   }, [token])
+  
+  const fetchMessages = async () => {
+    setLoading(true)
+    try {
+      const response = await fetch('/api/admin/contact', {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        }
+      })
+
+      const data = await response.json()
+      
+      if (!response.ok) {
+        throw new Error(data.message || 'Failed to fetch messages')
+      }
+      
+      // Map the messages to include computed status
+      const mappedMessages = data.data.map((msg: any) => ({
+        ...msg,
+        status: msg.isArchived ? 'archived' : (msg.isRead ? 'read' : 'unread')
+      }))
+      
+      setMessages(mappedMessages)
+    } catch (error: any) {
+      toast.error(error.message || 'Failed to load messages')
+    } finally {
+      setLoading(false)
+    }
+  }
 
   // Handle sorting
   const handleSort = (field: keyof ContactMessage) => {
@@ -331,6 +332,9 @@ export default function AdminContactMessages() {
               className="py-3 px-5 border-gray-300 rounded-md focus:border-[#FE7743] focus:outline-none"
             />
           </div>
+          <Button variant="default" onClick={() => fetchMessages()} className="rounded-lg h-auto p-3">
+            <RefreshCcw className="size-6"/>
+          </Button>
         </div>
       </Card>
 

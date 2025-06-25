@@ -4,7 +4,7 @@ import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Search, Trash2, Eye } from "lucide-react"
+import { Search, Trash2, Eye, RefreshCcw } from "lucide-react"
 import LoadingSpinner from "@/components/ui/loading-spinner"
 import { useAuth } from "@/context/auth.context"
 import toast from "react-hot-toast"
@@ -221,8 +221,8 @@ export default function AdminUsers() {
 
       {/* Filters */}
       <Card>
-        <CardContent className="p-4">
-          <div className="relative">
+        <div className="flex flex-col sm:flex-row gap-4">
+          <div className="flex-1 relative">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
             <Input
               placeholder="Search users..."
@@ -231,7 +231,10 @@ export default function AdminUsers() {
               className="pl-10"
             />
           </div>
-        </CardContent>
+          <Button variant="default" onClick={() => fetchUsers()} className="rounded-lg h-auto p-3">
+            <RefreshCcw className="size-6"/>
+          </Button>
+        </div>
       </Card>
 
       {/* Users Table */}

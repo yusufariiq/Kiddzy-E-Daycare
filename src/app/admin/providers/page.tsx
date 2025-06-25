@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Search, Plus, X } from "lucide-react"
+import { Search, Plus, X, RefreshCcw } from "lucide-react"
 import LoadingSpinner from "@/components/ui/loading-spinner"
 import { yupResolver } from "@hookform/resolvers/yup"
 import * as yup from "yup"
@@ -619,6 +619,9 @@ export default function AdminProviders() {
               className="w-full"
             />
           </div>
+          <Button variant="default" onClick={() => fetchProviders()} className="h-auto rounded-lg p-3">
+            <RefreshCcw className="size-6"/>
+          </Button>
         </div>
       </Card>
 

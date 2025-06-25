@@ -4,7 +4,7 @@ import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Search, Eye, Calendar, AlertCircle, Filter, ChevronUp, ChevronDown, Check } from "lucide-react"
+import { Search, Eye, Calendar, AlertCircle, Filter, ChevronUp, ChevronDown, Check, RefreshCcw } from "lucide-react"
 import LoadingSpinner from "@/components/ui/loading-spinner"
 import BookingModal from "@/components/booking/booking-modal"
 import { useAuth } from "@/context/auth.context"
@@ -221,17 +221,18 @@ export default function AdminBookings() {
       {/* Filters */}
       <Card>
         <div className="flex flex-col sm:flex-row gap-4">
-          <div className="flex-1">
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[#FE7743]" />
-              <Input
-                placeholder="Search by child name, parent, provider, or booking ID..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10"
-              />
-            </div>
+          <div className="flex-1 relative">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[#FE7743]" />
+            <Input
+              placeholder="Search by child name, parent, provider, or booking ID..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="pl-10"
+            />
           </div>
+          <Button variant="default" onClick={() => fetchBookings()} className="rounded-lg h-auto p-3">
+            <RefreshCcw className="size-6"/>
+          </Button>
         </div>
       </Card>
 
