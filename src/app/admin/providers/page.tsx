@@ -32,9 +32,14 @@ const providerSchema = yup.object({
   images: yup
     .array()
     .of(yup.string().required('Image URL is required'))
-    .min(1, 'At least one image is required'),
+    .min(1, 'At least one image is required')
+    .default([]) ,
   price: yup.number().typeError('Price must be a number').positive('Price must be a positive number').required('Price is required'),
-  features: yup.array().of(yup.string()).min(1, 'At least one feature is required'),
+  features: yup
+    .array()
+    .of(yup.string().required())
+    .min(1, 'At least one feature is required')
+    .default([]),
   ageGroups: yup
     .array()
     .of(
@@ -48,7 +53,8 @@ const providerSchema = yup.object({
           .required('Maximum age is required'),
       })
     )
-    .min(1, 'At least one age group is required'),
+    .min(1, 'At least one age group is required')
+    .default([]),
   capacity: yup.number().typeError('Capacity must be a number').integer('Capacity must be an integer').min(1, 'Capacity must be at least 1').required('Capacity is required'),
   operatingHours: yup
     .array()
@@ -59,7 +65,8 @@ const providerSchema = yup.object({
         close: yup.string().required('Closing time is required'),
       })
     )
-    .min(1, 'At least one operating hour is required'),
+    .min(1, 'At least one operating hour is required')
+    .default([]),
 })
 
 type ProviderFormData = yup.InferType<typeof providerSchema>

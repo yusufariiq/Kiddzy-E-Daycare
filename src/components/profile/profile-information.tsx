@@ -21,7 +21,7 @@ const profileSchema = yup.object({
     .string()
     .matches(/^[0-9+\-\s()]{10,15}$/, "Please enter a valid phone number")
     .required("Phone number is required"),
-  address: yup.string().nullable(),
+  address: yup.string().notRequired().default(""),
 })
 
 type ProfileFormData = yup.InferType<typeof profileSchema>

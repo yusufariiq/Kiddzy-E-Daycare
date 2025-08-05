@@ -30,7 +30,10 @@ const registerSchema = yup.object({
     .string()
     .oneOf([yup.ref("password")], "Passwords must match")
     .required("Please confirm your password"),
-  terms: yup.boolean().oneOf([true], "You must accept the terms and conditions"),
+  terms: yup
+    .boolean()
+    .oneOf([true], "You must accept the terms and conditions")
+    .required("You must accept the terms and conditions"),
 })
 
 type RegisterFormData = yup.InferType<typeof registerSchema>
