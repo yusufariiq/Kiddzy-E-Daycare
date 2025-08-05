@@ -2,6 +2,8 @@ import connectDB from "@/config/db";
 import { verifyAdmin } from "@/lib/middleware/auth.middleware";
 import { ContactService } from "@/lib/services/contact.service";
 import { NextRequest, NextResponse } from "next/server";
+import { ContactRepository } from "@/lib/repositories/contact.repository";  
+
 
 const contactService = new ContactService();
 
@@ -21,7 +23,7 @@ export async function GET(req: NextRequest) {
         const limit = parseInt(url.searchParams.get('limit') || '10');
         const page = parseInt(url.searchParams.get('page') || '1');
         
-        const contactRepo = new contactService['contactRepository'].constructor();
+        const contactRepo = new ContactRepository();
         const contacts = await contactRepo.findAll(limit, page);
         
         return NextResponse.json({ 
