@@ -30,14 +30,15 @@ export default function ChildInfoStep({
   isProcessing 
 }: ChildInfoStepProps) {
   const [childrenData, setChildrenData] = useState<Children[]>(initialData || [])
-  const [formData, setFormData] = useState<Children>({
+  const initialFormState: Children = {
     fullname: "",
     nickname: "",
     age: 0,
     gender: "male",
     specialNeeds: "",
     allergies: [],
-  })
+  };
+  const [formData, setFormData] = useState<Children>(initialFormState)
   const [newAllergy, setNewAllergy] = useState("")
   const [errors, setErrors] = useState<Record<string, string>>({})
   const [showForm, setShowForm] = useState(childrenData.length === 0)
@@ -62,14 +63,7 @@ export default function ChildInfoStep({
       setChildrenData([...childrenData, formData])
       
       // Reset form
-      setFormData({
-        fullname: "",
-        nickname: "",
-        age: 0,
-        gender: "male",
-        specialNeeds: "",
-        allergies: [],
-      })
+      setFormData(initialFormState)
       setNewAllergy("")
       setErrors({})
       setShowForm(false)
@@ -254,7 +248,7 @@ export default function ChildInfoStep({
 
               {formData.allergies.length > 0 && (
                 <div className="flex flex-wrap gap-2">
-                  {formData.allergies.map((allergy, index) => (
+                  {formData.allergies.map((allergy: any, index: any) => (
                     <div
                       key={index}
                       className="flex items-center gap-1 bg-[#FFF8F5] border border-[#FE7743]/20 rounded-full px-3 py-1"

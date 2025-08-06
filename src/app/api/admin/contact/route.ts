@@ -1,11 +1,7 @@
 import connectDB from "@/config/db";
 import { verifyAdmin } from "@/lib/middleware/auth.middleware";
-import { ContactService } from "@/lib/services/contact.service";
 import { NextRequest, NextResponse } from "next/server";
 import { ContactRepository } from "@/lib/repositories/contact.repository";  
-
-
-const contactService = new ContactService();
 
 export async function GET(req: NextRequest) {
     try {

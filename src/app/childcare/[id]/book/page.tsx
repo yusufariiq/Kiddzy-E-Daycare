@@ -17,7 +17,7 @@ import toast from "react-hot-toast"
 import ProtectedRoute from "@/components/common/ProtectedRoute"
 import { ProviderData } from "@/lib/types/providers"
 import { Children } from "@/lib/types/children"
-import { EmergencyContact } from "@/lib/types/booking"
+import Booking, { EmergencyContact } from "@/lib/types/booking"
 
 interface BookingData {
   startDate: Date
@@ -44,7 +44,7 @@ export default function BookingPage() {
   const [loading, setLoading] = useState(true)
   const [childrenData, setChildrenData] = useState<Children[]>([])
   const [childrenIds, setChildrenIds] = useState<string[]>([])
-  const [bookingData, setBookingData] = useState<BookingData | null>(null)
+  const [bookingData, setBookingData] = useState<Booking | null>(null)
   const [emergencyContact, setEmergencyContact] = useState<EmergencyContact | null>(null)
   const [paymentData, setPaymentData] = useState<PaymentData | null>(null)
   const [bookingId, setBookingId] = useState<string | null>(null)
@@ -185,7 +185,7 @@ export default function BookingPage() {
     }
   }
 
-  const handleBookingDetailsSubmit = (data: BookingData) => {
+  const handleBookingDetailsSubmit = (data: Booking) => {
     if (accessDenied) {
       toast.error("Booking is not available while the facility is closed")
       return

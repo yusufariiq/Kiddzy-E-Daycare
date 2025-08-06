@@ -1,3 +1,4 @@
+import mongoose from 'mongoose';
 import { BookingRepository } from '../repositories/booking.repository';
 import { ProviderRepository } from '../repositories/provider.repostiroy';
 import { IBooking } from '../models/booking.model';
@@ -78,9 +79,9 @@ export class BookingService {
     const totalAmount = provider.price * days * (bookingData.childrenCount || 1);
     
     const booking = await this.bookingRepository.create({
-      userId,
-      providerId: bookingData.providerId,
-      childrenIds: bookingData.childrenIds,
+      userId: new mongoose.Types.ObjectId(userId),
+      providerId: new mongoose.Types.ObjectId(bookingData.providerId),
+      childrenIds: bookingData.childrenIds.map(id => new mongoose.Types.ObjectId(id)),
       startDate,
       endDate,
       childrenCount: bookingData.childrenCount,
@@ -149,8 +150,9 @@ export class BookingService {
       throw new Error('Booking not found');
     }
     
-    // Validate status transitions
-    const validTransitions = {
+    type BookingStatus = 'pending' | 'confirmed' | 'active' | 'completed' | 'cancelled';
+
+    const validTransitions: Record<BookingStatus, BookingStatus[]> = {
       'pending': ['confirmed', 'cancelled'],
       'confirmed': ['active', 'cancelled'],
       'active': ['completed', 'cancelled'],
@@ -185,16 +187,20 @@ export class BookingService {
       ? `${booking.notes || ''}\nCancellation reason: ${reason}`.trim()
       : booking.notes;
     
-    await this.bookingRepository.updateNotes(bookingId, updatedNotes);
+    await this.bookingRepository.updateNotes(bookingId, updatedNotes || '');
     
     return await this.bookingRepository.updateStatus(bookingId, 'cancelled');
   }
 
-  async adminCancelBooking(bookingId: string, reason?: string): Promise<IBooking | null> {
+  async adminCancelBooking(bookingId: string, userId: string, reason?: string): Promise<IBooking | null> {
     const booking = await this.bookingRepository.findById(bookingId);
     
     if (!booking) {
       throw new Error('Booking not found');
+    }
+
+    if (booking.userId.toString() !== userId) {
+      throw new Error('Unauthorized to cancel this booking');
     }
     
     if (booking.status === 'completed' || booking.status === 'cancelled') {
@@ -206,7 +212,7 @@ export class BookingService {
       ? `${booking.notes || ''}\nAdmin cancellation reason: ${reason}`.trim()
       : booking.notes;
     
-    await this.bookingRepository.updateNotes(bookingId, updatedNotes);
+    await this.bookingRepository.updateNotes(bookingId, updatedNotes || '');
     
     return await this.bookingRepository.updateStatus(bookingId, 'cancelled');
   }

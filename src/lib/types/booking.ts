@@ -15,12 +15,13 @@ export default interface Booking {
   childName: string
   providerName: string
   providerAddress: string
-  startDate: string
-  endDate: string
+  startDate: Date
+  endDate: Date
   status: "pending" | "confirmed" | "active" | "completed" | "cancelled"
   totalAmount: number
   paymentMethod: string
-  createdAt: string
+  createdAt: Date
+  updatedAt: Date
   notes?: string
   childrenIds: Children[]
   childrenCount: number

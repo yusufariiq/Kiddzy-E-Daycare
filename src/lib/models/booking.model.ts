@@ -16,6 +16,8 @@ export interface IBooking extends Document {
         relationship: string;
     };
     notes?: string;
+    createdAt: Date;
+    updatedAt: Date;
 }
 
 const bookingSchema = new Schema<IBooking>(
