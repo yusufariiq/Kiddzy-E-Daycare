@@ -81,7 +81,7 @@ export default function BookingModal({ booking, isOpen, onClose, onStatusUpdate,
           key={child._id}
           className="bg-white p-4 rounded-lg border border-[#273F4F]/10 shadow-sm hover:shadow-md transition-shadow"
         >
-          <p className="font-medium text-[#273F4F]">{child.fullname || child.name}</p>
+          <p className="font-medium text-[#273F4F]">{child.fullname}</p>
           <p className="text-sm text-[#000000]/70">
             {child.age} years{child.gender === "male" ? "• Male" : "• Female"}
           </p>
