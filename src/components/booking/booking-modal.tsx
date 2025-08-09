@@ -4,6 +4,7 @@ import { useState, useEffect } from "react"
 import { X, Calendar, User, Phone, MapPin, CreditCard, FileText, AlertCircle, Check, PhoneIcon } from "lucide-react"
 import { Button } from "../ui/button"
 import Booking from "@/lib/types/booking"
+import { Children } from "@/lib/types/children"
 import Link from "next/link"
 
 interface BookingModalProps {
@@ -75,15 +76,27 @@ export default function BookingModal({ booking, isOpen, onClose, onStatusUpdate,
 
   // Handle array of children or single child object
   const renderChildren = () => {
-    if (Array.isArray(booking.childrenIds)) {
-      return booking.childrenIds.map((child) => (
+    if (!booking.childrenIds) return null
+
+    // Type guard to check if it's an array of Children
+    const isChildrenArray = (data: any): data is Children[] => {
+      return Array.isArray(data) && data.length > 0 && typeof data[0] === 'object'
+    }
+
+    // Type guard to check if it's a single Children object
+    const isSingleChild = (data: any): data is Children => {
+      return !Array.isArray(data) && typeof data === 'object' && data !== null
+    }
+
+    if (isChildrenArray(booking.childrenIds)) {
+      return booking.childrenIds.map((child: Children) => (
         <div
           key={child._id}
           className="bg-white p-4 rounded-lg border border-[#273F4F]/10 shadow-sm hover:shadow-md transition-shadow"
         >
           <p className="font-medium text-[#273F4F]">{child.fullname}</p>
           <p className="text-sm text-[#000000]/70">
-            {child.age} years{child.gender === "male" ? "• Male" : "• Female"}
+            {child.age} years{child.gender === "male" ? " • Male" : child.gender === "female" ? " • Female" : ""}
           </p>
           {child.specialNeeds && (
             <div className="mt-2">
@@ -91,7 +104,7 @@ export default function BookingModal({ booking, isOpen, onClose, onStatusUpdate,
               <p className="text-sm text-[#FE7743]">{child.specialNeeds}</p>
             </div>
           )}
-          {child.allergies && (
+          {child.allergies && child.allergies.length > 0 && (
             <div className="mt-2">
               <p className="text-xs font-medium text-[#273F4F]">Allergies:</p>
               <p className="text-sm text-[#FE7743]">
@@ -101,14 +114,14 @@ export default function BookingModal({ booking, isOpen, onClose, onStatusUpdate,
           )}
         </div>
       ))
-    } else if (booking.childrenIds) {
+    } else if (isSingleChild(booking.childrenIds)) {
       // Handle single child object
-      const child = booking.childrenIds
+      const child = booking.childrenIds as Children
       return (
         <div className="bg-white p-4 rounded-lg border border-[#273F4F]/10 shadow-sm hover:shadow-md transition-shadow">
-          <p className="font-medium text-[#273F4F]">{child.fullname || child.name}</p>
+          <p className="font-medium text-[#273F4F]">{child.fullname}</p>
           <p className="text-sm text-[#000000]/70">
-            {child.age} years{child.gender ? ` • ${child.gender}` : ""}
+            {child.age} years{child.gender === "male" ? " • Male" : child.gender === "female" ? " • Female" : ""}
           </p>
           {child.specialNeeds && (
             <div className="mt-2">
@@ -116,7 +129,7 @@ export default function BookingModal({ booking, isOpen, onClose, onStatusUpdate,
               <p className="text-sm text-[#FE7743]">{child.specialNeeds}</p>
             </div>
           )}
-          {child.allergies && (
+          {child.allergies && child.allergies.length > 0 && (
             <div className="mt-2">
               <p className="text-xs font-medium text-[#273F4F]">Allergies:</p>
               <p className="text-sm text-[#FE7743]">
