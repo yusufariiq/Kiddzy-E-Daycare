@@ -5,6 +5,7 @@ import { ChevronDown } from "lucide-react"
 import { cn } from "@/utils/utils"
 
 export interface SelectOption {
+  id?: string
   value: string | boolean
   label: string
 }
@@ -37,8 +38,11 @@ const Select = React.forwardRef<HTMLSelectElement, SelectProps>(
                 {placeholder}
               </option>
             )}
-            {options.map((option) => (
-              <option key={option.value} value={option.value}>
+            {options.map((option, index) => (
+              <option 
+                key={`option-${index}-${String(option.value)}`} 
+                value={String(option.value)}
+              >
                 {option.label}
               </option>
             ))}
