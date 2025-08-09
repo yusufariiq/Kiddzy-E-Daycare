@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from "react"
+import { Suspense, useEffect, useState } from "react"
 import { useSearchParams } from "next/navigation"
 import ChildcareCard from "@/components/common/childcare-card"
 import SearchBar from "@/components/common/searchbar"
@@ -9,7 +9,9 @@ import { RefreshCcw, ChevronLeft, ChevronRight } from "lucide-react"
 import LoadingSpinner from "@/components/ui/loading-spinner"
 import { ProviderData } from "@/lib/types/providers"
 
-export default function ChildcarePage() {
+
+
+function ChildcareContent() {
   const searchParams = useSearchParams()
   const [providers, setProviders] = useState<ProviderData[]>([])
   const [loading, setLoading] = useState(false)
@@ -180,4 +182,19 @@ export default function ChildcarePage() {
       </main>
     </div>
   )
+  
+}
+
+function ChildcarePageFallback(){
+  return (
+    <div className="min-h-screen flex items-center justify-center">
+      <LoadingSpinner size="lg" className="text-[#FE7743]" />
+    </div>
+  )
+}
+
+export default function ChildcarePage(){
+  <Suspense fallback={<ChildcarePageFallback />}>
+    <ChildcareContent />
+  </Suspense>
 }
