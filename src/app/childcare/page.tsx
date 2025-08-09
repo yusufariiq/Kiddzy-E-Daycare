@@ -193,7 +193,9 @@ function ChildcarePageFallback(){
 }
 
 export default function ChildcarePage(){
-  <Suspense fallback={<ChildcarePageFallback />}>
-    <ChildcareContent />
-  </Suspense>
+  return(
+    <Suspense fallback={<ChildcarePageFallback />}>
+      <ChildcareContent />
+    </Suspense>
+  )
 }
