@@ -62,7 +62,7 @@ export default function BookingModal({ booking, isOpen, onClose, onStatusUpdate,
   }
 
   // Format date to be more readable
-  const formatDate = (dateString: string) => {
+  const formatDate = (dateString: Date) => {
     const options: Intl.DateTimeFormatOptions = {
       year: "numeric",
       month: "long",
