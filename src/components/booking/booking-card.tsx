@@ -23,7 +23,7 @@ export default function BookingCard({
   const [showActions, setShowActions] = useState(false)
   const [showCancelConfirm, setShowCancelConfirm] = useState(false)
 
-  const formatDate = (dateString: string) => {
+  const formatDate = (dateString: Date) => {
     return new Date(dateString).toLocaleDateString("en-US", {
       month: "short",
       day: "numeric",
