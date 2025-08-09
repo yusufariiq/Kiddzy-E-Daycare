@@ -54,7 +54,7 @@ export default function BookingDetailsPage() {
     }
   }, [id])
 
-  const formatDate = (dateString: string) => {
+  const formatDate = (dateString: Date) => {
     return new Date(dateString).toLocaleDateString("en-US", {
       weekday: "long",
       year: "numeric",
