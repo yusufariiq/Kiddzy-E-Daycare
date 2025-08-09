@@ -193,14 +193,15 @@ export default function AvailableCalendar({
           {/* Children count selector */}
           <div className="flex items-center gap-3">
             <Users className="h-4 w-4 text-gray-500" />
+            <p>Child</p>
             <select
               value={childrenCount}
               onChange={(e) => onChildrenCountChange?.(parseInt(e.target.value))}
               className="border border-gray-300 rounded-lg px-3 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-[#FE7743]/20"
-            >
+              >
               {[1, 2, 3, 4, 5].map(count => (
                 <option key={count} value={count}>
-                  {count} {count === 1 ? 'Child' : 'Children'}
+                  {count}
                 </option>
               ))}
             </select>
