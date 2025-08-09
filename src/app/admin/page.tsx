@@ -105,7 +105,7 @@ export default function AdminDashboard() {
     fetchDashboardData();
   }, []);
 
-  const formatDate = (dateString: string) => {
+  const formatDate = (dateString: Date) => {
     try {
       return new Date(dateString).toLocaleDateString('en-US', {
         year: 'numeric',
@@ -117,7 +117,7 @@ export default function AdminDashboard() {
     }
   };
   
-  const formatHour = (dateString: string) => {
+  const formatHour = (dateString: Date) => {
     try {
       return new Date(dateString).toLocaleString('en-US', {
         weekday: 'short',
