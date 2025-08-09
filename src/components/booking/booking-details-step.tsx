@@ -10,6 +10,13 @@ import { Textarea } from "@/components/ui/textarea"
 import { ProviderData } from "@/lib/types/providers"
 import Booking from "@/lib/types/booking"
 
+interface BookingFormData {
+  startDate: Date
+  endDate: Date
+  childrenCount: number
+  notes: string
+}
+
 interface BookingDetailsStepProps {
   onSubmit: (data: Booking) => void
   initialData?: Booking | null
@@ -23,12 +30,13 @@ export default function BookingDetailsStep({
   provider, 
   childrenCount 
 }: BookingDetailsStepProps) {
-  const [formData, setFormData] = useState<Booking>({
+  const [formData, setFormData] = useState<BookingFormData>({
     startDate: initialData?.startDate || new Date(),
     endDate: initialData?.endDate || new Date(),
     childrenCount: childrenCount,
     notes: initialData?.notes || "",
   })
+  
   const [errors, setErrors] = useState<Record<string, string>>({})
   const [isCheckingAvailability, setIsCheckingAvailability] = useState(false)
 
@@ -136,7 +144,7 @@ export default function BookingDetailsStep({
         onSubmit({
           ...formData,
           childrenCount: childrenCount
-        })
+        } as Booking)
       }
     } catch (error) {
       console.error('Error during form submission:', error)
